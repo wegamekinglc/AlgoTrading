@@ -45,7 +45,7 @@ class Backtest(object):
 
     def _generateTradingInstance(self):
         self.dataHandler = self.dataHandlerCls(self.events, self.csvDir, self.symbolList)
-        self.strategy = self.strategyCls(self.dataHandler, self.events)
+        self.strategy = self.strategyCls(self.dataHandler, self.events, self.symbolList)
         self.portfolio = self.portfolioCls(self.dataHandler,
                                            self.events,
                                            self.startDate,

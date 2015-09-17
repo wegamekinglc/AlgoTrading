@@ -20,6 +20,7 @@ class MovingAverageCrossStrategy(Strategy):
     def __init__(self,
                  bars,
                  events,
+                 symbolList,
                  shortWindow=10,
                  longWindow=30):
         self.bars = bars
@@ -30,11 +31,6 @@ class MovingAverageCrossStrategy(Strategy):
         self.bought = self._calculateInitialBought()
 
     def calculateSignals(self, event):
-        #print("{0} vs {1} vs {2} vs {3}".format(self.short_sma.value,
-        #                                        self.compounded.value,
-        #                                        self.compounded2.value,
-        #                                        self.ret.value))
-        #print("{0}".format(self.sample.value))
         short_sma = self.short_sma.value
         long_sma = self.long_sma.value
         for s in self.symbolList:
@@ -58,7 +54,8 @@ class MovingAverageCrossStrategy(Strategy):
             bought[s] = 'OUT'
         return bought
 
-if __name__ == "__main__":
+
+def run_example():
     csvDir = "d:/data"
     symbolList = ['aapl', 'msft', 'ibm']
     initialCapital = 100000.0
@@ -76,3 +73,6 @@ if __name__ == "__main__":
                         MovingAverageCrossStrategy)
 
     backtest.simulateTrading()
+
+if __name__ == "__main__":
+    run_example()
