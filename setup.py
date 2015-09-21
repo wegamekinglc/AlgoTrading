@@ -14,6 +14,7 @@ setup(
     packages=['AlgoTrading',
               'AlgoTrading.Backtest',
               'AlgoTrading.Data',
+              'AlgoTrading.Data.DataProviders',
               'AlgoTrading.Events',
               'AlgoTrading.Execution',
               'AlgoTrading.Portfolio',

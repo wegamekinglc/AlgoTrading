@@ -1,47 +1,27 @@
 # -*- coding: utf-8 -*-
 u"""
-Created on 2015-7-24
+Created on 2015-9-21
 
 @author: cheng.li
 """
 
-
-from abc import ABCMeta
-from abc import abstractmethod
+import tushare as ts
+import pandas as pd
 import numpy as np
 from AlgoTrading.Events.Event import MarketEvent
+from AlgoTrading.Data.Data import DataFrameDataHandler
 
 
-class DataHandler(object):
+class DataYesMarketDataHandler(DataFrameDataHandler):
 
-    __metaclass__ = ABCMeta
-
-    @abstractmethod
-    def getLatestBar(self, symbol):
-        raise NotImplementedError()
-
-    @abstractmethod
-    def getLatestBars(self, symbol, N=1):
-        raise NotImplementedError()
-
-    @abstractmethod
-    def getLatestBarDatetime(self, symbol):
-        raise NotImplementedError()
-
-    @abstractmethod
-    def getLatestBarValue(self, symbol, valType):
-        raise NotImplementedError()
-
-    @abstractmethod
-    def getLatestBarsValues(self, symbol, valType, N=1):
-        raise NotImplementedError()
-
-    @abstractmethod
-    def updateBars(self):
-        raise NotImplementedError()
-
-
-class DataFrameDataHandler(DataHandler):
+    def __init__(self,
+                 symbolList,
+                 startDate,
+                 endDate):
+        self.mt = ts.Market()
+        self.symbolList = symbolList
+        self.starDate = startDate
+        self.endDate = endDate
 
     def getLatestBar(self, symbol):
         try:
@@ -98,4 +78,20 @@ class DataFrameDataHandler(DataHandler):
         for b in self.symbolData[symbol]:
             yield b
 
+    def _getDatas(self):
+        combIndex = None
+        for s in self.symbolList:
+            self.symbolData[s] = self.mt.MktEqud(secID=s,
+                                                 startDate=self.starDate,
+                                                 endDate=self.endDate,
+                                                 field='tradeDate,openPrice,highestPrice,lowestPrice,closePrice')
+            self.symboData[s].index = pd.to_datetime(self.symbolData[s]['tradeDate'], format="%y-%m-%d")
+            if combIndex is None:
+                combIndex = self.symbolData[s].index
+            else:
+                combIndex.union(self.symbolData[s].index)
 
+                self.latestSymbolData[s] = []
+
+            for s in self.symbolList:
+                self.symbolData[s] = self.symbolData[s].reindex(index=combIndex, method='pad').iterrows()

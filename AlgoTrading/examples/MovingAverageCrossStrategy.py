@@ -9,7 +9,7 @@ import datetime as dt
 
 from AlgoTrading.Strategy.Strategy import Strategy
 from AlgoTrading.Backtest.Backtest import Backtest
-from AlgoTrading.Data.Data import HistoricalCSVDataHandler
+from AlgoTrading.Data.DataProviders import HistoricalCSVDataHandler
 from AlgoTrading.Execution.Execution import SimulatedExecutionHandler
 from AlgoTrading.Portfolio.Portfolio import Portfolio
 from PyFin.Analysis.TechnicalAnalysis import SecurityMovingAverage as MA
@@ -56,7 +56,7 @@ class MovingAverageCrossStrategy(Strategy):
 
 
 def run_example():
-    csvDir = "d:/data"
+    csvDir = "data"
     symbolList = ['aapl', 'msft', 'ibm']
     initialCapital = 100000.0
     heartbeat = 0.0

@@ -5,6 +5,8 @@ Created on 2015-9-17
 @author: cheng.li
 """
 
-from AlgoTrading.Data.Data import HistoricalCSVDataHandler
+from AlgoTrading.Data.DataProviders import HistoricalCSVDataHandler
+from AlgoTrading.Data.DataProviders import DataYesMarketDataHandler
 
-__all__ = ['HistoricalCSVDataHandler']
+__all__ = ['HistoricalCSVDataHandler',
+           'DataYesMarketDataHandler']
