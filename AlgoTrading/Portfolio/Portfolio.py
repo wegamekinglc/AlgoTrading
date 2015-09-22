@@ -59,7 +59,7 @@ class Portfolio(object):
         dh['total'] = self.currentHoldings['cash']
 
         for s in self.symbolList:
-            marketValue = self.currentPosition[s] * self.bars.getLatestBarValue(s, 'adj_close')
+            marketValue = self.currentPosition[s] * self.bars.getLatestBarValue(s, 'close')
             dh[s] = marketValue
             dh['total'] += marketValue
 
@@ -81,7 +81,7 @@ class Portfolio(object):
         if fill.direction == 'SELL':
             fillDir = -1
 
-        fillCost = self.bars.getLatestBarValue(fill.symbol, 'adj_close')
+        fillCost = self.bars.getLatestBarValue(fill.symbol, 'close')
         cost = fillDir * fillCost * fill.quantity
         self.currentHoldings[fill.symbol] += cost
         self.currentHoldings['commission'] += fill.commission

@@ -15,77 +15,29 @@ from AlgoTrading.Data.Data import DataFrameDataHandler
 class DataYesMarketDataHandler(DataFrameDataHandler):
 
     def __init__(self,
+                 token,
                  symbolList,
                  startDate,
                  endDate):
+        ts.set_token(token)
         self.mt = ts.Market()
         self.symbolList = symbolList
-        self.starDate = startDate
-        self.endDate = endDate
-
-    def getLatestBar(self, symbol):
-        try:
-            barsList = self.latestSymbolData[symbol]
-        except KeyError:
-            raise RuntimeError("the symbol {0:s} is not available in the historical data set".format(symbol))
-        else:
-            return barsList[-1]
-
-    def getLatestBars(self, symbol, N=1):
-        try:
-            barsList = self.latestSymbolData[symbol]
-        except KeyError:
-            raise RuntimeError("the symbol {0:s} is not available in the historical data set".format(symbol))
-        else:
-            return barsList[-N:]
-
-    def getLatestBarDatetime(self, symbol):
-        try:
-            barsList = self.latestSymbolData[symbol]
-        except KeyError:
-            raise RuntimeError("the symbol {0:s} is not available in the historical data set".format(symbol))
-        else:
-            return barsList[-1][0]
-
-    def getLatestBarValue(self, symbol, valType):
-        try:
-            barsList = self.latestSymbolData[symbol]
-        except KeyError:
-            raise RuntimeError("the symbol {0:s} is not available in the historical data set".format(symbol))
-        else:
-            return getattr(barsList[-1][1], valType)
-
-    def getLatestBarsValues(self, symbol, valType, N=1):
-        try:
-            barsList = self.getLatestBars(symbol, N)
-        except KeyError:
-            raise RuntimeError("the symbol {0:s} is not available in the historical data set".format(symbol))
-        else:
-            return np.array([getattr(b[1], valType) for b in barsList])
-
-    def updateBars(self):
-        for s in self.symbolList:
-            try:
-                bar = next(self._getNewBar(s))
-            except StopIteration:
-                self.continueBacktest = False
-            else:
-                if bar is not None:
-                    self.latestSymbolData[s].append(bar)
-        self.events.put(MarketEvent())
-
-    def _getNewBar(self, symbol):
-        for b in self.symbolData[symbol]:
-            yield b
+        self.startDate = startDate.strftime("%Y%m%d")
+        self.endDate = endDate.strftime("%Y%m%d")
+        self.symbolData = {}
+        self.latestSymbolData = {}
+        self.continueBacktest = True
+        self._getDatas()
 
     def _getDatas(self):
         combIndex = None
         for s in self.symbolList:
             self.symbolData[s] = self.mt.MktEqud(secID=s,
-                                                 startDate=self.starDate,
+                                                 beginDate=self.startDate,
                                                  endDate=self.endDate,
-                                                 field='tradeDate,openPrice,highestPrice,lowestPrice,closePrice')
-            self.symboData[s].index = pd.to_datetime(self.symbolData[s]['tradeDate'], format="%y-%m-%d")
+                                                 field='tradeDate,openPrice,highestPrice,lowestPrice,turnoverVol,closePrice')
+            self.symbolData[s].index = pd.to_datetime(self.symbolData[s]['tradeDate'], format="%Y-%m-%d")
+            self.symbolData[s].columns = ['tradeDate', 'open', 'high', 'low', 'volume', 'close']
             if combIndex is None:
                 combIndex = self.symbolData[s].index
             else:
@@ -93,5 +45,8 @@ class DataYesMarketDataHandler(DataFrameDataHandler):
 
                 self.latestSymbolData[s] = []
 
-            for s in self.symbolList:
-                self.symbolData[s] = self.symbolData[s].reindex(index=combIndex, method='pad').iterrows()
+            self.latestSymbolData[s] = []
+
+        for s in self.symbolList:
+            self.symbolData[s] = self.symbolData[s].reindex(index=combIndex, method='pad').iterrows()
+        self.dateIndex = combIndex

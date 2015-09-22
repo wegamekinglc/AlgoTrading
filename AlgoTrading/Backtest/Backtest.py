@@ -15,27 +15,22 @@ import time
 class Backtest(object):
 
     def __init__(self,
-                 csv_dir,
                  symbol_list,
                  initial_capital,
                  heartbeat,
-                 start_date,
                  data_handler,
                  execution_handler,
                  portfolio,
                  strategy):
-        self.csvDir = csv_dir
         self.symbolList = symbol_list
         self.initialCapital = initial_capital
         self.heartbeat = heartbeat
-        self.startDate = start_date
-        self.dataHandlerCls = data_handler
+        self.dataHandler = data_handler
         self.executionHanlderCls = execution_handler
         self.portfolioCls = portfolio
         self.strategyCls = strategy
-
         self.events = queue.Queue()
-
+        self.dataHandler.setEvents(self.events)
         self.signals = 0
         self.orders = 0
         self.fills = 0
@@ -44,11 +39,10 @@ class Backtest(object):
         self._generateTradingInstance()
 
     def _generateTradingInstance(self):
-        self.dataHandler = self.dataHandlerCls(self.events, self.csvDir, self.symbolList)
         self.strategy = self.strategyCls(self.dataHandler, self.events, self.symbolList)
         self.portfolio = self.portfolioCls(self.dataHandler,
                                            self.events,
-                                           self.startDate,
+                                           self.dataHandler.getStartDate(),
                                            self.initialCapital)
         self.executionHanlder = self.executionHanlderCls(self.events)
 

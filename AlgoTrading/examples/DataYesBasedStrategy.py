@@ -9,7 +9,7 @@ import datetime as dt
 
 from AlgoTrading.Strategy.Strategy import Strategy
 from AlgoTrading.Backtest.Backtest import Backtest
-from AlgoTrading.Data.DataProviders import HistoricalCSVDataHandler
+from AlgoTrading.Data.DataProviders import DataYesMarketDataHandler
 from AlgoTrading.Execution.Execution import SimulatedExecutionHandler
 from AlgoTrading.Portfolio.Portfolio import Portfolio
 from PyFin.Analysis.TechnicalAnalysis import SecurityMovingAverage as MA
@@ -56,14 +56,16 @@ class MovingAverageCrossStrategy(Strategy):
 
 
 def run_example():
-    csvDir = "data"
-    symbolList = ['aapl', 'msft', 'ibm']
+    symbolList = ['600000.xshg', '000001.xshe']
     initialCapital = 100000.0
     heartbeat = 0.0
-    #startDate = dt.datetime(1990, 1, 2)
-    #endDate = dt.datetime(2015, 9, 15)
+    startDate = dt.datetime(2010, 1, 2)
+    endDate = dt.datetime(2015, 9, 15)
 
-    dataHandler = HistoricalCSVDataHandler(csvDir, symbolList)
+    dataHandler = DataYesMarketDataHandler(token="2bfc4b3b06efa5d8bba2ab9ef83b5d61f1c3887834de729b60eec9f13e1d4df8",
+                                           symbolList=symbolList,
+                                           startDate=startDate,
+                                           endDate=endDate)
 
     backtest = Backtest(symbolList,
                         initialCapital,

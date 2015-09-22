@@ -40,8 +40,14 @@ class DataHandler(object):
     def updateBars(self):
         raise NotImplementedError()
 
+    def setEvents(self, events):
+        self.events = events
+
 
 class DataFrameDataHandler(DataHandler):
+
+    def getStartDate(self):
+        return self.dateIndex[0]
 
     def getLatestBar(self, symbol):
         try:

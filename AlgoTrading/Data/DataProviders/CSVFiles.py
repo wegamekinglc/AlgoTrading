@@ -12,8 +12,7 @@ from AlgoTrading.Data.Data import DataFrameDataHandler
 
 class HistoricalCSVDataHandler(DataFrameDataHandler):
 
-    def __init__(self, events, csvDir, symbolList):
-        self.events = events
+    def __init__(self, csvDir, symbolList):
         self.csvDir = csvDir
         self.symbolList = symbolList
         self.symbolData = {}
@@ -31,6 +30,8 @@ class HistoricalCSVDataHandler(DataFrameDataHandler):
                                                      index_col=0,
                                                      parse_dates=True,
                                                      names=['datetime', 'open', 'high', 'low', 'close', 'volume', 'adj_close']).sort()
+            del self.symbolData[s]['close']
+            self.symbolData[s].columns = ['open', 'high', 'low', 'volume', 'close']
 
             if combIndex is None:
                 combIndex = self.symbolData[s].index
@@ -41,3 +42,4 @@ class HistoricalCSVDataHandler(DataFrameDataHandler):
 
         for s in self.symbolList:
             self.symbolData[s] = self.symbolData[s].reindex(index=combIndex, method='pad').iterrows()
+        self.dateIndex = combIndex
