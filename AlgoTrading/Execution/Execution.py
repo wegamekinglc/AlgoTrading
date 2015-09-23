@@ -8,7 +8,7 @@ Created on 2015-7-31
 from abc import ABCMeta, abstractmethod
 import datetime as dt
 
-from AlgoTrading.Events.Event import FillEvent
+from AlgoTrading.Events import FillEvent
 
 
 class ExecutionHanlder(object):

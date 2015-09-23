@@ -9,7 +9,7 @@ Created on 2015-7-24
 from abc import ABCMeta
 from abc import abstractmethod
 import datetime as dt
-from AlgoTrading.Events.Event import SignalEvent
+from AlgoTrading.Events import SignalEvent
 from PyFin.Analysis.SecurityValueHolders import SecurityValueHolder
 
 

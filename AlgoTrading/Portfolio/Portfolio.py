@@ -7,7 +7,7 @@ Created on 2015-7-24
 
 import pandas as pd
 from copy import deepcopy
-from AlgoTrading.Events.Event import OrderEvent
+from AlgoTrading.Events import OrderEvent
 
 
 class Portfolio(object):

@@ -9,7 +9,7 @@ Created on 2015-7-24
 from abc import ABCMeta
 from abc import abstractmethod
 import numpy as np
-from AlgoTrading.Events.Event import MarketEvent
+from AlgoTrading.Events import MarketEvent
 
 
 class DataHandler(object):
