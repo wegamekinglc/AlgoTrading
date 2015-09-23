@@ -3,7 +3,6 @@ numpy
 scipy
 pandas
 coverage
-cython
 Finance-Python
 tushare
 sqlalchemy
