@@ -41,7 +41,3 @@ class YaHooDataProvider(DataFrameDataHandler):
         for s in self.symbolList:
             self.symbolData[s] = self.symbolData[s].reindex(index=combIndex, method='pad').iterrows()
         self.dateIndex = combIndex
-
-
-if __name__ == "__main__":
-    pass
