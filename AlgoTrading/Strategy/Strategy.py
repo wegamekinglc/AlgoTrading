@@ -48,7 +48,7 @@ class Strategy(object):
     def monitoring(self):
         pass
 
-    def order(self, symbol, signalDirection):
+    def order(self, symbol, signalDirection, quantity):
         currentDT = dt.datetime.utcnow()
-        signal = SignalEvent(1, symbol, currentDT, signalDirection, 1.0)
+        signal = SignalEvent(1, symbol, currentDT, signalDirection, 1.0, quantity)
         self.events.put(signal)
