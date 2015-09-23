@@ -99,7 +99,7 @@ class Portfolio(object):
         symbol = signal.symbol
         direction = signal.signalType
 
-        mktQuantity = signal.quantity
+        mktQuantity = 100
         curQuantity = self.currentPosition[symbol]
         orderType = 'MKT'
 

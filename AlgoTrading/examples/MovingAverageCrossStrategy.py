@@ -34,16 +34,17 @@ class MovingAverageCrossStrategy(Strategy):
         short_sma = self.short_sma.value
         long_sma = self.long_sma.value
         for s in self.symbolList:
+            symbol = s
             currDt = self.bars.getLatestBarDatetime(s)
             if short_sma[s] > long_sma[s] and self.bought[s] == 'OUT':
                 print("{0}: BUY {1}".format(currDt, s))
                 sigDir = 'LONG'
-                self.order(s, sigDir, quantity=100)
+                self.order(symbol, sigDir)
                 self.bought[s] = 'LONG'
             if short_sma[s] < long_sma[s] and self.bought[s] == "LONG":
                 print("{0}: SELL {1}".format(currDt, s))
                 sigDir = 'EXIT'
-                self.order(s, sigDir, quantity=100)
+                self.order(symbol, sigDir)
                 self.bought[s] = 'OUT'
 
     def _calculateInitialBought(self):
@@ -59,6 +60,8 @@ def run_example():
     symbolList = ['aapl', 'msft', 'ibm']
     initialCapital = 100000.0
     heartbeat = 0.0
+    #startDate = dt.datetime(1990, 1, 2)
+    #endDate = dt.datetime(2015, 9, 15)
 
     dataHandler = HistoricalCSVDataHandler(csvDir, symbolList)
 

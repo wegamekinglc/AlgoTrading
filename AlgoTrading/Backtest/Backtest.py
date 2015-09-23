@@ -51,7 +51,7 @@ class Backtest(object):
         i = 0
         while True:
             i += 1
-            if self.dataHandler.continueBacktest:
+            if self.dataHandler.continueBacktest == True:
                 self.dataHandler.updateBars()
             else:
                 break

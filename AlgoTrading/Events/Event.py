@@ -18,14 +18,13 @@ class MarketEvent(Event):
 
 class SignalEvent(Event):
 
-    def __init__(self, strategyId, symbol, datetime, signalType, strength, quantity):
+    def __init__(self, strategyId, symbol, datetime, signalType, strength):
         self.type = 'SIGNAL'
         self.strategyId = strategyId
         self.symbol = symbol
         self.datetime = datetime
         self.signalType = signalType
         self.strength = strength
-        self.quantity = quantity
 
 
 class OrderEvent(Event):
