@@ -6,5 +6,9 @@ Created on 2015-9-17
 """
 
 from AlgoTrading.Backtest.Backtest import Backtest
+from AlgoTrading.Backtest.Backtest import strategyRunner
+from AlgoTrading.Backtest.Backtest import DataSource
 
-__all__ = ['Backtest']
+__all__ = ['Backtest',
+           'strategyRunner',
+           'DataSource']

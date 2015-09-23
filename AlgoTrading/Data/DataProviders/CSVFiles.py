@@ -12,10 +12,12 @@ from AlgoTrading.Data.Data import DataFrameDataHandler
 
 class HistoricalCSVDataHandler(DataFrameDataHandler):
 
-    def __init__(self, csvDir, symbolList):
+    _req_args = ['csvDir', 'symbolList']
+
+    def __init__(self, **kwargs):
         super(HistoricalCSVDataHandler, self).__init__()
-        self.csvDir = csvDir
-        self.symbolList = [s.lower() for s in symbolList]
+        self.csvDir = kwargs['csvDir']
+        self.symbolList = [s.lower() for s in kwargs['symbolList']]
         self._openConvertCSVFiles()
 
     def _openConvertCSVFiles(self):
@@ -26,9 +28,7 @@ class HistoricalCSVDataHandler(DataFrameDataHandler):
                                                      header=0,
                                                      index_col=0,
                                                      parse_dates=True,
-                                                     names=['datetime', 'open', 'high', 'low', 'close', 'volume', 'adj_close']).sort()
-            del self.symbolData[s]['close']
-            self.symbolData[s].columns = ['open', 'high', 'low', 'volume', 'close']
+                                                     usecols=['datetime', 'open', 'high', 'low', 'close', 'volume']).sort()
 
             if combIndex is None:
                 combIndex = self.symbolData[s].index

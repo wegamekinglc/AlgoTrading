@@ -18,7 +18,7 @@ class Strategy(object):
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def calculateSignals(self, event):
+    def calculateSignals(self):
         raise NotImplementedError()
 
     def _subscribe(self):
@@ -52,3 +52,7 @@ class Strategy(object):
         currentDT = dt.datetime.utcnow()
         signal = SignalEvent(1, symbol, currentDT, signalDirection, 1.0, quantity)
         self.events.put(signal)
+
+    @property
+    def secPos(self):
+        return self._port.currentPosition

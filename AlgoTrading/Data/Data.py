@@ -100,6 +100,7 @@ class DataFrameDataHandler(DataHandler):
                 bar = next(self._getNewBar(s))
             except StopIteration:
                 self.continueBacktest = False
+                return
             else:
                 if bar is not None:
                     self.latestSymbolData[s].append(bar)

@@ -6,69 +6,42 @@ Created on 2015-7-31
 """
 
 from AlgoTrading.Strategy.Strategy import Strategy
-from AlgoTrading.Backtest.Backtest import Backtest
-from AlgoTrading.Data.DataProviders import HistoricalCSVDataHandler
-from AlgoTrading.Execution.Execution import SimulatedExecutionHandler
-from AlgoTrading.Portfolio.Portfolio import Portfolio
-from PyFin.Analysis.TechnicalAnalysis import SecurityMovingAverage as MA
+from AlgoTrading.Backtest import strategyRunner
+from AlgoTrading.Backtest import DataSource
+from PyFin.API import MA
 
 
 class MovingAverageCrossStrategy(Strategy):
 
-    def __init__(self,
-                 bars,
-                 events,
-                 symbolList,
-                 shortWindow=10,
-                 longWindow=30):
-        self.bars = bars
-        self.symbolList = self.bars.symbolList
-        self.events = events
-        self.short_sma = MA(shortWindow, 'close', symbolList)
-        self.long_sma = MA(longWindow, 'close', symbolList)
-        self.bought = self._calculateInitialBought()
+    def __init__(self):
+        self.short_sma = MA(10, 'close')
+        self.long_sma = MA(30, 'close')
 
-    def calculateSignals(self, event):
+    def calculateSignals(self):
         short_sma = self.short_sma.value
         long_sma = self.long_sma.value
         for s in self.symbolList:
             currDt = self.bars.getLatestBarDatetime(s)
-            if short_sma[s] > long_sma[s] and self.bought[s] == 'OUT':
+            if short_sma[s] > long_sma[s] and self.secPos[s] == 0:
                 print("{0}: BUY {1}".format(currDt, s))
                 sigDir = 'LONG'
                 self.order(s, sigDir, quantity=100)
-                self.bought[s] = 'LONG'
-            if short_sma[s] < long_sma[s] and self.bought[s] == "LONG":
+            if short_sma[s] < long_sma[s] and self.secPos[s] != 0:
                 print("{0}: SELL {1}".format(currDt, s))
                 sigDir = 'EXIT'
                 self.order(s, sigDir, quantity=100)
-                self.bought[s] = 'OUT'
-
-    def _calculateInitialBought(self):
-        self._subscribe()
-        bought = {}
-        for s in self.symbolList:
-            bought[s] = 'OUT'
-        return bought
 
 
 def run_example():
     csvDir = "data"
     symbolList = ['aapl', 'msft', 'ibm']
     initialCapital = 100000.0
-    heartbeat = 0.0
 
-    dataHandler = HistoricalCSVDataHandler(csvDir, symbolList)
-
-    backtest = Backtest(symbolList,
-                        initialCapital,
-                        heartbeat,
-                        dataHandler,
-                        SimulatedExecutionHandler,
-                        Portfolio,
-                        MovingAverageCrossStrategy)
-
-    backtest.simulateTrading()
+    strategyRunner(userStrategy=MovingAverageCrossStrategy,
+                   initialCapital=initialCapital,
+                   symbolList=symbolList,
+                   dataSource=DataSource.CSV,
+                   csvDir=csvDir)
 
 if __name__ == "__main__":
     run_example()

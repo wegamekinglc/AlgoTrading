@@ -12,19 +12,16 @@ from AlgoTrading.Data.Data import DataFrameDataHandler
 
 class DataYesMarketDataHandler(DataFrameDataHandler):
 
-    def __init__(self,
-                 token,
-                 symbolList,
-                 startDate,
-                 endDate):
-        super(DataYesMarketDataHandler, self).__init__()
-        ts.set_token(token)
-        self.mt = ts.Market()
-        self.symbolList = [s.lower() for s in symbolList]
-        self.startDate = startDate.strftime("%Y%m%d")
-        self.endDate = endDate.strftime("%Y%m%d")
-        self._getDatas()
+    _req_args = ['token', 'symbolList', 'startDate', 'endDate']
 
+    def __init__(self, **kwargs):
+        super(DataYesMarketDataHandler, self).__init__()
+        ts.set_token(kwargs['token'])
+        self.mt = ts.Market()
+        self.symbolList = [s.lower() for s in kwargs['symbolList']]
+        self.startDate = kwargs['startDate'].strftime("%Y%m%d")
+        self.endDate = kwargs['endDate'].strftime("%Y%m%d")
+        self._getDatas()
 
     def _getDatas(self):
         combIndex = None
@@ -34,13 +31,12 @@ class DataYesMarketDataHandler(DataFrameDataHandler):
                                                  endDate=self.endDate,
                                                  field='tradeDate,openPrice,highestPrice,lowestPrice,turnoverVol,closePrice')
             self.symbolData[s].index = pd.to_datetime(self.symbolData[s]['tradeDate'], format="%Y-%m-%d")
+            self.symbolData[s].sort(inplace=True)
             self.symbolData[s].columns = ['tradeDate', 'open', 'high', 'low', 'volume', 'close']
             if combIndex is None:
                 combIndex = self.symbolData[s].index
             else:
                 combIndex.union(self.symbolData[s].index)
-
-                self.latestSymbolData[s] = []
 
             self.latestSymbolData[s] = []
 

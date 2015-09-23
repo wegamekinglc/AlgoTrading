@@ -11,14 +11,13 @@ from AlgoTrading.Data.Data import DataFrameDataHandler
 
 class YaHooDataProvider(DataFrameDataHandler):
 
-    def __init__(self,
-                 symbolList,
-                 startDate,
-                 endDate):
+    _req_args = ['symbolList', 'startDate', 'endDate']
+
+    def __init__(self, **kwargs):
         super(YaHooDataProvider, self).__init__()
-        self.symbolList = [s.lower() for s in symbolList]
-        self.startDate = startDate
-        self.endDate = endDate
+        self.symbolList = [s.lower() for s in kwargs['symbolList']]
+        self.startDate = kwargs['startDate']
+        self.endDate = kwargs['endDate']
         self._getDatas()
 
     def _getDatas(self):
@@ -26,10 +25,10 @@ class YaHooDataProvider(DataFrameDataHandler):
         for s in self.symbolList:
             self.symbolData[s] = web.get_data_yahoo(s,
                                                     start=self.startDate.strftime("%Y%m%d"),
-                                                    end=self.endDate.strftime("%Y%m%d"))
-            self.symbolData[s].columns = ['open', 'high', 'low', 'close', 'volume', 'adj_close']
-            del self.symbolData[s]['close']
-            self.symbolData[s].columns = ['open', 'high', 'low', 'volume', 'close']
+                                                    end=self.endDate.strftime("%Y%m%d"),
+                                                    adjust_price=True).sort()
+            del self.symbolData[s]['Adj_Ratio']
+            self.symbolData[s].columns = ['open', 'high', 'low', 'close', 'volume']
 
             if combIndex is None:
                 combIndex = self.symbolData[s].index
