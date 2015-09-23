@@ -13,7 +13,7 @@ from AlgoTrading.Data.Data import DataFrameDataHandler
 class HistoricalCSVDataHandler(DataFrameDataHandler):
 
     def __init__(self, csvDir, symbolList):
-        super(HistoricalCSVDataHandler, self).__init()
+        super(HistoricalCSVDataHandler, self).__init__()
         self.csvDir = csvDir
         self.symbolList = [s.lower() for s in symbolList]
         self._openConvertCSVFiles()

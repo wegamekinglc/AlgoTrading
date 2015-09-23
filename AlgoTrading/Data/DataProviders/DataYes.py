@@ -17,12 +17,13 @@ class DataYesMarketDataHandler(DataFrameDataHandler):
                  symbolList,
                  startDate,
                  endDate):
-        super(DataYesMarketDataHandler, self).__init()
+        super(DataYesMarketDataHandler, self).__init__()
         ts.set_token(token)
         self.mt = ts.Market()
         self.symbolList = [s.lower() for s in symbolList]
         self.startDate = startDate.strftime("%Y%m%d")
         self.endDate = endDate.strftime("%Y%m%d")
+        self._getDatas()
 
 
     def _getDatas(self):
