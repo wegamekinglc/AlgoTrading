@@ -7,6 +7,10 @@ Created on 2015-9-17
 
 from AlgoTrading.Data.DataProviders import HistoricalCSVDataHandler
 from AlgoTrading.Data.DataProviders import DataYesMarketDataHandler
+from AlgoTrading.Data.DataProviders import DXDataCenter
+from AlgoTrading.Data.DataProviders import YaHooDataProvider
 
 __all__ = ['HistoricalCSVDataHandler',
-           'DataYesMarketDataHandler']
+           'DataYesMarketDataHandler',
+           'DXDataCenter',
+           'YaHooDataProvider']

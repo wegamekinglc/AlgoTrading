@@ -10,5 +10,8 @@ doc/_build/*
 *.css
 *.c
 *.pyd
+tk.csv
+DongXingDataCenter.py
+DongXingSample.py
 
 

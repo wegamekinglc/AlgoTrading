@@ -5,8 +5,6 @@ Created on 2015-7-31
 @author: cheng.li
 """
 
-import datetime as dt
-
 from AlgoTrading.Strategy.Strategy import Strategy
 from AlgoTrading.Backtest.Backtest import Backtest
 from AlgoTrading.Data.DataProviders import HistoricalCSVDataHandler

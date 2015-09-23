@@ -46,6 +46,11 @@ class DataHandler(object):
 
 class DataFrameDataHandler(DataHandler):
 
+    def __init__(self):
+        self.symbolData = {}
+        self.latestSymbolData = {}
+        self.continueBacktest = True
+
     def getStartDate(self):
         return self.dateIndex[0]
 

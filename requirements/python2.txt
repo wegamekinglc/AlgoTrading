@@ -6,3 +6,5 @@ coverage
 cython
 Finance-Python
 tushare
+sqlalchemy
+pymssql

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 u"""
-Created on 2015-9-22
+Created on 2015-9-23
 
 @author: cheng.li
 """
@@ -9,7 +9,7 @@ import datetime as dt
 
 from AlgoTrading.Strategy.Strategy import Strategy
 from AlgoTrading.Backtest.Backtest import Backtest
-from AlgoTrading.Data.DataProviders import DataYesMarketDataHandler
+from AlgoTrading.Data.DataProviders import YaHooDataProvider
 from AlgoTrading.Execution.Execution import SimulatedExecutionHandler
 from AlgoTrading.Portfolio.Portfolio import Portfolio
 from PyFin.Analysis.TechnicalAnalysis import SecurityMovingAverage as MA
@@ -55,16 +55,15 @@ class MovingAverageCrossStrategy(Strategy):
 
 
 def run_example():
-    symbolList = ['600000.XSHG', '000001.XSHE', '600030.XSHG']
+    symbolList = ['aapl', 'msft', 'ibm']
     initialCapital = 100000.0
     heartbeat = 0.0
-    startDate = dt.datetime(2008, 1, 2)
+    startDate = dt.datetime(1990, 1, 1)
     endDate = dt.datetime(2015, 9, 15)
 
-    dataHandler = DataYesMarketDataHandler(token="2bfc4b3b06efa5d8bba2ab9ef83b5d61f1c3887834de729b60eec9f13e1d4df8",
-                                           symbolList=symbolList,
-                                           startDate=startDate,
-                                           endDate=endDate)
+    dataHandler = YaHooDataProvider(symbolList,
+                                    startDate,
+                                    endDate)
 
     backtest = Backtest(symbolList,
                         initialCapital,

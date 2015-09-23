@@ -13,12 +13,9 @@ from AlgoTrading.Data.Data import DataFrameDataHandler
 class HistoricalCSVDataHandler(DataFrameDataHandler):
 
     def __init__(self, csvDir, symbolList):
+        super(HistoricalCSVDataHandler, self).__init()
         self.csvDir = csvDir
-        self.symbolList = symbolList
-        self.symbolData = {}
-        self.latestSymbolData = {}
-        self.continueBacktest = True
-
+        self.symbolList = [s.lower() for s in symbolList]
         self._openConvertCSVFiles()
 
     def _openConvertCSVFiles(self):

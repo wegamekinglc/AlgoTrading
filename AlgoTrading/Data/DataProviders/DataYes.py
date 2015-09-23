@@ -7,8 +7,6 @@ Created on 2015-9-21
 
 import tushare as ts
 import pandas as pd
-import numpy as np
-from AlgoTrading.Events.Event import MarketEvent
 from AlgoTrading.Data.Data import DataFrameDataHandler
 
 
@@ -19,15 +17,13 @@ class DataYesMarketDataHandler(DataFrameDataHandler):
                  symbolList,
                  startDate,
                  endDate):
+        super(DataYesMarketDataHandler, self).__init()
         ts.set_token(token)
         self.mt = ts.Market()
-        self.symbolList = symbolList
+        self.symbolList = [s.lower() for s in symbolList]
         self.startDate = startDate.strftime("%Y%m%d")
         self.endDate = endDate.strftime("%Y%m%d")
-        self.symbolData = {}
-        self.latestSymbolData = {}
-        self.continueBacktest = True
-        self._getDatas()
+
 
     def _getDatas(self):
         combIndex = None
