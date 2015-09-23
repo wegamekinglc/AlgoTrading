@@ -20,7 +20,7 @@ class MovingAverageCrossStrategy(Strategy):
     def calculateSignals(self):
         short_sma = self.short_sma.value
         long_sma = self.long_sma.value
-        for s in self.symbolList:
+        for s in self.universe:
             currDt = self.bars.getLatestBarDatetime(s)
             if short_sma[s] > long_sma[s] and self.secPos[s] == 0:
                 print("{0}: BUY {1}".format(currDt, s))
@@ -34,12 +34,12 @@ class MovingAverageCrossStrategy(Strategy):
 
 def run_example():
     csvDir = "data"
-    symbolList = ['aapl', 'msft', 'ibm']
+    universe = ['aapl', 'msft', 'ibm']
     initialCapital = 100000.0
 
     strategyRunner(userStrategy=MovingAverageCrossStrategy,
                    initialCapital=initialCapital,
-                   symbolList=symbolList,
+                   symbolList=universe,
                    dataSource=DataSource.CSV,
                    csvDir=csvDir)
 

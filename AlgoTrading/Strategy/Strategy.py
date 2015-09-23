@@ -45,6 +45,10 @@ class Strategy(object):
         for subscriber in self._subscribed:
             subscriber.push(values)
 
+    @property
+    def universe(self):
+        return self.symbolList
+
     def monitoring(self):
         pass
 
