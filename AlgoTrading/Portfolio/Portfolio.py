@@ -23,7 +23,7 @@ class Portfolio(object):
         self.allPositions = self.constructAllPositions()
         self.currentPosition = dict((s, 0) for s in self.symbolList)
 
-        self.allHoldings = [] #self.constructAllHoldings()
+        self.allHoldings = []
         self.currentHoldings = self.constructCurrentHoldings()
 
     def constructAllPositions(self):
