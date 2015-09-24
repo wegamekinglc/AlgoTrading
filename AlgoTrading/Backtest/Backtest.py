@@ -13,6 +13,7 @@ import time
 import datetime as dt
 from enum import IntEnum
 from enum import unique
+from pandas import ExcelWriter
 from PyFin.Env import Settings
 from AlgoTrading.Data.DataProviders import HistoricalCSVDataHandler
 from AlgoTrading.Data.DataProviders import DataYesMarketDataHandler
@@ -159,4 +160,11 @@ def strategyRunner(userStrategy,
                         Portfolio,
                         userStrategy)
 
-    return backtest.simulateTrading()
+    equityCurve, orderBook, filledBook = backtest.simulateTrading()
+
+    # save to a excel file
+    writer = ExcelWriter('performance.xlsx')
+    equityCurve.to_excel(writer, 'equity_curve', float_format='%.2f')
+    orderBook.to_excel(writer, 'order_book', float_format='%.2f')
+    filledBook.to_excel(writer, 'filled_book', float_format='%.2f')
+    writer.save()

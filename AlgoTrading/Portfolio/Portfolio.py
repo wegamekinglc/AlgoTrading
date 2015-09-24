@@ -6,6 +6,7 @@ Created on 2015-7-24
 """
 
 import pandas as pd
+import numpy as np
 from copy import deepcopy
 from AlgoTrading.Events import OrderEvent
 
@@ -111,8 +112,8 @@ class Portfolio(object):
     def createEquityCurveDataframe(self):
         curve = pd.DataFrame(self.allHoldings)
         curve.set_index('datetime', inplace=True)
-        curve['return'] = curve['total'].pct_change()
-        curve['equity_curve'] = (1.0 + curve['return']).cumprod()
+        curve['return'] = np.log(curve['total'] / curve['total'].shift(1))
+        curve['equity_curve'] = np.exp(curve['return'].cumsum())
         self.equityCurve = curve
 
     def outputSummaryStats(self):

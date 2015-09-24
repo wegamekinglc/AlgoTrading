@@ -12,7 +12,6 @@ from PyFin.API import MA
 
 
 class MovingAverageCrossStrategy(Strategy):
-
     def __init__(self):
         self.short_sma = MA(10, 'close')
         self.long_sma = MA(30, 'close')
@@ -35,15 +34,12 @@ def run_example():
     universe = ['aapl', 'msft', 'ibm']
     initialCapital = 100000.0
 
-    equityCurve, orderBook, filledBook = strategyRunner(userStrategy=MovingAverageCrossStrategy,
-                                                        initialCapital=initialCapital,
-                                                        symbolList=universe,
-                                                        dataSource=DataSource.CSV,
-                                                        csvDir=csvDir)
+    strategyRunner(userStrategy=MovingAverageCrossStrategy,
+                   initialCapital=initialCapital,
+                   symbolList=universe,
+                   dataSource=DataSource.CSV,
+                   csvDir=csvDir)
 
-    print(equityCurve)
-    print(orderBook)
-    print(filledBook)
 
 if __name__ == "__main__":
     run_example()
