@@ -22,6 +22,7 @@ from AlgoTrading.Execution.Execution import SimulatedExecutionHandler
 from AlgoTrading.Execution.OrderBook import OrderBook
 from AlgoTrading.Execution.FilledBook import FilledBook
 from AlgoTrading.Portfolio.Portfolio import Portfolio
+from AlgoTrading.Finance.Commission import PerValue
 
 
 class Backtest(object):
@@ -33,7 +34,8 @@ class Backtest(object):
                  data_handler,
                  execution_handler,
                  portfolio,
-                 strategy):
+                 strategy,
+                 commission=PerValue()):
         self.symbolList = [s.lower() for s in symbol_list]
         self.initialCapital = initial_capital
         self.heartbeat = heartbeat
@@ -41,6 +43,7 @@ class Backtest(object):
         self.executionHanlderCls = execution_handler
         self.portfolioCls = portfolio
         self.strategyCls = strategy
+        self.comm = commission
         self.events = queue.Queue()
         self.dataHandler.setEvents(self.events)
         self.signals = 0
@@ -60,7 +63,7 @@ class Backtest(object):
                                            self.events,
                                            self.dataHandler.getStartDate(),
                                            self.initialCapital)
-        self.executionHanlder = self.executionHanlderCls(self.events)
+        self.executionHanlder = self.executionHanlderCls(self.events, self.comm, self.dataHandler)
         self.orderBook = OrderBook()
         self.filledBook = FilledBook()
         self.strategy._port = self.portfolio

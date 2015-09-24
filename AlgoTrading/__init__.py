@@ -17,5 +17,6 @@ __all__ = ['Backtest',
            'Data',
            'Events',
            'Execution',
+           'Finance',
            'Portfolio',
            'Strategy']

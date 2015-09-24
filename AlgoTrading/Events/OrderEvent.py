@@ -5,7 +5,14 @@ Created on 2015-9-23
 @author: cheng.li
 """
 
+from enum import IntEnum
+from enum import unique
 from AlgoTrading.Events.Event import Event
+
+@unique
+class OrderDirection(IntEnum):
+    BUY = 1
+    SELL = -1
 
 
 class OrderEvent(Event):
@@ -27,4 +34,4 @@ class OrderEvent(Event):
                "Order: Symbol = {1:s}, " \
                "Type = {2:s}, " \
                "Quantity = {3:s}, " \
-               "Direction = {4:s}".format(self.orderID, self.symbol, self.orderType, self.quantity, self.direction)
+               "Direction = {4}".format(self.orderID, self.symbol, self.orderType, self.quantity, self.direction)

@@ -6,8 +6,7 @@ Created on 2015-7-31
 """
 
 from abc import ABCMeta, abstractmethod
-import datetime as dt
-
+from AlgoTrading.Finance import Transaction
 from AlgoTrading.Events import FillEvent
 
 
@@ -22,18 +21,28 @@ class ExecutionHanlder(object):
 
 class SimulatedExecutionHandler(ExecutionHanlder):
 
-    def __init__(self, events):
+    def __init__(self, events, commissions, bars):
         self.events = events
+        self.commissions = commissions
+        self.bars = bars
 
     def executeOrder(self, event):
         if event.type == 'ORDER':
+            exchange = event.symbol.split('.')[-1]
+            transPrice = self.bars.getLatestBarValue(event.symbol, 'close')
+            trans = Transaction(transPrice,
+                                event.quantity,
+                                event.direction)
+            fillCost = transPrice * event.quantity * event.direction
+            commission = self.commissions.calculate(trans)
             fill_event = FillEvent(event.orderID,
                                    event.timeIndex,
                                    event.symbol,
-                                   'null',
+                                   exchange,
                                    event.quantity,
                                    event.direction,
-                                   None)
+                                   fillCost,
+                                   commission)
             self.events.put(fill_event)
 
 

@@ -26,10 +26,10 @@ class MovingAverageCrossStrategy(Strategy):
             currDt = self.bars.getLatestBarDatetime(s)
             if short_sma[s] > long_sma[s] and self.secPos[s] == 0:
                 print("{0}: BUY {1}".format(currDt, s))
-                self.order(s, 'BUY', quantity=100)
+                self.order(s, 1, quantity=100)
             if short_sma[s] < long_sma[s] and self.secPos[s] != 0:
                 print("{0}: SELL {1}".format(currDt, s))
-                self.order(s, 'SELL', quantity=100)
+                self.order(s, -1, quantity=100)
 
 
 def run_example():

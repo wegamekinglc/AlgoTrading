@@ -66,28 +66,15 @@ class Portfolio(object):
         self.allHoldings.append(dh)
 
     def updatePositionFromFill(self, fill):
-        fillDir = 0
-        if fill.direction == 'BUY':
-            fillDir = 1
-        if fill.direction == 'SELL':
-            fillDir = -1
+        fillDir = fill.direction
 
         self.currentPosition[fill.symbol] += fillDir * fill.quantity
 
     def updateHoldingsFromFill(self, fill):
-        fillDir = 0
-        if fill.direction == 'BUY':
-            fillDir = 1
-        if fill.direction == 'SELL':
-            fillDir = -1
-
-        fillCost = self.bars.getLatestBarValue(fill.symbol, 'close')
-        cost = fillDir * fillCost * fill.quantity
-        fill.fillCost = cost
-        self.currentHoldings[fill.symbol] += cost
+        self.currentHoldings[fill.symbol] += fill.fillCost
         self.currentHoldings['commission'] += fill.commission
-        self.currentHoldings['cash'] -= (cost + fill.commission)
-        self.currentHoldings['total'] -= (cost + fill.commission)
+        self.currentHoldings['cash'] -= (fill.fillCost + fill.commission)
+        self.currentHoldings['total'] -= (fill.fillCost + fill.commission)
 
     def updateFill(self, event):
         if event.type == 'FILL':
@@ -105,14 +92,14 @@ class Portfolio(object):
         orderType = 'MKT'
 
         if direction == 'LONG' and curQuantity == 0:
-            order = OrderEvent(symbol, orderType, mktQuantity, 'BUY')
+            order = OrderEvent(symbol, orderType, mktQuantity, 1)
         if direction == 'SHORT' and curQuantity == 0:
-            order = OrderEvent(symbol, orderType, mktQuantity, 'SELL')
+            order = OrderEvent(symbol, orderType, mktQuantity, -1)
 
         if direction == 'EXIT' and curQuantity > 0:
-            order = OrderEvent(symbol, orderType, abs(curQuantity), 'SELL')
+            order = OrderEvent(symbol, orderType, abs(curQuantity), -1)
         if direction == 'EXIT' and curQuantity < 0:
-            order = OrderEvent(symbol, orderType, abs(curQuantity), 'BUY')
+            order = OrderEvent(symbol, orderType, abs(curQuantity), 1)
 
         return order
 
