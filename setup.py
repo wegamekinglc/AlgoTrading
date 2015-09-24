@@ -17,6 +17,7 @@ setup(
               'AlgoTrading.Data.DataProviders',
               'AlgoTrading.Events',
               'AlgoTrading.Execution',
+              'AlgoTrading.Finance',
               'AlgoTrading.Portfolio',
               'AlgoTrading.Strategy',
               'AlgoTrading.examples',
