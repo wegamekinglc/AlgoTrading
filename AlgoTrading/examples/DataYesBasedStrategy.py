@@ -26,12 +26,10 @@ class MovingAverageCrossStrategy(Strategy):
             currDt = self.bars.getLatestBarDatetime(s)
             if short_sma[s] > long_sma[s] and self.secPos[s] == 0:
                 print("{0}: BUY {1}".format(currDt, s))
-                sigDir = 'LONG'
-                self.order(s, sigDir, quantity=100)
+                self.order(s, 'BUY', quantity=100)
             if short_sma[s] < long_sma[s] and self.secPos[s] != 0:
                 print("{0}: SELL {1}".format(currDt, s))
-                sigDir = 'EXIT'
-                self.order(s, sigDir, quantity=100)
+                self.order(s, 'SELL', quantity=100)
 
 
 def run_example():
@@ -40,13 +38,17 @@ def run_example():
     startDate = dt.datetime(2000, 1, 2)
     endDate = dt.datetime(2015, 9, 15)
 
-    strategyRunner(userStrategy=MovingAverageCrossStrategy,
-                   initialCapital=initialCapital,
-                   symbolList=universe,
-                   startDate=startDate,
-                   endDate=endDate,
-                   dataSource=DataSource.DataYes,
-                   token="2bfc4b3b06efa5d8bba2ab9ef83b5d61f1c3887834de729b60eec9f13e1d4df8")
+    equityCurve, orderBook, filledBook = strategyRunner(userStrategy=MovingAverageCrossStrategy,
+                                                        initialCapital=initialCapital,
+                                                        symbolList=universe,
+                                                        startDate=startDate,
+                                                        endDate=endDate,
+                                                        dataSource=DataSource.DataYes,
+                                                        token="2bfc4b3b06efa5d8bba2ab9ef83b5d61f1c3887834de729b60eec9f13e1d4df8")
+    print(equityCurve)
+    print(orderBook)
+    print(filledBook)
+
 
 if __name__ == "__main__":
     run_example()

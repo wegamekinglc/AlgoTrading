@@ -27,9 +27,10 @@ class SimulatedExecutionHandler(ExecutionHanlder):
 
     def executeOrder(self, event):
         if event.type == 'ORDER':
-            fill_event = FillEvent(dt.datetime.utcnow(),
+            fill_event = FillEvent(event.orderID,
+                                   event.timeIndex,
                                    event.symbol,
-                                   'ARCA',
+                                   'null',
                                    event.quantity,
                                    event.direction,
                                    None)

@@ -9,7 +9,7 @@ Created on 2015-7-24
 from abc import ABCMeta
 from abc import abstractmethod
 import datetime as dt
-from AlgoTrading.Events import SignalEvent
+from AlgoTrading.Events import OrderEvent
 from PyFin.Analysis.SecurityValueHolders import SecurityValueHolder
 
 
@@ -52,10 +52,11 @@ class Strategy(object):
     def monitoring(self):
         pass
 
-    def order(self, symbol, signalDirection, quantity):
-        currentDT = dt.datetime.utcnow()
-        signal = SignalEvent(1, symbol, currentDT, signalDirection, 1.0, quantity)
+    def order(self, symbol, direction, quantity):
+        currDT = self.bars.getLatestBarDatetime(symbol)
+        signal = OrderEvent(currDT, symbol, "MKT", quantity, direction)
         self.events.put(signal)
+        return signal.orderID
 
     @property
     def secPos(self):

@@ -10,8 +10,9 @@ from AlgoTrading.Events.Event import Event
 
 class FillEvent(Event):
 
-    def __init__(self, timeindex, symbol, exchange, quantity, direction, fillCost, commission=None):
+    def __init__(self, orderID, timeindex, symbol, exchange, quantity, direction, fillCost, commission=None):
         self.type = 'FILL'
+        self.orderID = orderID
         self.timeindex = timeindex
         self.symbol = symbol
         self.exchange = exchange

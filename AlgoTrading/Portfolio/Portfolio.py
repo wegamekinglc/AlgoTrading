@@ -83,6 +83,7 @@ class Portfolio(object):
 
         fillCost = self.bars.getLatestBarValue(fill.symbol, 'close')
         cost = fillDir * fillCost * fill.quantity
+        fill.fillCost = cost
         self.currentHoldings[fill.symbol] += cost
         self.currentHoldings['commission'] += fill.commission
         self.currentHoldings['cash'] -= (cost + fill.commission)

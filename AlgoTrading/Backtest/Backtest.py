@@ -19,6 +19,8 @@ from AlgoTrading.Data.DataProviders import DataYesMarketDataHandler
 from AlgoTrading.Data.DataProviders import DXDataCenter
 from AlgoTrading.Data.DataProviders import YaHooDataProvider
 from AlgoTrading.Execution.Execution import SimulatedExecutionHandler
+from AlgoTrading.Execution.OrderBook import OrderBook
+from AlgoTrading.Execution.FilledBook import FilledBook
 from AlgoTrading.Portfolio.Portfolio import Portfolio
 
 
@@ -59,6 +61,8 @@ class Backtest(object):
                                            self.dataHandler.getStartDate(),
                                            self.initialCapital)
         self.executionHanlder = self.executionHanlderCls(self.events)
+        self.orderBook = OrderBook()
+        self.filledBook = FilledBook()
         self.strategy._port = self.portfolio
 
     def _runBacktest(self):
@@ -86,25 +90,28 @@ class Backtest(object):
                         self.portfolio.updateSignal(event)
                     elif event.type == 'ORDER':
                         self.orders += 1
+                        self.orderBook.updateFromOrderEvent(event)
                         self.executionHanlder.executeOrder(event)
                     elif event.type == 'FILL':
                         self.fills += 1
+                        self.orderBook.updateFromFillEvent(event)
                         self.portfolio.updateFill(event)
+                        self.filledBook.updateFromFillEvent(event)
 
             time.sleep(self.heartbeat)
 
     def _outputPerformance(self):
-        self.portfolio.createEquityCurveDataframe()
-        print(self.portfolio.equityCurve)
-
         print("Signals: {0:d}".format(self.signals))
         print("Orders : {0:d}".format(self.orders))
         print("Fills  : {0:d}".format(self.fills))
 
+        self.portfolio.createEquityCurveDataframe()
+        return self.portfolio.equityCurve, self.orderBook.view(), self.filledBook.view()
+
     def simulateTrading(self):
         self.strategy._subscribe()
         self._runBacktest()
-        self._outputPerformance()
+        return self._outputPerformance()
 
 
 @unique
@@ -149,4 +156,4 @@ def strategyRunner(userStrategy,
                         Portfolio,
                         userStrategy)
 
-    backtest.simulateTrading()
+    return backtest.simulateTrading()

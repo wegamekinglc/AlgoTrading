@@ -9,6 +9,7 @@ import AlgoTrading.Backtest as Backtest
 import AlgoTrading.Data as Data
 import AlgoTrading.Events as Events
 import AlgoTrading.Execution as Execution
+import AlgoTrading.Finance as Finance
 import AlgoTrading.Portfolio as Portfolio
 import AlgoTrading.Strategy as Strategy
 
