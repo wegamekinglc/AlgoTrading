@@ -23,7 +23,8 @@ from AlgoTrading.Execution.Execution import SimulatedExecutionHandler
 from AlgoTrading.Execution.OrderBook import OrderBook
 from AlgoTrading.Execution.FilledBook import FilledBook
 from AlgoTrading.Portfolio.Portfolio import Portfolio
-from AlgoTrading.Finance.Commission import PerValue
+from AlgoTrading.Portfolio.PositionsBook import StocksPositionsBook
+from AlgoTrading.Assets import XSHGStock
 
 
 class Backtest(object):
@@ -35,8 +36,7 @@ class Backtest(object):
                  data_handler,
                  execution_handler,
                  portfolio,
-                 strategy,
-                 commission=PerValue()):
+                 strategy):
         self.symbolList = [s.lower() for s in symbol_list]
         self.initialCapital = initial_capital
         self.heartbeat = heartbeat
@@ -44,7 +44,7 @@ class Backtest(object):
         self.executionHanlderCls = execution_handler
         self.portfolioCls = portfolio
         self.strategyCls = strategy
-        self.comm = commission
+        self.assets = {s: XSHGStock for s in self.symbolList}
         self.events = queue.Queue()
         self.dataHandler.setEvents(self.events)
         self.signals = 0
@@ -64,10 +64,13 @@ class Backtest(object):
                                            self.events,
                                            self.dataHandler.getStartDate(),
                                            self.initialCapital)
-        self.executionHanlder = self.executionHanlderCls(self.events, self.comm, self.dataHandler)
+        self.executionHanlder = self.executionHanlderCls(self.events, self.assets, self.dataHandler)
         self.orderBook = OrderBook()
         self.filledBook = FilledBook()
+        lags = {s: self.assets[s].lag for s in self.symbolList}
+        self.stocksPositionsBook = StocksPositionsBook(lags)
         self.strategy._port = self.portfolio
+        self.strategy._posBook = self.stocksPositionsBook
 
     def _runBacktest(self):
 
@@ -87,7 +90,7 @@ class Backtest(object):
                 if event is not None:
                     if event.type == 'MARKET':
                         self.strategy._updateSubscribing()
-                        self.strategy.calculateSignals()
+                        self.strategy.handle_data()
                         self.portfolio.updateTimeindex()
                     elif event.type == 'SIGNAL':
                         self.signals += 1
@@ -101,6 +104,11 @@ class Backtest(object):
                         self.orderBook.updateFromFillEvent(event)
                         self.portfolio.updateFill(event)
                         self.filledBook.updateFromFillEvent(event)
+                        orderTime = self.orderBook.orderTime(event.orderID)
+                        self.stocksPositionsBook.updatePositionsByFill(event.symbol,
+                                                                       orderTime.date(),
+                                                                       event.quantity,
+                                                                       event.direction)
 
             time.sleep(self.heartbeat)
 

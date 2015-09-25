@@ -18,7 +18,7 @@ class Strategy(object):
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def calculateSignals(self):
+    def handle_data(self):
         raise NotImplementedError()
 
     def _subscribe(self):
@@ -53,8 +53,25 @@ class Strategy(object):
         pass
 
     def order(self, symbol, direction, quantity):
-        currDT = self.bars.getLatestBarDatetime(symbol)
-        signal = OrderEvent(currDT, symbol, "MKT", quantity, direction)
+        currDTTime = self.bars.getLatestBarDatetime(symbol)
+        currDT = currDTTime.date()
+        currValue = self.bars.getLatestBarValue(symbol, 'close')
+        if direction == -1:
+            amount = self._posBook.avaliableForSale(symbol, currDT)
+            if amount < quantity:
+                #print("{0} quantity need to be sold {1} is less then the available for sell amount {2}"
+                #      .format(symbol, quantity, amount))
+                return
+        elif direction == 1:
+            if quantity * currValue > self._port.currentHoldings['cash']:
+                #print("cash needed to buy the quantity {0} of {1} is less than available cash {2}"
+                #      .format(quantity, symbol,  self._port.currentHoldings['cash']))
+                return
+        else:
+            raise ValueError("Unrecognized direction %d" % direction)
+
+        self._posBook.updatePositionsByOrder(symbol, currDT, quantity, direction)
+        signal = OrderEvent(currDTTime, symbol, "MKT", quantity, direction)
         self.events.put(signal)
         return signal.orderID
 

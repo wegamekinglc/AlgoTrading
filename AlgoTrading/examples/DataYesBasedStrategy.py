@@ -18,7 +18,7 @@ class MovingAverageCrossStrategy(Strategy):
         self.short_sma = MA(10, 'close')
         self.long_sma = MA(30, 'close')
 
-    def calculateSignals(self):
+    def handle_data(self):
         short_sma = self.short_sma.value
         long_sma = self.long_sma.value
         for s in self.universe:

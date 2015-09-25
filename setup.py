@@ -12,6 +12,7 @@ setup(
     version='0.1.0',
     url='',
     packages=['AlgoTrading',
+              'AlgoTrading.Assets',
               'AlgoTrading.Backtest',
               'AlgoTrading.Data',
               'AlgoTrading.Data.DataProviders',

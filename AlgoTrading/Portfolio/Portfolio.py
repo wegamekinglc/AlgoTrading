@@ -9,6 +9,7 @@ import pandas as pd
 import numpy as np
 from copy import deepcopy
 from AlgoTrading.Events import OrderEvent
+from AlgoTrading.Portfolio.PositionsBook import StocksPositionsBook
 
 
 class Portfolio(object):

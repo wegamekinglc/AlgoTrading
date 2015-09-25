@@ -21,9 +21,9 @@ class ExecutionHanlder(object):
 
 class SimulatedExecutionHandler(ExecutionHanlder):
 
-    def __init__(self, events, commissions, bars):
+    def __init__(self, events, assets, bars):
         self.events = events
-        self.commissions = commissions
+        self.assets = assets
         self.bars = bars
 
     def executeOrder(self, event):
@@ -34,7 +34,8 @@ class SimulatedExecutionHandler(ExecutionHanlder):
                                 event.quantity,
                                 event.direction)
             fillCost = transPrice * event.quantity * event.direction
-            commission = self.commissions.calculate(trans)
+            comCals = self.assets[event.symbol].commission
+            commission = comCals.calculate(trans)
             fill_event = FillEvent(event.orderID,
                                    event.timeIndex,
                                    event.symbol,

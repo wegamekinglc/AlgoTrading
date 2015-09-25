@@ -26,6 +26,9 @@ class OrderBook(object):
         self._allOrders['filled'][event.orderID] = 0
         self._allOrders['direction'][event.orderID] = event.direction
 
+    def orderTime(self, orderID):
+        return self._allOrders['time'][orderID]
+
     def updateFromFillEvent(self, event):
         self._allOrders['filled'][event.orderID] += event.quantity
 
