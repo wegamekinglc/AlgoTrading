@@ -49,10 +49,7 @@ class Portfolio(object):
         return d
 
     def updateTimeindex(self):
-        latestDatetime = self.bars.getLatestBarDatetime(self.symbolList[0])
-        dp = deepcopy(self.currentPosition)
-        dp['date'] = latestDatetime
-        self.allPositions.append(dp)
+        latestDatetime = self.bars.currentTimeIndex
 
         dh = dict((s, 0) for s in self.symbolList)
         dh['datetime'] = latestDatetime
@@ -61,7 +58,9 @@ class Portfolio(object):
         dh['total'] = self.currentHoldings['cash']
 
         for s in self.symbolList:
-            marketValue = self.currentPosition[s] * self.bars.getLatestBarValue(s, 'close')
+            marketValue = 0.0
+            if self.currentPosition[s] != 0:
+                marketValue = self.currentPosition[s] * self.bars.getLatestBarValue(s, 'close')
             dh[s] = marketValue
             dh['total'] += marketValue
 
@@ -69,7 +68,6 @@ class Portfolio(object):
 
     def updatePositionFromFill(self, fill):
         fillDir = fill.direction
-
         self.currentPosition[fill.symbol] += fillDir * fill.quantity
 
     def updateHoldingsFromFill(self, fill):

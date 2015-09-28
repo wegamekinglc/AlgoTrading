@@ -21,19 +21,11 @@ class DataHandler(object):
         raise NotImplementedError()
 
     @abstractmethod
-    def getLatestBars(self, symbol, N=1):
-        raise NotImplementedError()
-
-    @abstractmethod
     def getLatestBarDatetime(self, symbol):
         raise NotImplementedError()
 
     @abstractmethod
     def getLatestBarValue(self, symbol, valType):
-        raise NotImplementedError()
-
-    @abstractmethod
-    def getLatestBarsValues(self, symbol, valType, N=1):
         raise NotImplementedError()
 
     @abstractmethod
@@ -60,15 +52,7 @@ class DataFrameDataHandler(DataHandler):
         except KeyError:
             raise RuntimeError("the symbol {0:s} is not available in the historical data set".format(symbol))
         else:
-            return barsList[-1]
-
-    def getLatestBars(self, symbol, N=1):
-        try:
-            barsList = self.latestSymbolData[symbol]
-        except KeyError:
-            raise RuntimeError("the symbol {0:s} is not available in the historical data set".format(symbol))
-        else:
-            return barsList[-N:]
+            return barsList
 
     def getLatestBarDatetime(self, symbol):
         try:
@@ -76,7 +60,7 @@ class DataFrameDataHandler(DataHandler):
         except KeyError:
             raise RuntimeError("the symbol {0:s} is not available in the historical data set".format(symbol))
         else:
-            return barsList[-1][0]
+            return barsList[0]
 
     def getLatestBarValue(self, symbol, valType):
         try:
@@ -84,30 +68,35 @@ class DataFrameDataHandler(DataHandler):
         except KeyError:
             raise RuntimeError("the symbol {0:s} is not available in the historical data set".format(symbol))
         else:
-            return getattr(barsList[-1][1], valType)
-
-    def getLatestBarsValues(self, symbol, valType, N=1):
-        try:
-            barsList = self.getLatestBars(symbol, N)
-        except KeyError:
-            raise RuntimeError("the symbol {0:s} is not available in the historical data set".format(symbol))
-        else:
-            return np.array([getattr(b[1], valType) for b in barsList])
+            return barsList[1][valType]
 
     def updateBars(self):
+        noDataCount = 0
+        availableSymbol = set(self.symbolList)
+        try:
+            currentTimeIndex = self.dateIndex[self.start]
+            self.start += 1
+        except IndexError:
+            self.continueBacktest = False
+            return
         for s in self.symbolList:
             try:
-                bar = next(self._getNewBar(s))
-            except StopIteration:
-                self.continueBacktest = False
-                return
+                bar = self._getNewBar(s, currentTimeIndex)
+            except KeyError:
+                noDataCount += 1
+                availableSymbol.remove(s)
             else:
                 if bar is not None:
-                    self.latestSymbolData[s].append(bar)
-        self.events.put(MarketEvent())
+                    self.latestSymbolData[s] = (currentTimeIndex, bar)
 
-    def _getNewBar(self, symbol):
-        for b in self.symbolData[symbol]:
-            yield b
+        if noDataCount == len(self.symbolList):
+            self.continueBacktest = False
+            return
+        self.events.put(MarketEvent())
+        self.currentTimeIndex = currentTimeIndex
+        return availableSymbol
+
+    def _getNewBar(self, symbol, timeIndex):
+        return self.symbolData[symbol][timeIndex]
 
 

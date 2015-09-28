@@ -30,20 +30,19 @@ from AlgoTrading.Assets import XSHGStock
 class Backtest(object):
 
     def __init__(self,
-                 symbol_list,
                  initial_capital,
                  heartbeat,
                  data_handler,
                  execution_handler,
                  portfolio,
                  strategy):
-        self.symbolList = [s.lower() for s in symbol_list]
         self.initialCapital = initial_capital
         self.heartbeat = heartbeat
         self.dataHandler = data_handler
         self.executionHanlderCls = execution_handler
         self.portfolioCls = portfolio
         self.strategyCls = strategy
+        self.symbolList = self.dataHandler.symbolList
         self.assets = {s: XSHGStock for s in self.symbolList}
         self.events = queue.Queue()
         self.dataHandler.setEvents(self.events)
@@ -78,7 +77,7 @@ class Backtest(object):
         while True:
             i += 1
             if self.dataHandler.continueBacktest:
-                self.dataHandler.updateBars()
+                self.strategy.symbolList = self.dataHandler.updateBars()
             else:
                 break
 
@@ -121,8 +120,10 @@ class Backtest(object):
         return self.portfolio.equityCurve, self.orderBook.view(), self.filledBook.view()
 
     def simulateTrading(self):
+        print(u"开始回测...")
         self.strategy._subscribe()
         self._runBacktest()
+        print(u"回测结束！")
         return self._outputPerformance()
 
 
@@ -140,6 +141,7 @@ def strategyRunner(userStrategy,
                    startDate=dt.datetime(2015, 9, 1),
                    endDate=dt.datetime(2015, 9, 15),
                    dataSource=DataSource.DXDataCenter,
+                   saveFile=False,
                    **kwargs):
 
     if dataSource == DataSource.CSV:
@@ -160,8 +162,7 @@ def strategyRunner(userStrategy,
                                         startDate=startDate,
                                         endDate=endDate)
 
-    backtest = Backtest(symbolList,
-                        initialCapital,
+    backtest = Backtest(initialCapital,
                         0.0,
                         dataHandler,
                         SimulatedExecutionHandler,
@@ -171,8 +172,11 @@ def strategyRunner(userStrategy,
     equityCurve, orderBook, filledBook = backtest.simulateTrading()
 
     # save to a excel file
-    writer = ExcelWriter('performance.xlsx')
-    equityCurve.to_excel(writer, 'equity_curve', float_format='%.2f')
-    orderBook.to_excel(writer, 'order_book', float_format='%.2f')
-    filledBook.to_excel(writer, 'filled_book', float_format='%.2f')
-    writer.save()
+    if saveFile:
+        print(u"策略表现数据写入excel文件，请稍等...")
+        writer = ExcelWriter('performance.xlsx')
+        equityCurve.to_excel(writer, 'equity_curve', float_format='%.4f')
+        orderBook.to_excel(writer, 'order_book', float_format='%.4f')
+        filledBook.to_excel(writer, 'filled_book', float_format='%.4f')
+        writer.save()
+        print(u"写入完成！")

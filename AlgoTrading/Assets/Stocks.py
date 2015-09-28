@@ -10,11 +10,11 @@ from AlgoTrading.Finance.Commission import PerValue
 
 XSHGStock = Asset(lag=1,
                   exchange='XSHG',
-                  commission=PerValue(buyCost=0.00, sellCost=0.0))
+                  commission=PerValue(buyCost=0.003, sellCost=0.0))
 
 XSHEStock = Asset(lag=1,
                   exchange='XSHE',
-                  commission=PerValue(buyCost=0.00, sellCost=0.0))
+                  commission=PerValue(buyCost=0.003, sellCost=0.0))
 
 
 

@@ -39,7 +39,10 @@ class DataYesMarketDataHandler(DataFrameDataHandler):
                 combIndex.union(self.symbolData[s].index)
 
             self.latestSymbolData[s] = []
+            self.symbolData[s] = self.symbolData[s].T.to_dict()
 
-        for s in self.symbolList:
-            self.symbolData[s] = self.symbolData[s].reindex(index=combIndex, method='pad').iterrows()
         self.dateIndex = combIndex
+        self.start = 0
+        for i, s in enumerate(self.symbolList):
+            if s not in self.symbolData:
+                del self.symbolList[i]

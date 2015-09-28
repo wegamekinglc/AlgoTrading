@@ -32,18 +32,19 @@ class Strategy(object):
     def _updateSubscribing(self):
 
         values = dict()
-        for s in self._pNames[0]:
-            securityValue = {}
-            fields = self._pNames[0][s]
-            try:
-                value = self.bars.getLatestBarValue(s, fields)
-                securityValue[fields] = value
-            except:
-                 pass
-            values[s] = securityValue
+        if self._pNames:
+            for s in self._pNames[0]:
+                securityValue = {}
+                fields = self._pNames[0][s]
+                try:
+                    value = self.bars.getLatestBarValue(s, fields)
+                    securityValue[fields] = value
+                except:
+                     pass
+                values[s] = securityValue
 
-        for subscriber in self._subscribed:
-            subscriber.push(values)
+            for subscriber in self._subscribed:
+                subscriber.push(values)
 
     @property
     def universe(self):
