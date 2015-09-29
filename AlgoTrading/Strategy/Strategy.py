@@ -36,11 +36,20 @@ class Strategy(object):
             for s in self._pNames[0]:
                 securityValue = {}
                 fields = self._pNames[0][s]
-                try:
-                    value = self.bars.getLatestBarValue(s, fields)
-                    securityValue[fields] = value
-                except:
-                     pass
+
+                if isinstance(fields, list):
+                    for f in fields:
+                        try:
+                            value = self.bars.getLatestBarValue(s, f)
+                            securityValue[f] = value
+                        except:
+                             pass
+                else:
+                    try:
+                        value = self.bars.getLatestBarValue(s, fields)
+                        securityValue[fields] = value
+                    except:
+                        pass
                 values[s] = securityValue
 
             for subscriber in self._subscribed:
