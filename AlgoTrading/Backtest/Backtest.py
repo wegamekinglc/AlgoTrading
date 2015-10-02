@@ -17,7 +17,10 @@ from pandas import ExcelWriter
 from PyFin.Env import Settings
 from AlgoTrading.Data.DataProviders import HistoricalCSVDataHandler
 from AlgoTrading.Data.DataProviders import DataYesMarketDataHandler
-from AlgoTrading.Data.DataProviders import DXDataCenter
+try:
+    from AlgoTrading.Data.DataProviders import DXDataCenter
+except ImportError:
+    pass
 from AlgoTrading.Data.DataProviders import YaHooDataProvider
 from AlgoTrading.Execution.Execution import SimulatedExecutionHandler
 from AlgoTrading.Execution.OrderBook import OrderBook
