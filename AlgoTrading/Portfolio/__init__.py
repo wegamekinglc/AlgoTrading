@@ -7,4 +7,5 @@ Created on 2015-9-17
 
 from AlgoTrading.Portfolio.Portfolio import Portfolio
 
-__all__ = ['Portfolio']
+__all__ = ['Plottings',
+           'Portfolio']

@@ -7,7 +7,9 @@ Created on 2015-10-9
 
 import pandas as pd
 import datetime as dt
+import numpy as np
 from math import sqrt
+from math import exp
 from PyFin.Math.Accumulators import MovingDrawDown
 
 APPROX_BDAYS_PER_YEAR = 252.
@@ -34,12 +36,28 @@ def aggregateReturns(returns, convert='daily'):
 def drawDown(returns):
 
     ddCal = MovingDrawDown(len(returns), 'ret')
-    ddSeries = [0.0] * len(returns)
+    length = len(returns)
+    ddSeries = [0.0] * length
+    peakSeries = [0] * length
+    valleySeries = [0] * length
+    recoverySeries = [returns.index[-1]] * length
     for i, value in enumerate(returns):
         ddCal.push({'ret': value})
-        ddSeries[i] = ddCal.value[0]
+        res = ddCal.value
+        ddSeries[i] = exp(res[0]) - 1.0
+        peakSeries[i] = returns.index[res[2]]
+        valleySeries[i] = returns.index[i]
 
-    return pd.Series(ddSeries, returns.index)
+    for i, value in enumerate(ddSeries):
+        for k in range(i, length):
+            if ddSeries[k] == 0.0:
+                recoverySeries[i] = returns.index[k]
+                break
+
+    df = pd.DataFrame(zip(ddSeries, peakSeries, valleySeries, recoverySeries),
+                      index=returns.index,
+                      columns=['draw_down', 'peak', 'valley', 'recovery'])
+    return df
 
 
 def annualReturn(returns):

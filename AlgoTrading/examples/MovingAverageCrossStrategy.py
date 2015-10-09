@@ -14,7 +14,7 @@ from PyFin.API import MA
 class MovingAverageCrossStrategy(Strategy):
     def __init__(self):
         self.short_sma = MA(10, 'close')
-        self.long_sma = MA(120, 'close')
+        self.long_sma = MA(30, 'close')
 
     def handle_data(self):
         for s in self.universe:
