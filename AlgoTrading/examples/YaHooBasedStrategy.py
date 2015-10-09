@@ -37,7 +37,8 @@ def run_example():
                    symbolList=universe,
                    startDate=startDate,
                    endDate=endDate,
-                   dataSource=DataSource.YAHOO)
+                   dataSource=DataSource.YAHOO,
+                   saveFile=True)
 
 
 if __name__ == "__main__":

@@ -50,7 +50,8 @@ class Strategy(object):
                         securityValue[fields] = value
                     except:
                         pass
-                values[s] = securityValue
+                if securityValue:
+                    values[s] = securityValue
 
             for subscriber in self._subscribed:
                 subscriber.push(values)

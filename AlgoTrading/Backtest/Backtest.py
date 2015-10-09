@@ -120,7 +120,8 @@ class Backtest(object):
         print("Fills  : {0:d}".format(self.fills))
 
         self.portfolio.createEquityCurveDataframe()
-        return self.portfolio.equityCurve, self.orderBook.view(), self.filledBook.view()
+        perf_metric, perf_df = self.portfolio.outputSummaryStats(self.portfolio.equityCurve)
+        return self.portfolio.equityCurve, self.orderBook.view(), self.filledBook.view(), perf_metric, perf_df
 
     def simulateTrading(self):
         print(u"开始回测...")
@@ -172,12 +173,14 @@ def strategyRunner(userStrategy,
                         Portfolio,
                         userStrategy)
 
-    equityCurve, orderBook, filledBook = backtest.simulateTrading()
+    equityCurve, orderBook, filledBook, perf_metric, perf_df = backtest.simulateTrading()
 
     # save to a excel file
     if saveFile:
         print(u"策略表现数据写入excel文件，请稍等...")
         writer = ExcelWriter('performance.xlsx')
+        perf_metric.to_excel(writer, 'perf_metrics', float_format='%.4f')
+        perf_df.to_excel(writer, 'perf_series', float_format='%.4f')
         equityCurve.to_excel(writer, 'equity_curve', float_format='%.4f')
         orderBook.to_excel(writer, 'order_book', float_format='%.4f')
         filledBook.to_excel(writer, 'filled_book', float_format='%.4f')

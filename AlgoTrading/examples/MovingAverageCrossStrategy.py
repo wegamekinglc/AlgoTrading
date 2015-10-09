@@ -33,7 +33,8 @@ def run_example():
                    initialCapital=initialCapital,
                    symbolList=universe,
                    dataSource=DataSource.CSV,
-                   csvDir=csvDir)
+                   csvDir=csvDir,
+                   saveFile=True)
 
 
 if __name__ == "__main__":

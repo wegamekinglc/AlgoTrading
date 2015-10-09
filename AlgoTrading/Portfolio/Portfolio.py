@@ -5,11 +5,16 @@ Created on 2015-7-24
 @author: cheng.li
 """
 
+from math import exp
 import pandas as pd
 import numpy as np
-from copy import deepcopy
 from AlgoTrading.Events import OrderEvent
-from AlgoTrading.Portfolio.PositionsBook import StocksPositionsBook
+from AlgoTrading.Finance import aggregateReturns
+from AlgoTrading.Finance import drawDown
+from AlgoTrading.Finance import annualReturn
+from AlgoTrading.Finance import annualVolatility
+from AlgoTrading.Finance import sortinoRatio
+from AlgoTrading.Finance import sharpRatio
 
 
 class Portfolio(object):
@@ -113,12 +118,27 @@ class Portfolio(object):
         curve.set_index('datetime', inplace=True)
         curve['return'] = np.log(curve['total'] / curve['total'].shift(1))
         curve['equity_curve'] = np.exp(curve['return'].cumsum())
-        self.equityCurve = curve
+        self.equityCurve = curve.dropna()
 
-    def outputSummaryStats(self):
-        totalReturn = self.equityCurve['equity_curve'][-1]
-        returns = self.equityCurve['returns']
-        pnl = self.equityCurve['equity_curve']
+    def outputSummaryStats(self, curve):
+        returns = curve['return']
+        aggregateDaily = aggregateReturns(returns)
+        drawDownDaily = drawDown(aggregateDaily)
+        annualRet = annualReturn(aggregateDaily)
+        annualVol = annualVolatility(aggregateDaily)
+        sortino = sortinoRatio(aggregateDaily)
+        sharp = sharpRatio(aggregateDaily)
+        maxDrawDown = np.min(drawDownDaily)
+        winningDays = np.sum(aggregateDaily > 0.)
+        lossingDays = np.sum(aggregateDaily < 0.)
 
-        #sharp_ratio = createSharpRatio(returns, perios=252 * 60 * 6.5)
+        perf_df = pd.DataFrame(index=aggregateDaily.index)
+        perf_df['daily_return'] = aggregateDaily
+        perf_df['daily_cum_return'] = np.exp(aggregateDaily.cumsum()) - 1.0
+        perf_df['daily_draw_down'] = np.exp(drawDownDaily) - 1.0
+
+        perf_metric = pd.DataFrame([annualRet, annualVol, sortino, sharp, exp(maxDrawDown) - 1.0, winningDays, lossingDays],
+                                   index=['annual_return', 'annual_volatiltiy', 'sortino_ratio', 'sharp_ratio', 'max_draw_down', 'winning_days', 'lossing_days'],
+                                   columns=['metrics'])
+        return perf_metric, perf_df
 
