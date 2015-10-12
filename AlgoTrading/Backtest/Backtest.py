@@ -115,7 +115,6 @@ class Backtest(object):
             time.sleep(self.heartbeat)
 
     def _outputPerformance(self):
-        print("Signals: {0:d}".format(self.signals))
         print("Orders : {0:d}".format(self.orders))
         print("Fills  : {0:d}".format(self.fills))
 

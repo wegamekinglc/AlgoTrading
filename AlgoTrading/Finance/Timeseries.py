@@ -7,7 +7,6 @@ Created on 2015-10-9
 
 import pandas as pd
 import datetime as dt
-import numpy as np
 from math import sqrt
 from math import exp
 from PyFin.Math.Accumulators import MovingDrawDown
@@ -29,6 +28,13 @@ def aggregateReturns(returns, convert='daily'):
     if convert == 'daily':
         return returns.groupby(
             lambda x: dt.datetime(x.year, x.month, x.day)).apply(cumulateReturns)
+    if convert == 'monthly':
+        return returns.groupby(
+            [lambda x: x.year,
+             lambda x: x.month]).apply(cumulateReturns)
+    if convert == 'yearly':
+        return returns.groupby(
+            [lambda x: x.year]).apply(cumulateReturns)
     else:
         ValueError('convert must be daily, weekly, monthly or yearly')
 

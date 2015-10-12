@@ -7,8 +7,10 @@ Created on 2015-10-9
 
 from functools import wraps
 import seaborn as sns
-import pandas as pd
+import matplotlib
 from matplotlib.ticker import FuncFormatter
+import pandas as pd
+from AlgoTrading.Finance.Timeseries import aggregateReturns
 
 
 def plotting_context(func):
@@ -85,7 +87,7 @@ def plottingDrawdownPeriods(cumReturns, drawDownTable, top, ax):
 
     ax.set_title('Top %i Drawdown Periods' % top)
     ax.set_ylabel('Cumulative returns')
-    ax.legend(['Portfolio'], loc='best')
+    ax.legend(['Cumulative returns'], loc='best')
     ax.set_xlabel('')
     return ax
 
@@ -98,4 +100,79 @@ def plottingUnderwater(drawDownSeries, ax):
     ax.set_title('Underwater Plot')
     ax.legend(loc='best')
     ax.set_xlabel('')
+    return ax
+
+
+def plottingMonthlyReturnsHeapmap(returns, ax):
+    monthlyRetTable = aggregateReturns(returns, 'monthly')
+    monthlyRetTable = monthlyRetTable.unstack()
+    sns.heatmap(monthlyRetTable.fillna(0) * 100.0,
+                annot=True,
+                annot_kws={"size": 9},
+                alpha=1.0,
+                center=0.0,
+                cbar=False,
+                cmap=matplotlib.cm.RdYlGn,
+                ax=ax)
+    ax.set_ylabel('Year')
+    ax.set_xlabel('Month')
+    ax.set_title('Monthly Returns (%)')
+    return ax
+
+
+def plottingAnnualReturns(returns, ax):
+    x_axis_formatter = FuncFormatter(percentage)
+    ax.xaxis.set_major_formatter(FuncFormatter(x_axis_formatter))
+    ax.tick_params(axis='x', which='major', labelsize=10)
+
+    annulaReturns = pd.DataFrame(aggregateReturns(returns, 'yearly'))
+
+    ax.axvline(annulaReturns.values.mean(),
+               color='steelblue',
+               linestyle='--',
+               lw=4,
+               alpha=0.7)
+
+    annulaReturns.sort_index(ascending=False).plot(
+        ax=ax,
+        kind='barh',
+        alpha=0.7
+    )
+
+    ax.axvline(0.0, color='black', linestyle='-', lw=3)
+
+    ax.set_ylabel('Year')
+    ax.set_xlabel('Returns')
+    ax.set_title("Annual Returns")
+    ax.legend(['mean'], loc='best')
+    return ax
+
+
+def plottingMonthlyRetDist(returns, ax):
+    x_axis_formatter = FuncFormatter(percentage)
+    ax.xaxis.set_major_formatter(FuncFormatter(x_axis_formatter))
+    ax.tick_params(axis='x', which='major', labelsize=10)
+
+    monthlyRetTable = aggregateReturns(returns, 'monthly')
+
+    ax.hist(
+        monthlyRetTable,
+        color='orangered',
+        alpha=0.8,
+        bins=20
+    )
+
+    ax.axvline(
+        monthlyRetTable.mean(),
+        color='gold',
+        linestyle='--',
+        lw=4,
+        alpha=1.0
+    )
+
+    ax.axvline(0.0, color='black', linestyle='-', lw=3, alpha=0.75)
+    ax.legend(['mean'], loc='best')
+    ax.set_ylabel('Number of months')
+    ax.set_xlabel('Returns')
+    ax.set_title("Distribution of Monthly Returns")
     return ax

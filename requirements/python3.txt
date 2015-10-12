@@ -6,4 +6,5 @@ Finance-Python
 tushare
 sqlalchemy
 pymssql
-
+matplotlib
+seaborn

@@ -20,6 +20,9 @@ from AlgoTrading.Portfolio.Plottings import plottingRollingReturn
 from AlgoTrading.Portfolio.Plottings import plottingDrawdownPeriods
 from AlgoTrading.Portfolio.Plottings import plottingUnderwater
 from AlgoTrading.Portfolio.Plottings import plotting_context
+from AlgoTrading.Portfolio.Plottings import plottingMonthlyReturnsHeapmap
+from AlgoTrading.Portfolio.Plottings import plottingAnnualReturns
+from AlgoTrading.Portfolio.Plottings import plottingMonthlyRetDist
 
 
 class Portfolio(object):
@@ -145,21 +148,29 @@ class Portfolio(object):
         perf_metric = pd.DataFrame([annualRet, annualVol, sortino, sharp, maxDrawDown, winningDays, lossingDays],
                                    index=['annual_return', 'annual_volatiltiy', 'sortino_ratio', 'sharp_ratio', 'max_draw_down', 'winning_days', 'lossing_days'],
                                    columns=['metrics'])
-        self._createPerfSheet(perf_df, drawDownDaily)
+        self._createPerfSheet(curve, perf_df, drawDownDaily)
         return perf_metric, perf_df
 
     @plotting_context
-    def _createPerfSheet(self, perf_df, drawDownDaily):
-        verticalSections = 4
-        fig = plt.figure(figsize=(16, 6 * verticalSections))
+    def _createPerfSheet(self, curve, perf_df, drawDownDaily):
+        returns = curve['return']
+        verticalSections = 5
+        fig = plt.figure(figsize=(16, 8 * verticalSections))
         gs = gridspec.GridSpec(verticalSections, 3, wspace=0.5, hspace=0.5)
 
         axRollingReturns = plt.subplot(gs[:2, :])
         axDrawDown = plt.subplot(gs[2, :], sharex=axRollingReturns)
         axUnderwater = plt.subplot(gs[3, :], sharex=axDrawDown)
+        axMonthlyHeatmap = plt.subplot(gs[4, 0])
+        axAnnualReturns = plt.subplot(gs[4, 1])
+        axMonthlyDist = plt.subplot(gs[4, 2])
+
         plottingRollingReturn(perf_df['daily_cum_return'], axRollingReturns)
         plottingDrawdownPeriods(perf_df['daily_cum_return'], drawDownDaily, 5, axDrawDown)
         plottingUnderwater(drawDownDaily['draw_down'], axUnderwater)
+        plottingMonthlyReturnsHeapmap(returns, axMonthlyHeatmap)
+        plottingAnnualReturns(returns, axAnnualReturns)
+        plottingMonthlyRetDist(returns, axMonthlyDist)
 
         plt.show()
         return fig
