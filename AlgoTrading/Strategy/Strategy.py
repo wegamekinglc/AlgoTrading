@@ -23,33 +23,32 @@ class Strategy(object):
 
     def _subscribe(self):
         self._subscribed = []
-        self._pNames = tuple()
+        self._pNames = {}
         for k, v in self.__dict__.items():
             if isinstance(v, SecurityValueHolder):
                 self._subscribed.append(v)
-                self._pNames = self._pNames + (v.dependency,)
+                if not self._pNames:
+                    for name in v.dependency:
+                        self._pNames[name] = set(v.dependency[name])
+                else:
+                    for name in self._pNames:
+                        self._pNames[name] = self._pNames[name].union(set(v.dependency[name]))
 
     def _updateSubscribing(self):
 
         values = dict()
         if self._pNames:
-            for s in self._pNames[0]:
+            for s in self._pNames:
                 securityValue = {}
-                fields = self._pNames[0][s]
+                fields = self._pNames[s]
 
-                if isinstance(fields, list):
-                    for f in fields:
-                        try:
-                            value = self.bars.getLatestBarValue(s, f)
-                            securityValue[f] = value
-                        except:
-                             pass
-                else:
+                for f in fields:
                     try:
-                        value = self.bars.getLatestBarValue(s, fields)
-                        securityValue[fields] = value
+                        value = self.bars.getLatestBarValue(s, f)
+                        securityValue[f] = value
                     except:
-                        pass
+                            pass
+
                 if securityValue:
                     values[s] = securityValue
 

@@ -185,3 +185,5 @@ def strategyRunner(userStrategy,
         filledBook.to_excel(writer, 'filled_book', float_format='%.4f')
         writer.save()
         print(u"写入完成！")
+
+    return equityCurve, orderBook, filledBook, perf_metric, perf_df
