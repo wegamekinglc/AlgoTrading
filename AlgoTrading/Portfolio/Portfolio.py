@@ -128,7 +128,7 @@ class Portfolio(object):
         curve['equity_curve'] = np.exp(curve['return'].cumsum())
         self.equityCurve = curve.dropna()
 
-    def outputSummaryStats(self, curve):
+    def outputSummaryStats(self, curve, plot):
         returns = curve['return']
         aggregateDaily = aggregateReturns(returns)
         drawDownDaily = drawDown(aggregateDaily)
@@ -148,30 +148,36 @@ class Portfolio(object):
         perf_metric = pd.DataFrame([annualRet, annualVol, sortino, sharp, maxDrawDown, winningDays, lossingDays],
                                    index=['annual_return', 'annual_volatiltiy', 'sortino_ratio', 'sharp_ratio', 'max_draw_down', 'winning_days', 'lossing_days'],
                                    columns=['metrics'])
-        self._createPerfSheet(curve, perf_df, drawDownDaily)
+        if plot:
+            self._createPerfSheet(curve, perf_df, drawDownDaily)
         return perf_metric, perf_df
 
     @plotting_context
     def _createPerfSheet(self, curve, perf_df, drawDownDaily):
         returns = curve['return']
-        verticalSections = 4
-        fig = plt.figure(figsize=(16, 7 * verticalSections))
+        verticalSections = 2
+        fig1 = plt.figure(figsize=(16, 7 * verticalSections))
         gs = gridspec.GridSpec(verticalSections, 3, wspace=0.5, hspace=0.5)
 
         axRollingReturns = plt.subplot(gs[0, :])
-        axDrawDown = plt.subplot(gs[1, :], sharex=axRollingReturns)
-        axUnderwater = plt.subplot(gs[2, :], sharex=axDrawDown)
-        axMonthlyHeatmap = plt.subplot(gs[3, 0])
-        axAnnualReturns = plt.subplot(gs[3, 1])
-        axMonthlyDist = plt.subplot(gs[3, 2])
+        axDrawDown = plt.subplot(gs[1, :])
 
         plottingRollingReturn(perf_df['daily_cum_return'], axRollingReturns)
         plottingDrawdownPeriods(perf_df['daily_cum_return'], drawDownDaily, 5, axDrawDown)
+
+        fig2 = plt.figure(figsize=(16, 7 * verticalSections))
+        gs = gridspec.GridSpec(verticalSections, 3, wspace=0.5, hspace=0.5)
+
+        axUnderwater = plt.subplot(gs[0, :])
+        axMonthlyHeatmap = plt.subplot(gs[1, 0])
+        axAnnualReturns = plt.subplot(gs[1, 1])
+        axMonthlyDist = plt.subplot(gs[1, 2])
+
         plottingUnderwater(drawDownDaily['draw_down'], axUnderwater)
         plottingMonthlyReturnsHeapmap(returns, axMonthlyHeatmap)
         plottingAnnualReturns(returns, axAnnualReturns)
         plottingMonthlyRetDist(returns, axMonthlyDist)
 
         plt.show()
-        return fig
+        return fig1, fig2
 

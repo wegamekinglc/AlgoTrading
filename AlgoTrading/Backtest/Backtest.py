@@ -38,7 +38,8 @@ class Backtest(object):
                  data_handler,
                  execution_handler,
                  portfolio,
-                 strategy):
+                 strategy,
+                 plot=False):
         self.initialCapital = initial_capital
         self.heartbeat = heartbeat
         self.dataHandler = data_handler
@@ -53,6 +54,7 @@ class Backtest(object):
         self.orders = 0
         self.fills = 0
         self.num_strats = 1
+        self.plot = plot
 
         self._generateTradingInstance()
 
@@ -119,7 +121,7 @@ class Backtest(object):
         print("Fills  : {0:d}".format(self.fills))
 
         self.portfolio.createEquityCurveDataframe()
-        perf_metric, perf_df = self.portfolio.outputSummaryStats(self.portfolio.equityCurve)
+        perf_metric, perf_df = self.portfolio.outputSummaryStats(self.portfolio.equityCurve, self.plot)
         return self.portfolio.equityCurve, self.orderBook.view(), self.filledBook.view(), perf_metric, perf_df
 
     def simulateTrading(self):
@@ -145,6 +147,7 @@ def strategyRunner(userStrategy,
                    endDate=dt.datetime(2015, 9, 15),
                    dataSource=DataSource.DXDataCenter,
                    saveFile=False,
+                   plot=False,
                    **kwargs):
 
     if dataSource == DataSource.CSV:
@@ -170,7 +173,8 @@ def strategyRunner(userStrategy,
                         dataHandler,
                         SimulatedExecutionHandler,
                         Portfolio,
-                        userStrategy)
+                        userStrategy,
+                        plot=plot)
 
     equityCurve, orderBook, filledBook, perf_metric, perf_df = backtest.simulateTrading()
 
