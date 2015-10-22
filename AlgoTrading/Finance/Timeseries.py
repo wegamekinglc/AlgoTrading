@@ -60,7 +60,7 @@ def drawDown(returns):
                 recoverySeries[i] = returns.index[k]
                 break
 
-    df = pd.DataFrame(zip(ddSeries, peakSeries, valleySeries, recoverySeries),
+    df = pd.DataFrame(list(zip(ddSeries, peakSeries, valleySeries, recoverySeries)),
                       index=returns.index,
                       columns=['draw_down', 'peak', 'valley', 'recovery'])
     return df

@@ -73,9 +73,9 @@ def plottingDrawdownPeriods(cumReturns, drawDownTable, top, ax):
     cumReturns.plot(ax=ax)
     lim = ax.get_ylim()
 
-    tmp = drawDownTable.sort('draw_down')
+    tmp = drawDownTable.sort_values(by='draw_down')
     topDrawdown = tmp.groupby('recovery').first()
-    topDrawdown = topDrawdown.sort('draw_down')[:top]
+    topDrawdown = topDrawdown.sort_values(by='draw_down')[:top]
     colors = sns.cubehelix_palette(len(topDrawdown))[::-1]
     for i in range(len(colors)):
         recovery = topDrawdown.index[i]

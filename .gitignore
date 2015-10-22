@@ -1,6 +1,7 @@
 build/*
 *.pyc
 .idea/*
+AlgoTrading/.idea/*
 doc/_build/*
 *.coverage
 *.html

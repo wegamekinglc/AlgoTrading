@@ -31,7 +31,7 @@ class DataYesMarketDataHandler(DataFrameDataHandler):
                                                  endDate=self.endDate,
                                                  field='tradeDate,openPrice,highestPrice,lowestPrice,turnoverVol,closePrice')
             self.symbolData[s].index = pd.to_datetime(self.symbolData[s]['tradeDate'], format="%Y-%m-%d")
-            self.symbolData[s].sort(inplace=True)
+            self.symbolData[s].sort_index(inplace=True)
             self.symbolData[s].columns = ['tradeDate', 'open', 'high', 'low', 'volume', 'close']
             if combIndex is None:
                 combIndex = self.symbolData[s].index

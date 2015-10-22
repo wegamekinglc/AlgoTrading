@@ -154,16 +154,16 @@ class Portfolio(object):
     @plotting_context
     def _createPerfSheet(self, curve, perf_df, drawDownDaily):
         returns = curve['return']
-        verticalSections = 5
-        fig = plt.figure(figsize=(16, 8 * verticalSections))
+        verticalSections = 4
+        fig = plt.figure(figsize=(16, 7 * verticalSections))
         gs = gridspec.GridSpec(verticalSections, 3, wspace=0.5, hspace=0.5)
 
-        axRollingReturns = plt.subplot(gs[:2, :])
-        axDrawDown = plt.subplot(gs[2, :], sharex=axRollingReturns)
-        axUnderwater = plt.subplot(gs[3, :], sharex=axDrawDown)
-        axMonthlyHeatmap = plt.subplot(gs[4, 0])
-        axAnnualReturns = plt.subplot(gs[4, 1])
-        axMonthlyDist = plt.subplot(gs[4, 2])
+        axRollingReturns = plt.subplot(gs[0, :])
+        axDrawDown = plt.subplot(gs[1, :], sharex=axRollingReturns)
+        axUnderwater = plt.subplot(gs[2, :], sharex=axDrawDown)
+        axMonthlyHeatmap = plt.subplot(gs[3, 0])
+        axAnnualReturns = plt.subplot(gs[3, 1])
+        axMonthlyDist = plt.subplot(gs[3, 2])
 
         plottingRollingReturn(perf_df['daily_cum_return'], axRollingReturns)
         plottingDrawdownPeriods(perf_df['daily_cum_return'], drawDownDaily, 5, axDrawDown)

@@ -5,7 +5,7 @@ Created on 2015-9-23
 @author: cheng.li
 """
 
-import pandas.io.data as web
+import pandas_datareader.data as web
 from AlgoTrading.Data.Data import DataFrameDataHandler
 
 
