@@ -47,7 +47,7 @@ class Strategy(object):
                         value = self.bars.getLatestBarValue(s, f)
                         securityValue[f] = value
                     except:
-                            pass
+                        pass
 
                 if securityValue:
                     values[s] = securityValue
