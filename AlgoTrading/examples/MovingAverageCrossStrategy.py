@@ -34,7 +34,7 @@ def run_example():
                    symbolList=universe,
                    dataSource=DataSource.CSV,
                    csvDir=csvDir,
-                   saveFile=True)
+                   saveFile=False)
 
 
 if __name__ == "__main__":

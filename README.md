@@ -9,3 +9,20 @@
 见requirements目录；
 除此之外，还需要安装Finance-Python:
 https://github.com/ChinaQuants/Finance-Python
+以及tushare：
+
+~~~
+pip install tushare
+~~~
+
+pandas_datareader:
+
+~~~
+pip install pandas_datareader
+~~~
+
+以及pymssql
+
+~~~
+pip install pymssql
+~~~
