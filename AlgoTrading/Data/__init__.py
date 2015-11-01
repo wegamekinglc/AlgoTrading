@@ -18,4 +18,4 @@ __all__ = ['set_universe',
            'HistoricalCSVDataHandler',
            'DataYesMarketDataHandler',
            'DXDataCenter',
-           'YaHooDataProvider',]
+           'YaHooDataProvider']
