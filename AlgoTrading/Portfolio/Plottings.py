@@ -49,7 +49,7 @@ def percentage(x, pos):
     return '%.0f%%' % (x * 100)
 
 
-def plottingRollingReturn(cumReturns, ax):
+def plottingRollingReturn(cumReturns, benchmarkReturns, ax, title='Strategy Cumulative Returns'):
 
     y_axis_formatter = FuncFormatter(one_dec_places)
     ax.yaxis.set_major_formatter(FuncFormatter(y_axis_formatter))
@@ -57,17 +57,24 @@ def plottingRollingReturn(cumReturns, ax):
     cumReturns.plot(lw=3,
                     color='forestgreen',
                     alpha=0.6,
-                    label='Cumulative returns',
+                    label='Strategy',
                     ax=ax)
+
+    if benchmarkReturns is not None:
+        benchmarkReturns.plot(lw=2,
+                              color='gray',
+                              alpha=0.6,
+                              label=benchmarkReturns.name,
+                              ax=ax)
 
     ax.axhline(0.0, linestyle='--', color='black', lw=2)
     ax.set_ylabel('Cumulative returns')
-    ax.set_title('Cumulative Returns')
+    ax.set_title(title)
     ax.legend(loc='best')
     return ax
 
 
-def plottingDrawdownPeriods(cumReturns, drawDownTable, top, ax):
+def plottingDrawdownPeriods(cumReturns, drawDownTable, top, ax, title='Top 5 Drawdown Periods'):
     y_axis_formatter = FuncFormatter(one_dec_places)
     ax.yaxis.set_major_formatter(FuncFormatter(y_axis_formatter))
     cumReturns.plot(ax=ax)
@@ -85,42 +92,43 @@ def plottingDrawdownPeriods(cumReturns, drawDownTable, top, ax):
                         alpha=.4,
                         color=colors[i])
 
-    ax.set_title('Top %i Drawdown Periods' % top)
+    ax.set_title(title)
     ax.set_ylabel('Cumulative returns')
     ax.legend(['Cumulative returns'], loc='best')
     ax.set_xlabel('')
     return ax
 
 
-def plottingUnderwater(drawDownSeries, ax):
+def plottingUnderwater(drawDownSeries, ax, title='Underwater Plot'):
     y_axis_formatter = FuncFormatter(percentage)
     ax.yaxis.set_major_formatter(FuncFormatter(y_axis_formatter))
     drawDownSeries.plot(ax=ax, kind='area', color='coral', alpha=0.7)
     ax.set_ylabel('Drawdown')
-    ax.set_title('Underwater Plot')
+    ax.set_title(title)
     ax.legend(loc='best')
     ax.set_xlabel('')
     return ax
 
 
-def plottingMonthlyReturnsHeapmap(returns, ax):
+def plottingMonthlyReturnsHeapmap(returns, ax, title='Monthly Returns (%)'):
     monthlyRetTable = aggregateReturns(returns, 'monthly')
     monthlyRetTable = monthlyRetTable.unstack()
     sns.heatmap(monthlyRetTable.fillna(0) * 100.0,
                 annot=True,
+                fmt=".1f",
                 annot_kws={"size": 9},
                 alpha=1.0,
                 center=0.0,
                 cbar=False,
-                cmap=matplotlib.cm.RdYlGn,
+                cmap=matplotlib.cm.RdYlGn_r,
                 ax=ax)
     ax.set_ylabel('Year')
     ax.set_xlabel('Month')
-    ax.set_title('Monthly Returns (%)')
+    ax.set_title(title)
     return ax
 
 
-def plottingAnnualReturns(returns, ax):
+def plottingAnnualReturns(returns, ax, title='Annual Returns'):
     x_axis_formatter = FuncFormatter(percentage)
     ax.xaxis.set_major_formatter(FuncFormatter(x_axis_formatter))
     ax.tick_params(axis='x', which='major', labelsize=10)
@@ -143,12 +151,12 @@ def plottingAnnualReturns(returns, ax):
 
     ax.set_ylabel('Year')
     ax.set_xlabel('Returns')
-    ax.set_title("Annual Returns")
+    ax.set_title(title)
     ax.legend(['mean'], loc='best')
     return ax
 
 
-def plottingMonthlyRetDist(returns, ax):
+def plottingMonthlyRetDist(returns, ax, title="Distribution of Monthly Returns"):
     x_axis_formatter = FuncFormatter(percentage)
     ax.xaxis.set_major_formatter(FuncFormatter(x_axis_formatter))
     ax.tick_params(axis='x', which='major', labelsize=10)
@@ -157,14 +165,14 @@ def plottingMonthlyRetDist(returns, ax):
 
     ax.hist(
         monthlyRetTable,
-        color='orangered',
+        color='orange',
         alpha=0.8,
         bins=20
     )
 
     ax.axvline(
         monthlyRetTable.mean(),
-        color='gold',
+        color='steelblue',
         linestyle='--',
         lw=4,
         alpha=1.0
@@ -174,5 +182,5 @@ def plottingMonthlyRetDist(returns, ax):
     ax.legend(['mean'], loc='best')
     ax.set_ylabel('Number of months')
     ax.set_xlabel('Returns')
-    ax.set_title("Distribution of Monthly Returns")
+    ax.set_title(title)
     return ax

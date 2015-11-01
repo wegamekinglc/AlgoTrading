@@ -39,7 +39,8 @@ def run_example():
                    endDate=endDate,
                    dataSource=DataSource.DataYes,
                    token="2bfc4b3b06efa5d8bba2ab9ef83b5d61f1c3887834de729b60eec9f13e1d4df8",
-                   saveFile=True)
+                   saveFile=True,
+                   plot=True)
 
 
 if __name__ == "__main__":

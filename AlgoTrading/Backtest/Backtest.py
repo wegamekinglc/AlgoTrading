@@ -39,6 +39,7 @@ class Backtest(object):
                  execution_handler,
                  portfolio,
                  strategy,
+                 benchmark=None,
                  plot=False):
         self.initialCapital = initial_capital
         self.heartbeat = heartbeat
@@ -54,6 +55,7 @@ class Backtest(object):
         self.orders = 0
         self.fills = 0
         self.num_strats = 1
+        self.benchmark = benchmark
         self.plot = plot
 
         self._generateTradingInstance()
@@ -67,7 +69,8 @@ class Backtest(object):
         self.portfolio = self.portfolioCls(self.dataHandler,
                                            self.events,
                                            self.dataHandler.getStartDate(),
-                                           self.initialCapital)
+                                           self.initialCapital,
+                                           self.benchmark)
         self.executionHanlder = self.executionHanlderCls(self.events, self.assets, self.dataHandler)
         self.orderBook = OrderBook()
         self.filledBook = FilledBook()
@@ -146,6 +149,7 @@ def strategyRunner(userStrategy,
                    startDate=dt.datetime(2015, 9, 1),
                    endDate=dt.datetime(2015, 9, 15),
                    dataSource=DataSource.DXDataCenter,
+                   benchmark=None,
                    saveFile=False,
                    plot=False,
                    **kwargs):
@@ -157,7 +161,8 @@ def strategyRunner(userStrategy,
         dataHandler = DataYesMarketDataHandler(token=kwargs['token'],
                                                symbolList=symbolList,
                                                startDate=startDate,
-                                               endDate=endDate)
+                                               endDate=endDate,
+                                               benchmark=benchmark)
     elif dataSource == DataSource.DXDataCenter:
         dataHandler = DXDataCenter(symbolList=symbolList,
                                    startDate=startDate,
@@ -174,6 +179,7 @@ def strategyRunner(userStrategy,
                         SimulatedExecutionHandler,
                         Portfolio,
                         userStrategy,
+                        benchmark,
                         plot=plot)
 
     equityCurve, orderBook, filledBook, perf_metric, perf_df = backtest.simulateTrading()
@@ -190,4 +196,8 @@ def strategyRunner(userStrategy,
         writer.save()
         print(u"写入完成！")
 
-    return equityCurve, orderBook, filledBook, perf_metric, perf_df
+    return {'equity_curve': equityCurve,
+             'order_book': orderBook,
+             'filled_book': filledBook,
+             'perf_metric': perf_metric,
+             'perf_series': perf_df}

@@ -6,22 +6,26 @@ Created on 2015-9-21
 """
 
 import tushare as ts
+import numpy as np
 import pandas as pd
 from AlgoTrading.Data.Data import DataFrameDataHandler
 
 
 class DataYesMarketDataHandler(DataFrameDataHandler):
 
-    _req_args = ['token', 'symbolList', 'startDate', 'endDate']
+    _req_args = ['token', 'symbolList', 'startDate', 'endDate', 'benchmark']
 
     def __init__(self, **kwargs):
         super(DataYesMarketDataHandler, self).__init__()
         ts.set_token(kwargs['token'])
         self.mt = ts.Market()
+        self.idx = ts.Idx()
         self.symbolList = [s.lower() for s in kwargs['symbolList']]
         self.startDate = kwargs['startDate'].strftime("%Y%m%d")
         self.endDate = kwargs['endDate'].strftime("%Y%m%d")
         self._getDatas()
+        if kwargs['benchmark']:
+            self._getBenchmarkData(kwargs['benchmark'], self.startDate, self.endDate)
 
     def _getDatas(self):
         combIndex = None
@@ -46,3 +50,12 @@ class DataYesMarketDataHandler(DataFrameDataHandler):
         for i, s in enumerate(self.symbolList):
             if s not in self.symbolData:
                 del self.symbolList[i]
+
+    def _getBenchmarkData(self, indexID, startTimeStamp, endTimeStamp):
+        indexData = self.mt.MktIdxd(indexID=indexID, beginDate=startTimeStamp, endDate=endTimeStamp, field='tradeDate,closeIndex')
+        indexData['tradeDate'] = pd.to_datetime(indexData['tradeDate'], format="%Y-%m-%d")
+        indexData.set_index('tradeDate', inplace=True)
+        indexData.columns = ['close']
+        indexData['return'] = np.log(indexData['close'] / indexData['close'].shift(1))
+        indexData = indexData.dropna()
+        self.benchmarkData = indexData
