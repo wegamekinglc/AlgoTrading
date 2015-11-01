@@ -5,6 +5,7 @@ Created on 2015-9-17
 @author: cheng.li
 """
 
+from AlgoTrading.Data.Data import set_universe
 from AlgoTrading.Data.DataProviders import HistoricalCSVDataHandler
 from AlgoTrading.Data.DataProviders import DataYesMarketDataHandler
 try:
@@ -13,7 +14,8 @@ except ImportError:
     pass
 from AlgoTrading.Data.DataProviders import YaHooDataProvider
 
-__all__ = ['HistoricalCSVDataHandler',
+__all__ = ['set_universe',
+           'HistoricalCSVDataHandler',
            'DataYesMarketDataHandler',
            'DXDataCenter',
-           'YaHooDataProvider']
+           'YaHooDataProvider',]

@@ -11,6 +11,13 @@ from abc import abstractmethod
 from AlgoTrading.Events import MarketEvent
 
 
+def set_universe(code):
+    import tushare as ts
+    ts.set_token('2bfc4b3b06efa5d8bba2ab9ef83b5d61f1c3887834de729b60eec9f13e1d4df8')
+    idx = ts.Idx()
+    return list(idx.IdxCons(secID=code, field='consID')['consID'])
+
+
 class DataHandler(object):
 
     __metaclass__ = ABCMeta
@@ -97,5 +104,3 @@ class DataFrameDataHandler(DataHandler):
 
     def _getNewBar(self, symbol, timeIndex):
         return self.symbolData[symbol][timeIndex]
-
-

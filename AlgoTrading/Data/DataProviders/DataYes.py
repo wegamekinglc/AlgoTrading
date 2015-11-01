@@ -44,6 +44,7 @@ class DataYesMarketDataHandler(DataFrameDataHandler):
 
             self.latestSymbolData[s] = []
             self.symbolData[s] = self.symbolData[s].T.to_dict()
+            print("Symbol %s is ready" % s)
 
         self.dateIndex = combIndex
         self.start = 0

@@ -10,6 +10,7 @@ import datetime as dt
 from AlgoTrading.Strategy.Strategy import Strategy
 from AlgoTrading.Backtest import strategyRunner
 from AlgoTrading.Backtest import DataSource
+from AlgoTrading.Data import set_universe
 from PyFin.API import MA
 from PyFin.API import MAX
 from PyFin.API import MIN
@@ -22,15 +23,16 @@ class MovingAverageCrossStrategy(Strategy):
         self.signal = indicator[filtering]
 
     def handle_data(self):
+        print(self.current_datetime)
         for s in self.universe:
             if self.signal[s] > 0. and self.secPos[s] == 0:
-                self.order(s, 1, quantity=5000)
+                self.order(s, 1, quantity=1000)
             elif self.signal[s] < 0. and self.secPos[s] != 0:
-                self.order(s, -1, quantity=5000)
+                self.order(s, -1, quantity=1000)
 
 
 def run_example():
-    universe = ['000001.XSHE', '000002.XSHE', '000004.XSHE', '000005.XSHE', '000006.XSHE', '000007.XSHE', '000008.XSHE']
+    universe = set_universe('000300.zicn')
     initialCapital = 100000.0
     startDate = dt.datetime(2000, 1, 2)
     endDate = dt.datetime(2015, 9, 15)
@@ -44,7 +46,7 @@ def run_example():
                    token="2bfc4b3b06efa5d8bba2ab9ef83b5d61f1c3887834de729b60eec9f13e1d4df8",
                    benchmark='000300.zicn',
                    saveFile=False,
-                   refreshRate=5,
+                   refreshRate=1,
                    plot=True)
 
 
