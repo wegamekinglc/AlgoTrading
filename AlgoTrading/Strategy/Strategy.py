@@ -36,6 +36,7 @@ class Strategy(object):
 
     def _updateSubscribing(self):
 
+        self._current_datetime = None
         values = dict()
         if self._pNames:
             for s in self._pNames:
@@ -45,6 +46,8 @@ class Strategy(object):
                 for f in fields:
                     try:
                         value = self.bars.getLatestBarValue(s, f)
+                        if not self.current_datetime:
+                            self._current_datetime = self.bars.getLatestBarDatetime(s)
                         securityValue[f] = value
                     except:
                         pass
@@ -61,6 +64,10 @@ class Strategy(object):
 
     def monitoring(self):
         pass
+
+    @property
+    def current_datetime(self):
+        return self._current_datetime
 
     def order(self, symbol, direction, quantity):
         currDTTime = self.bars.getLatestBarDatetime(symbol)

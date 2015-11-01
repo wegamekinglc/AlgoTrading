@@ -40,6 +40,7 @@ class Backtest(object):
                  portfolio,
                  strategy,
                  benchmark=None,
+                 refreshRate=1,
                  plot=False):
         self.initialCapital = initial_capital
         self.heartbeat = heartbeat
@@ -56,6 +57,8 @@ class Backtest(object):
         self.fills = 0
         self.num_strats = 1
         self.benchmark = benchmark
+        self.refreshRate = refreshRate
+        self.counter = 0
         self.plot = plot
 
         self._generateTradingInstance()
@@ -96,8 +99,10 @@ class Backtest(object):
                     break
                 if event is not None:
                     if event.type == 'MARKET':
+                        self.counter += 1
                         self.strategy._updateSubscribing()
-                        self.strategy.handle_data()
+                        if self.counter % self.refreshRate == 0:
+                            self.strategy.handle_data()
                         self.portfolio.updateTimeindex()
                     elif event.type == 'SIGNAL':
                         self.signals += 1
@@ -150,6 +155,7 @@ def strategyRunner(userStrategy,
                    endDate=dt.datetime(2015, 9, 15),
                    dataSource=DataSource.DXDataCenter,
                    benchmark=None,
+                   refreshRate=1,
                    saveFile=False,
                    plot=False,
                    **kwargs):
@@ -180,6 +186,7 @@ def strategyRunner(userStrategy,
                         Portfolio,
                         userStrategy,
                         benchmark,
+                        refreshRate,
                         plot=plot)
 
     equityCurve, orderBook, filledBook, perf_metric, perf_df = backtest.simulateTrading()
