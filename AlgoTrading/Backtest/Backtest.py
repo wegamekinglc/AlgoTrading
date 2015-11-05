@@ -17,6 +17,7 @@ from pandas import ExcelWriter
 from PyFin.Env import Settings
 from AlgoTrading.Data.DataProviders import HistoricalCSVDataHandler
 from AlgoTrading.Data.DataProviders import DataYesMarketDataHandler
+from AlgoTrading.Utilities import logger
 try:
     from AlgoTrading.Data.DataProviders import DXDataCenter
 except ImportError:
@@ -74,7 +75,7 @@ class Backtest(object):
                                            self.dataHandler.getStartDate(),
                                            self.initialCapital,
                                            self.benchmark)
-        self.executionHanlder = self.executionHanlderCls(self.events, self.assets, self.dataHandler)
+        self.executionHanlder = self.executionHanlderCls(self.events, self.assets, self.dataHandler, self.portfolio)
         self.orderBook = OrderBook()
         self.filledBook = FilledBook()
         lags = {s: self.assets[s].lag for s in self.symbolList}
@@ -110,17 +111,16 @@ class Backtest(object):
                     elif event.type == 'ORDER':
                         self.orders += 1
                         self.orderBook.updateFromOrderEvent(event)
-                        self.executionHanlder.executeOrder(event)
-                    elif event.type == 'FILL':
+                        fill_event = self.executionHanlder.executeOrder(event)
                         self.fills += 1
-                        self.orderBook.updateFromFillEvent(event)
-                        self.portfolio.updateFill(event)
-                        self.filledBook.updateFromFillEvent(event)
-                        orderTime = self.orderBook.orderTime(event.orderID)
-                        self.stocksPositionsBook.updatePositionsByFill(event.symbol,
+                        self.orderBook.updateFromFillEvent(fill_event)
+                        self.portfolio.updateFill(fill_event)
+                        self.filledBook.updateFromFillEvent(fill_event)
+                        orderTime = self.orderBook.orderTime(fill_event.orderID)
+                        self.stocksPositionsBook.updatePositionsByFill(fill_event.symbol,
                                                                        orderTime.date(),
-                                                                       event.quantity,
-                                                                       event.direction)
+                                                                       fill_event.quantity,
+                                                                       fill_event.direction)
 
             time.sleep(self.heartbeat)
 
@@ -133,10 +133,10 @@ class Backtest(object):
         return self.portfolio.equityCurve, self.orderBook.view(), self.filledBook.view(), perf_metric, perf_df
 
     def simulateTrading(self):
-        print(u"开始回测...")
+        logger.info("Start backtesting...")
         self.strategy._subscribe()
         self._runBacktest()
-        print(u"回测结束！")
+        logger.info("Backesting finished!")
         return self._outputPerformance()
 
 
@@ -173,7 +173,8 @@ def strategyRunner(userStrategy,
         dataHandler = DXDataCenter(symbolList=symbolList,
                                    startDate=startDate,
                                    endDate=endDate,
-                                   freq=kwargs['freq'])
+                                   freq=kwargs['freq'],
+                                   benchmark=benchmark)
     elif dataSource == DataSource.YAHOO:
         dataHandler = YaHooDataProvider(symbolList=symbolList,
                                         startDate=startDate,
@@ -194,13 +195,11 @@ def strategyRunner(userStrategy,
     # save to a excel file
     if saveFile:
         print(u"策略表现数据写入excel文件，请稍等...")
-        writer = ExcelWriter('performance.xlsx')
-        perf_metric.to_excel(writer, 'perf_metrics', float_format='%.4f')
-        perf_df.to_excel(writer, 'perf_series', float_format='%.4f')
-        equityCurve.to_excel(writer, 'equity_curve', float_format='%.4f')
-        orderBook.to_excel(writer, 'order_book', float_format='%.4f')
-        filledBook.to_excel(writer, 'filled_book', float_format='%.4f')
-        writer.save()
+        perf_metric.to_csv('perf/perf_metrics.csv', float_format='%.4f')
+        perf_df.to_csv('perf/perf_series.csv', float_format='%.4f')
+        equityCurve.to_csv('perf/equity_curve.csv', float_format='%.4f')
+        orderBook.to_csv('perf/order_book.csv', float_format='%.4f')
+        filledBook.to_csv('perf/filled_book.csv', float_format='%.4f')
         print(u"写入完成！")
 
     return {'equity_curve': equityCurve,
