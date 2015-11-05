@@ -8,8 +8,8 @@ Created on 2015-7-24
 
 from abc import ABCMeta
 from abc import abstractmethod
-import datetime as dt
 from AlgoTrading.Events import OrderEvent
+from AlgoTrading.Utilities import logger
 from PyFin.Analysis.SecurityValueHolders import SecurityValueHolder
 
 
@@ -38,6 +38,7 @@ class Strategy(object):
 
         self._current_datetime = None
         values = dict()
+        criticalFields = set(['open', 'high', 'low', 'close'])
         if self._pNames:
             for s in self._pNames:
                 securityValue = {}
@@ -48,7 +49,8 @@ class Strategy(object):
                         value = self.bars.getLatestBarValue(s, f)
                         if not self.current_datetime:
                             self._current_datetime = self.bars.getLatestBarDatetime(s)
-                        securityValue[f] = value
+                        if f not in criticalFields or value != 0.0:
+                            securityValue[f] = value
                     except:
                         pass
 
@@ -69,26 +71,40 @@ class Strategy(object):
     def current_datetime(self):
         return self._current_datetime
 
+    @property
+    def cash(self):
+        return self._port.currentHoldings['cash']
+
+    def avaliableForSale(self, symbol):
+        currDTTime = self.current_datetime
+        currDT = currDTTime.date()
+        amount = self._posBook.avaliableForSale(symbol, currDT)
+        return amount
+
     def order(self, symbol, direction, quantity):
-        currDTTime = self.bars.getLatestBarDatetime(symbol)
+        currDTTime = self.current_datetime
         currDT = currDTTime.date()
         currValue = self.bars.getLatestBarValue(symbol, 'close')
         if direction == -1:
             amount = self._posBook.avaliableForSale(symbol, currDT)
             if amount < quantity:
-                #print("{0} quantity need to be sold {1} is less then the available for sell amount {2}"
-                #      .format(symbol, quantity, amount))
+                logger.warning("{0}: {1} quantity need to be sold {2} is less then the available for sell amount {3}"
+                               .format(currDTTime, symbol, quantity, amount))
                 return
         elif direction == 1:
             if quantity * currValue > self._port.currentHoldings['cash']:
-                #print("cash needed to buy the quantity {0} of {1} is less than available cash {2}"
-                #      .format(quantity, symbol,  self._port.currentHoldings['cash']))
+                logger.warning("{0}: ${1} cash needed to buy the quantity {2} of {3} is less than available cash ${4}"
+                               .format(currDTTime, quantity * currValue, quantity, symbol,  self._port.currentHoldings['cash']))
                 return
         else:
             raise ValueError("Unrecognized direction %d" % direction)
 
         self._posBook.updatePositionsByOrder(symbol, currDT, quantity, direction)
         signal = OrderEvent(currDTTime, symbol, "MKT", quantity, direction)
+
+        logger.info("{0}: {1} Order ID: {2} is sent with quantity {3} and direction {4} on symbol {5}"
+                    .format(signal.timeIndex, signal.orderType, signal.orderID, signal.quantity, signal.direction, symbol))
+
         self.events.put(signal)
         return signal.orderID
 

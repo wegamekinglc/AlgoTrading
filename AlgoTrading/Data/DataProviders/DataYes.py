@@ -9,6 +9,7 @@ import tushare as ts
 import numpy as np
 import pandas as pd
 from AlgoTrading.Data.Data import DataFrameDataHandler
+from AlgoTrading.Utilities import logger
 
 
 class DataYesMarketDataHandler(DataFrameDataHandler):
@@ -28,6 +29,9 @@ class DataYesMarketDataHandler(DataFrameDataHandler):
             self._getBenchmarkData(kwargs['benchmark'], self.startDate, self.endDate)
 
     def _getDatas(self):
+
+        logger.info("Start loading bars from DataYes source...")
+
         combIndex = None
         for s in self.symbolList:
             self.symbolData[s] = self.mt.MktEqud(secID=s,
@@ -52,7 +56,12 @@ class DataYesMarketDataHandler(DataFrameDataHandler):
             if s not in self.symbolData:
                 del self.symbolList[i]
 
+        logger.info("Bars loading finished!")
+
     def _getBenchmarkData(self, indexID, startTimeStamp, endTimeStamp):
+
+        logger.info("Start loading benchmark {0:s} data from DataYes source...".format(indexID))
+
         indexData = self.mt.MktIdxd(indexID=indexID, beginDate=startTimeStamp, endDate=endTimeStamp, field='tradeDate,closeIndex')
         indexData['tradeDate'] = pd.to_datetime(indexData['tradeDate'], format="%Y-%m-%d")
         indexData.set_index('tradeDate', inplace=True)
@@ -60,3 +69,5 @@ class DataYesMarketDataHandler(DataFrameDataHandler):
         indexData['return'] = np.log(indexData['close'] / indexData['close'].shift(1))
         indexData = indexData.dropna()
         self.benchmarkData = indexData
+
+        logger.info("Benchmark data loading finished!")

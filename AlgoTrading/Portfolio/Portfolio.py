@@ -147,11 +147,13 @@ class Portfolio(object):
         perf_df['daily_draw_down'] = drawDownDaily['draw_down']
         if self.benchmark:
             perf_df['benchmark_cum_return'] = self.dataHandler.benchmarkData['return'].cumsum()
+            perf_df.dropna(inplace=True)
             perf_df['benchmark_cum_return'] = np.exp(perf_df['benchmark_cum_return']
                                                      - perf_df['benchmark_cum_return'][0]) - 1.0
             perf_df['access_return'] = aggregateDaily - self.dataHandler.benchmarkData['return']
             perf_df['access_cum_return'] = (1.0 + perf_df['daily_cum_return']) \
                                            / (1.0 + perf_df['benchmark_cum_return']) - 1.0
+            perf_df.fillna(0.0, inplace=True)
             accessDrawDownDaily = drawDown(perf_df['access_return'])
         else:
             accessDrawDownDaily = None

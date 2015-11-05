@@ -2,6 +2,7 @@ build/*
 *.pyc
 .idea/*
 AlgoTrading/.idea/*
+notebooks/.ipynb_checkpoints/*
 doc/_build/*
 *.coverage
 *.html

@@ -41,8 +41,8 @@ def context(context='notebook', font_scale=1.5, rc=None):
                                 rc=rc)
 
 
-def one_dec_places(x, pos):
-    return '%.1f' % x
+def two_dec_places(x, pos):
+    return '%.2f' % x
 
 
 def percentage(x, pos):
@@ -51,7 +51,7 @@ def percentage(x, pos):
 
 def plottingRollingReturn(cumReturns, benchmarkReturns, ax, title='Strategy Cumulative Returns'):
 
-    y_axis_formatter = FuncFormatter(one_dec_places)
+    y_axis_formatter = FuncFormatter(two_dec_places)
     ax.yaxis.set_major_formatter(FuncFormatter(y_axis_formatter))
 
     cumReturns.plot(lw=3,
@@ -75,7 +75,7 @@ def plottingRollingReturn(cumReturns, benchmarkReturns, ax, title='Strategy Cumu
 
 
 def plottingDrawdownPeriods(cumReturns, drawDownTable, top, ax, title='Top 5 Drawdown Periods'):
-    y_axis_formatter = FuncFormatter(one_dec_places)
+    y_axis_formatter = FuncFormatter(two_dec_places)
     ax.yaxis.set_major_formatter(FuncFormatter(y_axis_formatter))
     cumReturns.plot(ax=ax)
     lim = ax.get_ylim()

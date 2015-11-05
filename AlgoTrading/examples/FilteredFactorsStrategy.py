@@ -46,7 +46,7 @@ def run_example():
                    benchmark='000300.zicn',
                    saveFile=False,
                    refreshRate=1,
-                   plot=False)
+                   plot=True)
 
 
 if __name__ == "__main__":
