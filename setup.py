@@ -22,6 +22,7 @@ setup(
               'AlgoTrading.Portfolio',
               'AlgoTrading.Strategy',
               'AlgoTrading.examples',
+              'AlgoTrading.Utilities',
               'AlgoTrading.tests'],
     py_modules=['AlgoTrading.__init__'],
     license='',
