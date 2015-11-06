@@ -10,10 +10,10 @@ try:
 except ImportError:
     import queue
 import time
+import os
 import datetime as dt
 from enum import IntEnum
 from enum import unique
-from pandas import ExcelWriter
 from PyFin.Env import Settings
 from AlgoTrading.Data.DataProviders import HistoricalCSVDataHandler
 from AlgoTrading.Data.DataProviders import DataYesMarketDataHandler
@@ -125,8 +125,8 @@ class Backtest(object):
             time.sleep(self.heartbeat)
 
     def _outputPerformance(self):
-        print("Orders : {0:d}".format(self.orders))
-        print("Fills  : {0:d}".format(self.fills))
+        logger.info("Orders : {0:d}".format(self.orders))
+        logger.info("Fills  : {0:d}".format(self.fills))
 
         self.portfolio.createEquityCurveDataframe()
         perf_metric, perf_df = self.portfolio.outputSummaryStats(self.portfolio.equityCurve, self.plot)
@@ -164,7 +164,11 @@ def strategyRunner(userStrategy,
         dataHandler = HistoricalCSVDataHandler(csvDir=kwargs['csvDir'],
                                                symbolList=symbolList)
     elif dataSource == DataSource.DataYes:
-        dataHandler = DataYesMarketDataHandler(token=kwargs['token'],
+        try:
+            token = kwargs['token']
+        except KeyError:
+            token = None
+        dataHandler = DataYesMarketDataHandler(token=token,
                                                symbolList=symbolList,
                                                startDate=startDate,
                                                endDate=endDate,
@@ -194,13 +198,15 @@ def strategyRunner(userStrategy,
 
     # save to a excel file
     if saveFile:
-        print(u"策略表现数据写入excel文件，请稍等...")
-        perf_metric.to_csv('perf/perf_metrics.csv', float_format='%.4f')
-        perf_df.to_csv('perf/perf_series.csv', float_format='%.4f')
-        equityCurve.to_csv('perf/equity_curve.csv', float_format='%.4f')
-        orderBook.to_csv('perf/order_book.csv', float_format='%.4f')
-        filledBook.to_csv('perf/filled_book.csv', float_format='%.4f')
-        print(u"写入完成！")
+        if not os.path.isdir('performance/'):
+            os.mkdir('performance')
+        logger.info("Strategy performance is now saving to local files...")
+        perf_metric.to_csv('performance/perf_metrics.csv', float_format='%.4f')
+        perf_df.to_csv('performance/perf_series.csv', float_format='%.4f')
+        equityCurve.to_csv('performance/equity_curve.csv', float_format='%.4f')
+        orderBook.to_csv('performance/order_book.csv', float_format='%.4f')
+        filledBook.to_csv('performance/filled_book.csv', float_format='%.4f')
+        logger.info("Performance saving is finished!")
 
     return {'equity_curve': equityCurve,
              'order_book': orderBook,
