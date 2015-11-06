@@ -11,7 +11,7 @@ import logging
 class CustomLogger(object):
 
     def __init__(self):
-        self.logger = logging.getLogger('console_output')
+        self.logger = logging.getLogger('output')
         self.logger.setLevel(logging.DEBUG)
         ch = logging.StreamHandler()
         sh = logging.FileHandler('strategy.log')
