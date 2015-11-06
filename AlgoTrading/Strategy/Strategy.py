@@ -82,7 +82,7 @@ class Strategy(object):
         return amount
 
     def order(self, symbol, direction, quantity):
-        currDTTime = self.current_datetime
+        currDTTime = self.bars.getLatestBarDatetime(symbol)
         currDT = currDTTime.date()
         currValue = self.bars.getLatestBarValue(symbol, 'close')
         if direction == -1:
