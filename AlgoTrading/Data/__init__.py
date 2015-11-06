@@ -10,8 +10,11 @@ from AlgoTrading.Data.DataProviders import HistoricalCSVDataHandler
 from AlgoTrading.Data.DataProviders import DataYesMarketDataHandler
 try:
     from AlgoTrading.Data.DataProviders import DXDataCenter
-except ImportError:
-    pass
+except ImportError as e:
+    if str(e).endswith('DXDataCenter'):
+        pass
+    else:
+        raise
 from AlgoTrading.Data.DataProviders import YaHooDataProvider
 
 __all__ = ['set_universe',

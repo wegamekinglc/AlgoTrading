@@ -9,8 +9,11 @@ from AlgoTrading.Data.DataProviders.CSVFiles import HistoricalCSVDataHandler
 from AlgoTrading.Data.DataProviders.DataYes import DataYesMarketDataHandler
 try:
     from AlgoTrading.Data.DataProviders.DongXingDataCenter import DXDataCenter
-except ImportError:
-    pass
+except ImportError as e:
+    if str(e).endswith('DongXingDataCenter'):
+        pass
+    else:
+        raise
 from AlgoTrading.Data.DataProviders.YaHoo import YaHooDataProvider
 
 __all__ = ["HistoricalCSVDataHandler",
