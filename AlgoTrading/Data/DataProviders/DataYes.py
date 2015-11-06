@@ -5,6 +5,7 @@ Created on 2015-9-21
 @author: cheng.li
 """
 
+import os
 import tushare as ts
 import numpy as np
 import pandas as pd
@@ -18,7 +19,15 @@ class DataYesMarketDataHandler(DataFrameDataHandler):
 
     def __init__(self, **kwargs):
         super(DataYesMarketDataHandler, self).__init__()
-        ts.set_token(kwargs['token'])
+        if kwargs['token']:
+            ts.set_token(kwargs['token'])
+        else:
+            try:
+                token = os.environ['DATAYES_TOKEN']
+                ts.set_token(token)
+            except KeyError:
+                raise ValueError("Please input token or set up DATAYES_TOKEN in the envirement.")
+
         self.mt = ts.Market()
         self.idx = ts.Idx()
         self.symbolList = [s.lower() for s in kwargs['symbolList']]
@@ -48,7 +57,7 @@ class DataYesMarketDataHandler(DataFrameDataHandler):
 
             self.latestSymbolData[s] = []
             self.symbolData[s] = self.symbolData[s].T.to_dict()
-            print("Symbol %s is ready" % s)
+            logger.info("Symbol {0:s} is ready for back testing".format(s))
 
         self.dateIndex = combIndex
         self.start = 0
