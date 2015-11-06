@@ -184,3 +184,24 @@ def plottingMonthlyRetDist(returns, ax, title="Distribution of Monthly Returns")
     ax.set_xlabel('Returns')
     ax.set_title(title)
     return ax
+
+
+def plottingExposure(positions, ax, title="Total non cash exposure (%)"):
+    y_axis_formatter = FuncFormatter(two_dec_places)
+    ax.yaxis.set_major_formatter(FuncFormatter(y_axis_formatter))
+    positions_without_cash = positions.drop('cash', axis='columns')
+    total_security_position = positions_without_cash.sum(axis=1) * 100.
+    total_security_position.plot(kind='area', color='lightblue', alpha=1.0, ax=ax)
+    ax.set_title(title)
+
+
+def plottingTop5Exposure(positions, ax, top=10, title="Top 10 securities exposure (%)"):
+    y_axis_formatter = FuncFormatter(two_dec_places)
+    ax.yaxis.set_major_formatter(FuncFormatter(y_axis_formatter))
+    positions_without_cash = positions.drop('cash', axis='columns')
+    df_max = positions_without_cash.mean()
+    df_top = df_max.nlargest(top)
+    (positions[df_top.index] * 100.).plot(ax=ax)
+    ax.legend(loc='upper center', frameon=True, bbox_to_anchor=(0.5, -0.14), ncol=5)
+    ax.set_title(title)
+    return ax

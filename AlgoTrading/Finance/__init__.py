@@ -11,6 +11,7 @@ from AlgoTrading.Finance.Commission import PerTrade
 from AlgoTrading.Finance.Commission import PerValue
 from AlgoTrading.Finance.Timeseries import cumReturn
 from AlgoTrading.Finance.Timeseries import aggregateReturns
+from AlgoTrading.Finance.Timeseries import aggregatePositons
 from AlgoTrading.Finance.Timeseries import drawDown
 from AlgoTrading.Finance.Timeseries import annualReturn
 from AlgoTrading.Finance.Timeseries import annualVolatility
@@ -24,6 +25,7 @@ __all__ = ['Transaction',
            'PerValue',
            'cumReturn',
            'aggregateReturns',
+           'aggregatePositons',
            'drawDown',
            'annualReturn',
            'annualVolatility',

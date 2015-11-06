@@ -20,6 +20,20 @@ def cumReturn(returns):
     return dfCum
 
 
+def aggregatePositons(positionBooks, convert='daily'):
+
+    raw_positions = positionBooks.drop(['commission', 'total', 'return', 'equity_curve'], axis=1)
+
+    if convert == 'daily':
+        resampled_pos = raw_positions.groupby(
+            lambda x: dt.datetime(x.year, x.month, x.day)).last()
+
+    return resampled_pos.divide(
+        resampled_pos.abs().sum(axis='columns'),
+        axis='rows'
+    )
+
+
 def aggregateReturns(returns, convert='daily'):
 
     def cumulateReturns(x):
