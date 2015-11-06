@@ -5,11 +5,14 @@ Created on 2015-9-25
 @author: cheng.li
 """
 
+import datetime as dt
+import bisect
 from PyFin.API import bizDatesList
-from PyFin.API import isBizDay
 
 
 class StocksPositionsBook(object):
+
+    _bizDatesList = bizDatesList("China.SSE", dt.datetime(1993, 1, 1), dt.datetime(2025, 12, 31))
 
     def __init__(self, lags):
 
@@ -46,9 +49,13 @@ class StocksPositionsBook(object):
                 date = dates[i]
 
             while i >= 0:
-                bizDates = len(bizDatesList("China.SSE", date, currDT))
-                if isBizDay("China.SSE", currDT):
+                startPos = bisect.bisect_left(StocksPositionsBook._bizDatesList, date)
+                endPos = bisect.bisect_left(StocksPositionsBook._bizDatesList, currDT)
+                bizDates = endPos - startPos + 1
+                if StocksPositionsBook._bizDatesList[endPos] == currDT:
                     bizDates -= 1
+                else:
+                    bizDates -= 2
                 if bizDates >= lag:
                     break
                 i -= 1
