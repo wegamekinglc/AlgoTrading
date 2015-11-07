@@ -11,7 +11,7 @@ from AlgoTrading.Data.DataProviders import DataYesMarketDataHandler
 try:
     from AlgoTrading.Data.DataProviders import DXDataCenter
 except ImportError as e:
-    if str(e).endswith("'DXDataCenter'"):
+    if str(e).endswith("'DXDataCenter'") or str(e).endswith("DXDataCenter"):
         pass
     else:
         raise

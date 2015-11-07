@@ -60,6 +60,12 @@ class Strategy(object):
             for subscriber in self._subscribed:
                 subscriber.push(values)
 
+    def _handle_data(self):
+        self._buyOrderRecords = []
+        self._sellOrderRecords = []
+        self.handle_data()
+        self._processOrders()
+
     @property
     def universe(self):
         return self.symbolList
@@ -81,32 +87,60 @@ class Strategy(object):
         amount = self._posBook.avaliableForSale(symbol, currDT)
         return amount
 
-    def order(self, symbol, direction, quantity):
-        currDTTime = self.bars.getLatestBarDatetime(symbol)
-        currDT = currDTTime.date()
-        currValue = self.bars.getLatestBarValue(symbol, 'close')
-        if direction == -1:
+    def _processOrders(self):
+
+        signals = []
+
+        # buy orders
+        cashAmount = self._port.currentHoldings['cash']
+        for order in self._buyOrderRecords:
+            symbol = order['symbol']
+            quantity = order['quantity']
+            currDTTime = self.bars.getLatestBarDatetime(symbol)
+            currValue = self.bars.getLatestBarValue(symbol, 'close')
+            currDT = currDTTime.date()
+            if (quantity * currValue) < cashAmount:
+                signal = OrderEvent(currDTTime, symbol, "MKT", quantity, 1)
+                self._posBook.updatePositionsByOrder(symbol, currDT, quantity, 1)
+                signals.append(signal)
+                cashAmount -= quantity * currValue
+            else:
+                logger.warning("{0}: ${1} cash needed to buy the quantity {2} of {3} is less than available cash ${4}"
+                               .format(currDTTime, quantity * currValue, quantity, symbol, cashAmount))
+
+        # sell orders
+        for order in self._sellOrderRecords:
+            symbol = order['symbol']
+            quantity = order['quantity']
+            currDTTime = self.bars.getLatestBarDatetime(symbol)
+            currDT = currDTTime.date()
             amount = self._posBook.avaliableForSale(symbol, currDT)
-            if amount < quantity:
+            if amount >= quantity:
+                signal = OrderEvent(currDTTime, symbol, "MKT", quantity, -1)
+                self._posBook.updatePositionsByOrder(symbol, currDT, quantity, -1)
+                signals.append(signal)
+            else:
                 logger.warning("{0}: {1} quantity need to be sold {2} is less then the available for sell amount {3}"
                                .format(currDTTime, symbol, quantity, amount))
-                return
-        elif direction == 1:
-            if quantity * currValue > self._port.currentHoldings['cash']:
-                logger.warning("{0}: ${1} cash needed to buy the quantity {2} of {3} is less than available cash ${4}"
-                               .format(currDTTime, quantity * currValue, quantity, symbol,  self._port.currentHoldings['cash']))
-                return
+
+        # log the signal informations
+        for signal in signals:
+            logger.info("{0}: {1} Order ID: {2} is sent with quantity {3} and direction {4} on symbol {5}"
+                    .format(signal.timeIndex,
+                            signal.orderType,
+                            signal.orderID,
+                            signal.quantity,
+                            signal.direction,
+                            signal.symbol))
+            self.events.put(signal)
+
+    def order(self, symbol, direction, quantity):
+        if direction == 1:
+            self._buyOrderRecords.append({'symbol': symbol, 'quantity': quantity})
+        elif direction == -1:
+            self._sellOrderRecords.append({'symbol': symbol, 'quantity': quantity})
         else:
             raise ValueError("Unrecognized direction %d" % direction)
-
-        self._posBook.updatePositionsByOrder(symbol, currDT, quantity, direction)
-        signal = OrderEvent(currDTTime, symbol, "MKT", quantity, direction)
-
-        logger.info("{0}: {1} Order ID: {2} is sent with quantity {3} and direction {4} on symbol {5}"
-                    .format(signal.timeIndex, signal.orderType, signal.orderID, signal.quantity, signal.direction, symbol))
-
-        self.events.put(signal)
-        return signal.orderID
 
     @property
     def secPos(self):

@@ -18,24 +18,24 @@ class MovingAverageCrossStrategy(Strategy):
 
     def handle_data(self):
         for s in self.universe:
-            if self.short_sma[s] > self.long_sma[s] and self.secPos[s] == 0:
-                self.order(s, 1, quantity=1000)
+            if self.short_sma[s] > self.long_sma[s]:
+                self.order(s, 1, quantity=100)
             elif self.short_sma[s] < self.long_sma[s] and self.secPos[s] != 0:
-                self.order(s, -1, quantity=1000)
+                self.order(s, -1, quantity=100)
 
 
 def run_example():
     csvDir = "data"
     universe = ['aapl', 'msft', 'ibm']
-    initialCapital = 100000.0
+    initialCapital = 1000000.0
 
     strategyRunner(userStrategy=MovingAverageCrossStrategy,
                    initialCapital=initialCapital,
                    symbolList=universe,
                    dataSource=DataSource.CSV,
                    csvDir=csvDir,
-                   saveFile=False,
-                   plot=True)
+                   saveFile=True,
+                   plot=False)
 
 
 if __name__ == "__main__":

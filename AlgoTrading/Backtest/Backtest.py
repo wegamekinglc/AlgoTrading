@@ -103,7 +103,7 @@ class Backtest(object):
                         self.counter += 1
                         self.strategy._updateSubscribing()
                         if self.counter % self.refreshRate == 0:
-                            self.strategy.handle_data()
+                            self.strategy._handle_data()
                         self.portfolio.updateTimeindex()
                     elif event.type == 'SIGNAL':
                         self.signals += 1

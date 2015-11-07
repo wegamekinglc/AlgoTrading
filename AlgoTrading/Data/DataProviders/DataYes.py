@@ -57,7 +57,7 @@ class DataYesMarketDataHandler(DataFrameDataHandler):
 
             self.latestSymbolData[s] = []
             self.symbolData[s] = self.symbolData[s].T.to_dict()
-            logger.info("Symbol {0:s} is ready for back testing".format(s))
+            logger.info("Symbol {0:s} is ready for back testing.".format(s))
 
         self.dateIndex = combIndex
         self.start = 0
