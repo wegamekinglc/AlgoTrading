@@ -29,7 +29,7 @@ class MovingAverageCrossStrategy(Strategy):
         for s in self.universe:
             amount = self.avaliableForSale(s)
             if self.signal[s] > 0. and self.secPos[s] == 0:
-                self.order(s, 1, quantity=1000)
+                self.order(s, 1, quantity=200)
             elif self.signal[s] < 0. and amount != 0:
                 self.order(s, -1, quantity=amount)
 
@@ -46,8 +46,9 @@ def run_example():
                    startDate=startDate,
                    endDate=endDate,
                    dataSource=DataSource.DataYes,
+                   benchmark='000300.zicn',
                    saveFile=False,
-                   plot=False)
+                   plot=True)
 
 
 if __name__ == "__main__":

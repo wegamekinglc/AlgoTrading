@@ -12,11 +12,11 @@ class CustomLogger(object):
 
     def __init__(self):
         self.logger = logging.getLogger('output')
-        self.logger.setLevel(logging.WARNING)
+        self.logger.setLevel(logging.INFO)
         ch = logging.StreamHandler()
         sh = logging.FileHandler('strategy.log')
-        ch.setLevel(logging.WARNING)
-        sh.setLevel(logging.WARNING)
+        ch.setLevel(logging.INFO)
+        sh.setLevel(logging.INFO)
         formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
         ch.setFormatter(formatter)
         sh.setFormatter(formatter)
