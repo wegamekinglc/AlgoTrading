@@ -7,6 +7,7 @@ Created on 2015-9-23
 
 import pandas_datareader.data as web
 from AlgoTrading.Data.Data import DataFrameDataHandler
+from AlgoTrading.Utilities import transfromDFtoDict
 
 
 class YaHooDataProvider(DataFrameDataHandler):
@@ -28,7 +29,7 @@ class YaHooDataProvider(DataFrameDataHandler):
             self.symbolData[s] = web.get_data_yahoo(s,
                                                     start=self.startDate.strftime("%Y%m%d"),
                                                     end=self.endDate.strftime("%Y%m%d"),
-                                                    adjust_price=True).sort()
+                                                    adjust_price=True).sort_index()
             del self.symbolData[s]['Adj_Ratio']
             self.symbolData[s].columns = ['open', 'high', 'low', 'close', 'volume']
 
@@ -38,7 +39,7 @@ class YaHooDataProvider(DataFrameDataHandler):
                 combIndex.union(self.symbolData[s].index)
 
             self.latestSymbolData[s] = []
-            self.symbolData[s] = self.symbolData[s].T.to_dict()
+            self.symbolData[s] = transfromDFtoDict(self.symbolData[s])
 
         self.dateIndex = combIndex
         self.start = 0

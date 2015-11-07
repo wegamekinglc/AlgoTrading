@@ -38,8 +38,13 @@ def run_example():
                    startDate=startDate,
                    endDate=endDate,
                    dataSource=DataSource.YAHOO,
-                   saveFile=True)
+                   saveFile=False)
 
 
 if __name__ == "__main__":
+    startTime = dt.datetime.now()
+    print("Start: %s" % startTime)
     run_example()
+    endTime = dt.datetime.now()
+    print("End : %s" % endTime)
+    print("Elapsed: %s" % (endTime - startTime))

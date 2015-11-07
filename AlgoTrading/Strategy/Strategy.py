@@ -103,7 +103,6 @@ class Strategy(object):
                 signal = OrderEvent(currDTTime, symbol, "MKT", quantity, 1)
                 self._posBook.updatePositionsByOrder(symbol, currDT, quantity, 1)
                 signals.append(signal)
-                cashAmount -= quantity * currValue
             else:
                 logger.warning("{0}: ${1} cash needed to buy the quantity {2} of {3} is less than available cash ${4}"
                                .format(currDTTime, quantity * currValue, quantity, symbol, cashAmount))

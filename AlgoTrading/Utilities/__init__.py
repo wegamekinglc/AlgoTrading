@@ -6,5 +6,7 @@ Created on 2015-11-5
 """
 
 from AlgoTrading.Utilities.Logger import logger
+from AlgoTrading.Utilities.Parsers import transfromDFtoDict
 
-__all__ = ['logger']
+__all__ = ['logger',
+           'transfromDFtoDict']

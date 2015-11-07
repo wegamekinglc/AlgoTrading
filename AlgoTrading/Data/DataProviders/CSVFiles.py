@@ -8,6 +8,7 @@ Created on 2015-9-21
 import os
 import pandas.io as io
 from AlgoTrading.Data.Data import DataFrameDataHandler
+from AlgoTrading.Utilities import transfromDFtoDict
 
 
 class HistoricalCSVDataHandler(DataFrameDataHandler):
@@ -36,7 +37,7 @@ class HistoricalCSVDataHandler(DataFrameDataHandler):
                 combIndex.union(self.symbolData[s].index)
 
             self.latestSymbolData[s] = []
-            self.symbolData[s] = self.symbolData[s].T.to_dict()
+            self.symbolData[s] = transfromDFtoDict(self.symbolData[s])
 
         self.dateIndex = combIndex
         self.start = 0

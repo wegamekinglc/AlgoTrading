@@ -35,7 +35,7 @@ class MovingAverageCrossStrategy(Strategy):
 
 
 def run_example():
-    universe = set_universe('000300.zicn')
+    universe = set_universe('000300.zicn')[:300]
     initialCapital = 100000.0
     startDate = dt.datetime(2006, 10, 1)
     endDate = dt.datetime(2015, 10, 1)
@@ -48,7 +48,7 @@ def run_example():
                    dataSource=DataSource.DataYes,
                    benchmark='000300.zicn',
                    saveFile=False,
-                   plot=True)
+                   plot=False)
 
 
 if __name__ == "__main__":
