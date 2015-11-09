@@ -17,7 +17,6 @@ from enum import unique
 from PyFin.Env import Settings
 from AlgoTrading.Data.DataProviders import HistoricalCSVDataHandler
 from AlgoTrading.Data.DataProviders import DataYesMarketDataHandler
-from AlgoTrading.Utilities import logger
 try:
     from AlgoTrading.Data.DataProviders import DXDataCenter
 except ImportError:
@@ -29,6 +28,7 @@ from AlgoTrading.Execution.FilledBook import FilledBook
 from AlgoTrading.Portfolio.Portfolio import Portfolio
 from AlgoTrading.Portfolio.PositionsBook import StocksPositionsBook
 from AlgoTrading.Assets import XSHGStock
+from AlgoTrading.Utilities import CustomLogger
 
 
 class Backtest(object):
@@ -40,6 +40,7 @@ class Backtest(object):
                  execution_handler,
                  portfolio,
                  strategy,
+                 logger,
                  benchmark=None,
                  refreshRate=1,
                  plot=False):
@@ -61,6 +62,7 @@ class Backtest(object):
         self.refreshRate = refreshRate
         self.counter = 0
         self.plot = plot
+        self.logger = logger
 
         self._generateTradingInstance()
 
@@ -70,12 +72,13 @@ class Backtest(object):
         self.strategy.events = self.events
         self.strategy.bars = self.dataHandler
         self.strategy.symbolList = self.symbolList
+        self.strategy.logger = self.logger
         self.portfolio = self.portfolioCls(self.dataHandler,
                                            self.events,
                                            self.dataHandler.getStartDate(),
                                            self.initialCapital,
                                            self.benchmark)
-        self.executionHanlder = self.executionHanlderCls(self.events, self.assets, self.dataHandler, self.portfolio)
+        self.executionHanlder = self.executionHanlderCls(self.events, self.assets, self.dataHandler, self.portfolio, self.logger)
         self.orderBook = OrderBook()
         self.filledBook = FilledBook()
         lags = {s: self.assets[s].lag for s in self.symbolList}
@@ -125,18 +128,18 @@ class Backtest(object):
             time.sleep(self.heartbeat)
 
     def _outputPerformance(self):
-        logger.info("Orders : {0:d}".format(self.orders))
-        logger.info("Fills  : {0:d}".format(self.fills))
+        self.logger.info("Orders : {0:d}".format(self.orders))
+        self.logger.info("Fills  : {0:d}".format(self.fills))
 
         self.portfolio.createEquityCurveDataframe()
         perf_metric, perf_df = self.portfolio.outputSummaryStats(self.portfolio.equityCurve, self.plot)
         return self.portfolio.equityCurve, self.orderBook.view(), self.filledBook.view(), perf_metric, perf_df
 
     def simulateTrading(self):
-        logger.info("Start backtesting...")
+        self.logger.info("Start backtesting...")
         self.strategy._subscribe()
         self._runBacktest()
-        logger.info("Backesting finished!")
+        self.logger.info("Backesting finished!")
         return self._outputPerformance()
 
 
@@ -158,11 +161,15 @@ def strategyRunner(userStrategy,
                    refreshRate=1,
                    saveFile=False,
                    plot=False,
+                   logLevel='info',
                    **kwargs):
+
+    logger = CustomLogger(logLevel)
 
     if dataSource == DataSource.CSV:
         dataHandler = HistoricalCSVDataHandler(csvDir=kwargs['csvDir'],
-                                               symbolList=symbolList)
+                                               symbolList=symbolList,
+                                               logger=logger)
     elif dataSource == DataSource.DataYes:
         try:
             token = kwargs['token']
@@ -172,17 +179,20 @@ def strategyRunner(userStrategy,
                                                symbolList=symbolList,
                                                startDate=startDate,
                                                endDate=endDate,
-                                               benchmark=benchmark)
+                                               benchmark=benchmark,
+                                               logger=logger)
     elif dataSource == DataSource.DXDataCenter:
         dataHandler = DXDataCenter(symbolList=symbolList,
                                    startDate=startDate,
                                    endDate=endDate,
                                    freq=kwargs['freq'],
-                                   benchmark=benchmark)
+                                   benchmark=benchmark,
+                                   logger=logger)
     elif dataSource == DataSource.YAHOO:
         dataHandler = YaHooDataProvider(symbolList=symbolList,
                                         startDate=startDate,
-                                        endDate=endDate)
+                                        endDate=endDate,
+                                        logger=logger)
 
     backtest = Backtest(initialCapital,
                         0.0,
@@ -190,6 +200,7 @@ def strategyRunner(userStrategy,
                         SimulatedExecutionHandler,
                         Portfolio,
                         userStrategy,
+                        logger,
                         benchmark,
                         refreshRate,
                         plot=plot)

@@ -9,12 +9,14 @@ from abc import ABCMeta, abstractmethod
 from math import floor
 from AlgoTrading.Finance import Transaction
 from AlgoTrading.Events import FillEvent
-from AlgoTrading.Utilities import logger
 
 
 class ExecutionHanlder(object):
 
     __metaclass__ = ABCMeta
+
+    def __init__(self, logger):
+        self.logger = logger
 
     @abstractmethod
     def executeOrder(self, event):
@@ -23,7 +25,8 @@ class ExecutionHanlder(object):
 
 class SimulatedExecutionHandler(ExecutionHanlder):
 
-    def __init__(self, events, assets, bars, portfolio):
+    def __init__(self, events, assets, bars, portfolio, logger):
+        super(SimulatedExecutionHandler, self).__init__(logger=logger)
         self.events = events
         self.assets = assets
         self.portfolio = portfolio
@@ -77,7 +80,7 @@ class SimulatedExecutionHandler(ExecutionHanlder):
                                    fillCost,
                                    commission)
 
-            logger.info("{0}: Order ID: {1} filled at price: ${2} with quantity {3} direction {4}. "
+            self.logger.info("{0}: Order ID: {1} filled at price: ${2} with quantity {3} direction {4}. "
                         "original order quantity is {5}"
                         .format(event.timeIndex, event.orderID, transPrice, quantity, event.direction, event.quantity))
 

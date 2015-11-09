@@ -15,7 +15,7 @@ class YaHooDataProvider(DataFrameDataHandler):
     _req_args = ['symbolList', 'startDate', 'endDate']
 
     def __init__(self, **kwargs):
-        super(YaHooDataProvider, self).__init__()
+        super(YaHooDataProvider, self).__init__(kwargs['logger'])
         self.symbolList = [s.lower() for s in kwargs['symbolList']]
         self.symbolList = [s.replace('xshg', 'ss') for s in self.symbolList]
         self.symbolList = [s.replace('xshe', 'sz') for s in self.symbolList]

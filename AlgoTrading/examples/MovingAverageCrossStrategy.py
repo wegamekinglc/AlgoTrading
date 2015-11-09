@@ -9,12 +9,9 @@ import datetime as dt
 from AlgoTrading.Strategy.Strategy import Strategy
 from AlgoTrading.Backtest import strategyRunner
 from AlgoTrading.Backtest import DataSource
-from AlgoTrading.Utilities import logger
 from PyFin.API import MA
 from PyFin.API import MAX
 from PyFin.API import MIN
-
-logger.setLevel('info')
 
 
 class MovingAverageCrossStrategy(Strategy):

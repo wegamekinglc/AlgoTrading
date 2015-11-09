@@ -22,6 +22,9 @@ class DataHandler(object):
 
     __metaclass__ = ABCMeta
 
+    def __init__(self, logger):
+        self.logger = logger
+
     @abstractmethod
     def getLatestBar(self, symbol):
         raise NotImplementedError()
@@ -44,7 +47,8 @@ class DataHandler(object):
 
 class DataFrameDataHandler(DataHandler):
 
-    def __init__(self):
+    def __init__(self, logger):
+        super(DataFrameDataHandler, self).__init__(logger=logger)
         self.symbolData = {}
         self.latestSymbolData = {}
         self.continueBacktest = True

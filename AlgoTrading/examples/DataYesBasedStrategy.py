@@ -11,12 +11,9 @@ from AlgoTrading.Strategy.Strategy import Strategy
 from AlgoTrading.Backtest import strategyRunner
 from AlgoTrading.Backtest import DataSource
 from AlgoTrading.Data import set_universe
-from AlgoTrading.Utilities import logger
 from PyFin.API import MA
 from PyFin.API import MAX
 from PyFin.API import MIN
-
-logger.setLevel("info")
 
 
 class MovingAverageCrossStrategy(Strategy):
@@ -35,7 +32,7 @@ class MovingAverageCrossStrategy(Strategy):
 
 
 def run_example():
-    universe = set_universe('000300.zicn')[:300]
+    universe = set_universe('000300.zicn')[:30]
     initialCapital = 100000.0
     startDate = dt.datetime(2006, 10, 1)
     endDate = dt.datetime(2015, 10, 1)

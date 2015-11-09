@@ -9,7 +9,6 @@ Created on 2015-7-24
 from abc import ABCMeta
 from abc import abstractmethod
 from AlgoTrading.Events import OrderEvent
-from AlgoTrading.Utilities import logger
 from PyFin.Analysis.SecurityValueHolders import SecurityValueHolder
 
 
@@ -18,7 +17,7 @@ class Strategy(object):
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def handle_data(self):
+    def handle_data(self,):
         raise NotImplementedError()
 
     def _subscribe(self):
@@ -104,7 +103,7 @@ class Strategy(object):
                 self._posBook.updatePositionsByOrder(symbol, currDT, quantity, 1)
                 signals.append(signal)
             else:
-                logger.warning("{0}: ${1} cash needed to buy the quantity {2} of {3} is less than available cash ${4}"
+                self.logger.warning("{0}: ${1} cash needed to buy the quantity {2} of {3} is less than available cash ${4}"
                                .format(currDTTime, quantity * currValue, quantity, symbol, cashAmount))
 
         # sell orders
@@ -119,12 +118,12 @@ class Strategy(object):
                 self._posBook.updatePositionsByOrder(symbol, currDT, quantity, -1)
                 signals.append(signal)
             else:
-                logger.warning("{0}: {1} quantity need to be sold {2} is less then the available for sell amount {3}"
+                self.logger.warning("{0}: {1} quantity need to be sold {2} is less then the available for sell amount {3}"
                                .format(currDTTime, symbol, quantity, amount))
 
         # log the signal informations
         for signal in signals:
-            logger.info("{0}: {1} Order ID: {2} is sent with quantity {3} and direction {4} on symbol {5}"
+            self.logger.info("{0}: {1} Order ID: {2} is sent with quantity {3} and direction {4} on symbol {5}"
                     .format(signal.timeIndex,
                             signal.orderType,
                             signal.orderID,

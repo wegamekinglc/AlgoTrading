@@ -42,7 +42,6 @@ def run_example():
                    startDate=startDate,
                    endDate=endDate,
                    dataSource=DataSource.DataYes,
-                   token="2bfc4b3b06efa5d8bba2ab9ef83b5d61f1c3887834de729b60eec9f13e1d4df8",
                    benchmark='000300.zicn',
                    saveFile=False,
                    refreshRate=1,

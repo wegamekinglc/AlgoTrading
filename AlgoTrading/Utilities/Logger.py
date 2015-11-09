@@ -10,7 +10,7 @@ import logging
 
 class CustomLogger(object):
 
-    def __init__(self):
+    def __init__(self, logLevel='info'):
         self.logger = logging.getLogger('output')
         self.logger.setLevel(logging.INFO)
         ch = logging.StreamHandler()
@@ -22,6 +22,7 @@ class CustomLogger(object):
         sh.setFormatter(formatter)
         self.logger.addHandler(ch)
         self.logger.addHandler(sh)
+        self.setLevel(logLevel)
 
     def setLevel(self, type):
         if type.lower() == "info":
@@ -36,5 +37,3 @@ class CustomLogger(object):
 
     def warning(self, msg):
         self.logger.warning(msg)
-
-logger = CustomLogger()

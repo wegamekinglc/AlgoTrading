@@ -11,7 +11,6 @@ from multiprocessing.pool import ThreadPool
 import numpy as np
 import pandas as pd
 from AlgoTrading.Data.Data import DataFrameDataHandler
-from AlgoTrading.Utilities import logger
 from AlgoTrading.Utilities import transfromDFtoDict
 
 
@@ -20,7 +19,7 @@ class DataYesMarketDataHandler(DataFrameDataHandler):
     _req_args = ['token', 'symbolList', 'startDate', 'endDate', 'benchmark']
 
     def __init__(self, **kwargs):
-        super(DataYesMarketDataHandler, self).__init__()
+        super(DataYesMarketDataHandler, self).__init__(kwargs['logger'])
         if kwargs['token']:
             ts.set_token(kwargs['token'])
         else:
@@ -40,7 +39,7 @@ class DataYesMarketDataHandler(DataFrameDataHandler):
 
     def _getDatas(self):
 
-        logger.info("Start loading bars from DataYes source...")
+        self.logger.info("Start loading bars from DataYes source...")
 
         combIndex = None
 
@@ -64,7 +63,7 @@ class DataYesMarketDataHandler(DataFrameDataHandler):
             logger.info("Symbol {0:s} is ready for back testing.".format(s))
             result[s] = data
 
-        pool.map(getOneSymbolData, [(ts.Market(), s, self.startDate, self.endDate, logger, result) for s in self.symbolList])
+        pool.map(getOneSymbolData, [(ts.Market(), s, self.startDate, self.endDate, self.logger, result) for s in self.symbolList])
 
         for s in result:
             self.symbolData[s] = result[s]
@@ -84,11 +83,11 @@ class DataYesMarketDataHandler(DataFrameDataHandler):
             if s not in self.symbolData:
                 del self.symbolList[i]
 
-        logger.info("Bars loading finished!")
+        self.logger.info("Bars loading finished!")
 
     def _getBenchmarkData(self, indexID, startTimeStamp, endTimeStamp):
 
-        logger.info("Start loading benchmark {0:s} data from DataYes source...".format(indexID))
+        self.logger.info("Start loading benchmark {0:s} data from DataYes source...".format(indexID))
 
         indexData = ts.Market().MktIdxd(indexID=indexID, beginDate=startTimeStamp, endDate=endTimeStamp, field='tradeDate,closeIndex')
         indexData['tradeDate'] = pd.to_datetime(indexData['tradeDate'], format="%Y-%m-%d")
@@ -98,7 +97,7 @@ class DataYesMarketDataHandler(DataFrameDataHandler):
         indexData = indexData.dropna()
         self.benchmarkData = indexData
 
-        logger.info("Benchmark data loading finished!")
+        self.logger.info("Benchmark data loading finished!")
 
 
 
