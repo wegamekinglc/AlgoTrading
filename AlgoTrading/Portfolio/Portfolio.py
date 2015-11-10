@@ -11,6 +11,14 @@ import matplotlib.pyplot as plt
 from AlgoTrading.Events import OrderEvent
 from VisualPortfolio.Tears import createPerformanceTearSheet
 from VisualPortfolio.Tears import createPostionTearSheet
+from VisualPortfolio.Tears import createTranscationTearSheet
+
+
+def extractTransactionFromFilledBook(filledBook):
+    interestedColumns = filledBook[['time', 'symbol', 'quantity', 'fillCost']]
+    interestedColumns.set_index('time', inplace=True)
+    interestedColumns.rename(columns={'quantity': 'turnover_volume', 'fillCost': 'turnover_value'}, inplace=True)
+    return interestedColumns
 
 
 class Portfolio(object):
@@ -124,9 +132,12 @@ class Portfolio(object):
         perf_metric, perf_df = createPerformanceTearSheet(returns=returns, benchmarkReturns=self.dataHandler.benchmarkData['return'], plot=plot)
 
         positons = curve.drop(['commission', 'total', 'return', 'equity_curve'], axis=1)
-        createPostionTearSheet(positons, plot=plot)
+        aggregated_positons = createPostionTearSheet(positons, plot=plot)
+
+        transactions = extractTransactionFromFilledBook(self.filledBook.view())
+        turnover_rate = createTranscationTearSheet(transactions, positons, plot=plot)
 
         if plot:
             plt.show()
 
-        return perf_metric, perf_df
+        return perf_metric, perf_df, aggregated_positons, transactions, turnover_rate

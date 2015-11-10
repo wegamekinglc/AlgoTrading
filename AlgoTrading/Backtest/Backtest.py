@@ -81,6 +81,7 @@ class Backtest(object):
         self.executionHanlder = self.executionHanlderCls(self.events, self.assets, self.dataHandler, self.portfolio, self.logger)
         self.orderBook = OrderBook()
         self.filledBook = FilledBook()
+        self.portfolio.filledBook = self.filledBook
         lags = {s: self.assets[s].lag for s in self.symbolList}
         self.stocksPositionsBook = StocksPositionsBook(lags)
         self.strategy._port = self.portfolio
@@ -118,7 +119,7 @@ class Backtest(object):
                         self.fills += 1
                         self.orderBook.updateFromFillEvent(fill_event)
                         self.portfolio.updateFill(fill_event)
-                        self.filledBook.updateFromFillEvent(fill_event)
+                        self.portfolio.filledBook.updateFromFillEvent(fill_event)
                         orderTime = self.orderBook.orderTime(fill_event.orderID)
                         self.stocksPositionsBook.updatePositionsByFill(fill_event.symbol,
                                                                        orderTime.date(),
@@ -132,8 +133,8 @@ class Backtest(object):
         self.logger.info("Fills  : {0:d}".format(self.fills))
 
         self.portfolio.createEquityCurveDataframe()
-        perf_metric, perf_df = self.portfolio.outputSummaryStats(self.portfolio.equityCurve, self.plot)
-        return self.portfolio.equityCurve, self.orderBook.view(), self.filledBook.view(), perf_metric, perf_df
+        perf_metric, perf_df, aggregated_positions, transactions, turnover_rate = self.portfolio.outputSummaryStats(self.portfolio.equityCurve, self.plot)
+        return self.portfolio.equityCurve, self.orderBook.view(), self.filledBook.view(), perf_metric, perf_df, aggregated_positions, transactions, turnover_rate
 
     def simulateTrading(self):
         self.logger.info("Start backtesting...")
@@ -205,7 +206,7 @@ def strategyRunner(userStrategy,
                         refreshRate,
                         plot=plot)
 
-    equityCurve, orderBook, filledBook, perf_metric, perf_df = backtest.simulateTrading()
+    equityCurve, orderBook, filledBook, perf_metric, perf_df, aggregated_positions, transactions, turnover_rate = backtest.simulateTrading()
 
     # save to a excel file
     if saveFile:
@@ -217,10 +218,16 @@ def strategyRunner(userStrategy,
         equityCurve.to_csv('performance/equity_curve.csv', float_format='%.4f')
         orderBook.to_csv('performance/order_book.csv', float_format='%.4f')
         filledBook.to_csv('performance/filled_book.csv', float_format='%.4f')
+        aggregated_positions.to_csv('performance/aggregated_positions.csv', float_format='%.4f')
+        turnover_rate.to_csv('performance/turnover_rate.csv', float_format='%.4f')
+        transactions.to_csv('performance/transactions.csv', float_format='%.4f')
         logger.info("Performance saving is finished!")
 
     return {'equity_curve': equityCurve,
-             'order_book': orderBook,
-             'filled_book': filledBook,
-             'perf_metric': perf_metric,
-             'perf_series': perf_df}
+            'order_book': orderBook,
+            'filled_book': filledBook,
+            'perf_metric': perf_metric,
+            'perf_series': perf_df,
+            'aggregated_positions': aggregated_positions,
+            'transactions': transactions,
+            'turnover_rate': turnover_rate}
