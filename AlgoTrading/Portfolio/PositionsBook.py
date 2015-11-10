@@ -5,13 +5,13 @@ Created on 2015-9-25
 @author: cheng.li
 """
 
-import datetime as dt
 import bisect
 from PyFin.API import bizDatesList
 
 
 class StocksPositionsBook(object):
 
+    import datetime as dt
     _bizDatesList = bizDatesList("China.SSE", dt.datetime(1993, 1, 1), dt.datetime(2025, 12, 31))
 
     def __init__(self, lags):

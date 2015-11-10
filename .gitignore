@@ -4,6 +4,10 @@ build/*
 AlgoTrading/.idea/*
 notebooks/.ipynb_checkpoints/*
 notebooks/presentation/.ipynb_checkpoints/*
+notebooks/presentation/performance/*
+notebooks/performance/*
+AlgoTrading/examples/performance/*
+*.log
 doc/_build/*
 *.coverage
 *.html
@@ -13,6 +17,8 @@ doc/_build/*
 *.css
 *.c
 *.pyd
+*.csv
+*.mat
 tk.csv
 DongXingDataCenter.py
 DongXingSample.py
