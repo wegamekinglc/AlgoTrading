@@ -26,7 +26,7 @@ setup(
               'AlgoTrading.tests'],
     py_modules=['AlgoTrading.__init__'],
     license='',
-    author='lenovo',
+    author='cheng.li',
     author_email='wegamekinglc@hotmail.com',
     description='algorithmic trading framework for multiple assets'
 )

@@ -119,7 +119,8 @@ class Portfolio(object):
 
     def outputSummaryStats(self, curve, plot):
         returns = curve['return']
-
+        benchmarkReturns = self.dataHandler.benchmarkData['return']
+        benchmarkReturns.name = self.benchmark
         perf_metric, perf_df = createPerformanceTearSheet(returns=returns, benchmarkReturns=self.dataHandler.benchmarkData['return'], plot=plot)
 
         positons = curve.drop(['commission', 'total', 'return', 'equity_curve'], axis=1)
