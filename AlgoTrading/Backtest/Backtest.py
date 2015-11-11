@@ -133,8 +133,8 @@ class Backtest(object):
         self.logger.info("Fills  : {0:d}".format(self.fills))
 
         self.portfolio.createEquityCurveDataframe()
-        perf_metric, perf_df, aggregated_positions, transactions, turnover_rate = self.portfolio.outputSummaryStats(self.portfolio.equityCurve, self.plot)
-        return self.portfolio.equityCurve, self.orderBook.view(), self.filledBook.view(), perf_metric, perf_df, aggregated_positions, transactions, turnover_rate
+        perf_metric, perf_df, rollingRisk, aggregated_positions, transactions, turnover_rate = self.portfolio.outputSummaryStats(self.portfolio.equityCurve, self.plot)
+        return self.portfolio.equityCurve, self.orderBook.view(), self.filledBook.view(), perf_metric, perf_df, rollingRisk, aggregated_positions, transactions, turnover_rate
 
     def simulateTrading(self):
         self.logger.info("Start backtesting...")
@@ -206,7 +206,7 @@ def strategyRunner(userStrategy,
                         refreshRate,
                         plot=plot)
 
-    equityCurve, orderBook, filledBook, perf_metric, perf_df, aggregated_positions, transactions, turnover_rate = backtest.simulateTrading()
+    equityCurve, orderBook, filledBook, perf_metric, perf_df, rollingRisk, aggregated_positions, transactions, turnover_rate = backtest.simulateTrading()
 
     # save to a excel file
     if saveFile:
@@ -215,6 +215,7 @@ def strategyRunner(userStrategy,
         logger.info("Strategy performance is now saving to local files...")
         perf_metric.to_csv('performance/perf_metrics.csv', float_format='%.4f')
         perf_df.to_csv('performance/perf_series.csv', float_format='%.4f')
+        rollingRisk.to_csv('performance/rollingRisk.csv', float_format='%.4f')
         equityCurve.to_csv('performance/equity_curve.csv', float_format='%.4f')
         orderBook.to_csv('performance/order_book.csv', float_format='%.4f')
         filledBook.to_csv('performance/filled_book.csv', float_format='%.4f')

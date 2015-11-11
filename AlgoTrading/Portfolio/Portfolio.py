@@ -17,7 +17,7 @@ from VisualPortfolio.Tears import createTranscationTearSheet
 def extractTransactionFromFilledBook(filledBook):
     interestedColumns = filledBook[['time', 'symbol', 'quantity', 'fillCost']]
     interestedColumns.set_index('time', inplace=True)
-    interestedColumns.rename(columns={'quantity': 'turnover_volume', 'fillCost': 'turnover_value'}, inplace=True)
+    interestedColumns = interestedColumns.rename(columns={'quantity': 'turnover_volume', 'fillCost': 'turnover_value'})
     return interestedColumns
 
 
@@ -129,7 +129,7 @@ class Portfolio(object):
         returns = curve['return']
         benchmarkReturns = self.dataHandler.benchmarkData['return']
         benchmarkReturns.name = self.benchmark
-        perf_metric, perf_df = createPerformanceTearSheet(returns=returns, benchmarkReturns=self.dataHandler.benchmarkData['return'], plot=plot)
+        perf_metric, perf_df, rollingRisk = createPerformanceTearSheet(returns=returns, benchmarkReturns=self.dataHandler.benchmarkData['return'], plot=plot)
 
         positons = curve.drop(['commission', 'total', 'return', 'equity_curve'], axis=1)
         aggregated_positons = createPostionTearSheet(positons, plot=plot)
@@ -140,4 +140,4 @@ class Portfolio(object):
         if plot:
             plt.show()
 
-        return perf_metric, perf_df, aggregated_positons, transactions, turnover_rate
+        return perf_metric, perf_df, rollingRisk, aggregated_positons, transactions, turnover_rate
