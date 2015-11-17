@@ -5,40 +5,50 @@ Created on 2015-9-25
 @author: cheng.li
 """
 
+import datetime as dt
 import bisect
 from PyFin.API import bizDatesList
 
 
 class StocksPositionsBook(object):
 
-    import datetime as dt
     _bizDatesList = bizDatesList("China.SSE", dt.datetime(1993, 1, 1), dt.datetime(2025, 12, 31))
 
-    def __init__(self, lags):
+    def __init__(self, assets):
 
         self._allPositions = {}
-        self._lags = lags
+        self.assets = assets
+        self._lags = {s: self.assets[s].lag for s in self.assets.keys()}
+        self._shortable = {s: self.assets[s].short for s in self.assets.keys()}
         self._cachedSaleAmount = {}
+        self._allPositions = {}
 
-    def avaliableForSale(self, symbol, currDT):
+    def avaliableForTrade(self, symbol, currDT):
         if symbol in self._cachedSaleAmount:
             record = self._cachedSaleAmount[symbol]
             if record['date'] < currDT:
-                return self._avaliableForSale(symbol, currDT)
+                return self._avaliableForTrade(symbol, currDT)
             else:
                 return record['amount']
         else:
-            return self._avaliableForSale(symbol, currDT)
+            return self._avaliableForTrade(symbol, currDT)
 
-    def _avaliableForSale(self, symbol, currDT):
+    def _avaliableForTrade(self, symbol, currDT):
         lag = self._lags[symbol]
         if symbol not in self._allPositions:
-            amount = 0
+            avaliableForSell = 0
+            avaliableForBuy = 0
         elif lag == 0:
-            avalPos = self._allPositions[symbol]
-            amount = sum(avalPos[1])
+            _, positions, locked, existDirections = self._allPositions[symbol]
+            avaliableForSell = 0
+            avaliableForBuy = 0
+            for i, direction in enumerate(existDirections):
+                if direction == 1:
+                    avaliableForSell += positions[i] - locked[i]
+                else:
+                    avaliableForBuy += positions[i] - locked[i]
         else:
-            dates, positions, locked = self._allPositions[symbol]
+            dates, positions, locked, existDirections = self._allPositions[symbol]
             i = len(dates) - 1
             date = dates[i]
 
@@ -63,100 +73,91 @@ class StocksPositionsBook(object):
                     break
                 date = dates[i]
 
-            if i < 0:
-                amount = 0
-            else:
-                amount = sum(positions[:i+1]) - sum(locked[:i+1])
-        self._cachedSaleAmount[symbol] = {'date': currDT, 'amount': amount}
-        return amount
+            avaliableForSell = 0
+            avaliableForBuy = 0
+            if i >= 0:
+                for k in range(i+1):
+                    if existDirections[k] == 1:
+                        avaliableForSell += positions[k] - locked[k]
+                    else:
+                        avaliableForBuy += positions[k] - locked[k]
+        self._cachedSaleAmount[symbol] = {'date': currDT, 'amount': (avaliableForSell, avaliableForBuy)}
+        return avaliableForSell, avaliableForBuy
 
     def updatePositionsByOrder(self, symbol, currDT, quantity, direction):
         if symbol not in self._allPositions:
-            if direction == 1:
-                self._allPositions[symbol] = ([currDT], [quantity], [quantity])
-            else:
-                raise ValueError("Short sell is currently not allowed")
+            if not self._shortable[symbol] and direction == -1:
+                raise ValueError("Short sell is not allowed for {0}".format(symbol))
         else:
-            dates, positions, locked = self._allPositions[symbol]
-            if direction == 1:
-                if dates[-1] == currDT:
-                    positions[-1] += quantity
-                    locked[-1] += quantity
-                else:
-                    self._allPositions[symbol][0].append(currDT)
-                    self._allPositions[symbol][1].append(quantity)
-                    self._allPositions[symbol][2].append(quantity)
-            elif direction == -1:
-                i = 0
-                toSell = quantity
-                while toSell != 0:
+            dates, positions, locked, existDirections = self._allPositions[symbol]
+
+            toFinish = quantity
+            i = 0
+            while toFinish != 0 and i != len(dates):
+                if existDirections[i] != direction:
                     amount = positions[i] - locked[i]
-                    if amount >= toSell:
-                        locked[i] += toSell
+                    if amount >= toFinish:
+                        locked[i] += toFinish
+                        toFinish = 0
                         break
                     else:
                         locked[i] = positions[i]
                         i += 1
-                        toSell -= amount
-            else:
-                raise ValueError("Unrecognized direction %d" % direction)
-        self._avaliableForSale(symbol, currDT)
-
-    def updatePositionsByFill(self, symbol, currDT, quantity, direction):
-        dates, positions, locked = self._allPositions[symbol]
-        if direction == 1:
-            i = 0
-            while dates[i] != currDT:
-                i += 1
-            locked[i] -= quantity
-        elif direction == -1:
-            i = 0
-            toSell = quantity
-            while toSell != 0:
-                amount = positions[i]
-                if amount >= toSell:
-                    positions[i] -= toSell
-                    locked[i] -= toSell
-                    break
+                        toFinish -= amount
                 else:
                     i += 1
-                    toSell -= amount
-            if positions[i] == 0:
-                i += 1
-            if i != 0:
-                del dates[:i]
-                del positions[:i]
-                del locked[:i]
+
+            if toFinish > 0 and direction == -1 and not self._shortable[symbol]:
+                raise ValueError("Existing amount is not enough to cover sell order. Short sell is not allowed for {0}".format(symbol))
+
+        self._avaliableForTrade(symbol, currDT)
+
+    def updatePositionsByFill(self, symbol, currDT, quantity, direction):
+        if symbol not in self._allPositions:
+            self._allPositions[symbol] = [currDT], [quantity], [0], [direction]
+        else:
+            dates, positions, locked, existDirections = self._allPositions[symbol]
+            toFinish = quantity
+            for i, d in enumerate(existDirections):
+                if d != direction:
+                    amount = positions[i]
+                    if amount >= toFinish:
+                        positions[i] -= toFinish
+                        locked[i] -= toFinish
+                        toFinish = 0
+                        break
+                    else:
+                        toFinish -= amount
+                        positions[i] = 0
+                        locked[i] = 0
+            if toFinish != 0:
+                dates.append(currDT)
+                positions.append(toFinish)
+                locked.append(0)
+                existDirections.append(direction)
+
+            for k in range(i+1):
+                if positions[k] == 0:
+                    del dates[k]
+                    del positions[k]
+                    del locked[k]
+                    del existDirections[k]
 
             if not dates:
                 del self._allPositions[symbol]
 
-        else:
-            raise ValueError("Unrecognized direction %d" % direction)
-        self._avaliableForSale(symbol, currDT)
+        self._avaliableForTrade(symbol, currDT)
+
 
 if __name__ == "__main__":
 
-    import datetime as dt
-
-    pb = StocksPositionsBook({'s':1})
-    pb.updatePositionsByOrder('s', dt.datetime(2015, 9, 23), 300, 1)
-    pb.updatePositionsByFill('s', dt.datetime(2015, 9, 23), 50, 1)
-    pb.updatePositionsByOrder('s', dt.datetime(2015, 9, 24), 100, 1)
-    pb.updatePositionsByOrder('s', dt.datetime(2015, 9, 25), 200, 1)
-    pb.updatePositionsByFill('s', dt.datetime(2015, 9, 24), 50, 1)
-    pb.updatePositionsByFill('s', dt.datetime(2015, 9, 25), 50, 1)
-    print(pb._allPositions['s'])
-    print(pb.avaliableForSale('s', dt.datetime(2015, 9, 25)))
-    print(pb.avaliableForSale('s', dt.datetime(2015, 9, 25)))
-    pb.updatePositionsByOrder('s', dt.datetime(2015, 9, 25), 75, -1)
-    print(pb.avaliableForSale('s', dt.datetime(2015, 9, 25)))
-    pb.updatePositionsByOrder('s', dt.datetime(2015, 9, 25), 250, -1)
-    print(pb.avaliableForSale('s', dt.datetime(2015, 9, 25)))
-    pb.updatePositionsByFill('s', dt.datetime(2015, 9, 25), 250, -1)
-    print(pb._allPositions['s'])
-    pb.updatePositionsByFill('s', dt.datetime(2015, 9, 25), 100, -1)
-    print(pb._allPositions['s'])
+    from AlgoTrading.Assets import XSHEStock
+    from AlgoTrading.Assets import IndexFutures
+    pb = StocksPositionsBook({'s': XSHEStock})
+    pb.updatePositionsByOrder('s', dt.date(2015, 9, 23), 300, 1)
+    print(pb._allPositions)
+    pb.updatePositionsByOrder('s', dt.date(2015, 9, 23), 500, -1)
+    print(pb._allPositions)
 
 
 

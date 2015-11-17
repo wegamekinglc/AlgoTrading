@@ -60,8 +60,7 @@ class Strategy(object):
                 subscriber.push(values)
 
     def _handle_data(self):
-        self._buyOrderRecords = []
-        self._sellOrderRecords = []
+        self._orderRecords = []
         self.handle_data()
         self._processOrders()
 
@@ -81,45 +80,66 @@ class Strategy(object):
         return self._port.currentHoldings['cash']
 
     def avaliableForSale(self, symbol):
+        return self.avaliableForTrade(symbol)[0]
+
+    def avaliableForBuyBack(self, symbol):
+        return self.avaliableForBuyBack(symbol)[1]
+
+    def avaliableForTrade(self, symbol):
         currDTTime = self.current_datetime
         currDT = currDTTime.date()
-        amount = self._posBook.avaliableForSale(symbol, currDT)
-        return amount
+        return self._posBook.avaliableForTrade(symbol, currDT)
 
     def _processOrders(self):
 
         signals = []
 
-        # buy orders
         cashAmount = self._port.currentHoldings['cash']
-        for order in self._buyOrderRecords:
+        for order in self._orderRecords:
             symbol = order['symbol']
             quantity = order['quantity']
+            direction = order['direction']
             currDTTime = self.bars.getLatestBarDatetime(symbol)
+            currDT = currDTTime.date()
             currValue = self.bars.getLatestBarValue(symbol, 'close')
-            currDT = currDTTime.date()
-            if (quantity * currValue) < cashAmount:
-                signal = OrderEvent(currDTTime, symbol, "MKT", quantity, 1)
-                self._posBook.updatePositionsByOrder(symbol, currDT, quantity, 1)
-                signals.append(signal)
-            else:
-                self.logger.warning("{0}: ${1} cash needed to buy the quantity {2} of {3} is less than available cash ${4}"
-                               .format(currDTTime, quantity * currValue, quantity, symbol, cashAmount))
 
-        # sell orders
-        for order in self._sellOrderRecords:
-            symbol = order['symbol']
-            quantity = order['quantity']
-            currDTTime = self.bars.getLatestBarDatetime(symbol)
-            currDT = currDTTime.date()
-            amount = self._posBook.avaliableForSale(symbol, currDT)
-            if amount >= quantity:
-                signal = OrderEvent(currDTTime, symbol, "MKT", quantity, -1)
-                self._posBook.updatePositionsByOrder(symbol, currDT, quantity, -1)
-                signals.append(signal)
+            multiplier = self._port.assets[symbol].multiplier
+            settle = self._port.assets[symbol].settle
+            margin = self._port.assets[symbol].margin
+            shortable = self._port.assets[symbol].short
+
+            # amount available for buy back or sell
+            if direction == 1:
+                amount = self._posBook.avaliableForTrade(symbol, currDT)[1]
+            elif direction == -1:
+                amount = self._posBook.avaliableForTrade(symbol, currDT)[0]
+
+            if direction == 1:
+                fill_cost = quantity * currValue * multiplier * settle
             else:
-                self.logger.warning("{0}: {1} quantity need to be sold {2} is less then the available for sell amount {3}"
-                               .format(currDTTime, symbol, quantity, amount))
+                fill_cost = 0.
+
+            margin_cost = max(quantity - amount, 0) * currValue * multiplier * margin
+            maximumCashCost = max(fill_cost, margin_cost)
+
+            if maximumCashCost <= cashAmount and (direction == 1 or (quantity <= amount or shortable)):
+                signal = OrderEvent(currDTTime, symbol, "MKT", quantity, direction)
+                self._posBook.updatePositionsByOrder(symbol, currDT, quantity, direction)
+                signals.append(signal)
+                cashAmount -= maximumCashCost
+            elif maximumCashCost > cashAmount:
+                if direction == 1:
+                    self.logger.warning("{0}: ${1} cash needed to buy the quantity {2} of {3} "
+                                        "is less than available cash ${4}"
+                                        .format(currDTTime, maximumCashCost, quantity, symbol, cashAmount))
+                else:
+                    self.logger.warning("{0}: ${1} cash needed to sell the quantity {2} of {3} "
+                                        "is less than available cash ${4}"
+                                        .format(currDTTime, maximumCashCost, quantity, symbol, cashAmount))
+            else:
+                self.logger.warning("{0}: short disabled {1} quantity need to be sold {2} "
+                                    "is less then the available for sell amount {3}"
+                                    .format(currDTTime, symbol, quantity, amount))
 
         # log the signal informations
         for signal in signals:
@@ -133,10 +153,17 @@ class Strategy(object):
             self.events.put(signal)
 
     def order(self, symbol, direction, quantity):
-        if direction == 1:
-            self._buyOrderRecords.append({'symbol': symbol, 'quantity': quantity})
-        elif direction == -1:
-            self._sellOrderRecords.append({'symbol': symbol, 'quantity': quantity})
+
+        if quantity % self._port.assets[symbol].minimum != 0:
+            self.logger.warning("Order for {0} with amount {1} and direction as {2} is not consistent "
+                                "with minimum bucket amount seeting. "
+                                "Order is discarded!".format(symbol, quantity, direction))
+            return
+
+        if quantity > 0:
+            self._orderRecords.append({'symbol': symbol, 'quantity': quantity, 'direction': direction})
+        elif quantity == 0 and abs(direction) == 1:
+            pass
         else:
             raise ValueError("Unrecognized direction %d" % direction)
 

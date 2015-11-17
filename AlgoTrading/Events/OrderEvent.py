@@ -34,4 +34,8 @@ class OrderEvent(Event):
                "Order: Symbol = {1:s}, " \
                "Type = {2:s}, " \
                "Quantity = {3:s}, " \
-               "Direction = {4}".format(self.orderID, self.symbol, self.orderType, self.quantity, self.direction)
+               "Direction = {4}}".format(self.orderID,
+                                         self.symbol,
+                                         self.orderType,
+                                         self.quantity,
+                                         self.direction)

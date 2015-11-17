@@ -40,7 +40,7 @@ def run_example():
                    dataSource=DataSource.CSV,
                    csvDir=csvDir,
                    saveFile=False,
-                   plot=False)
+                   plot=True)
 
 
 if __name__ == "__main__":

@@ -16,7 +16,6 @@ class FilledBook(object):
         self._allFills = {'orderID': {},
                           'time': {},
                           'symbol': {},
-                          'exchange': {},
                           'quantity': {},
                           'direction': {},
                           'fillCost': {},
@@ -26,7 +25,6 @@ class FilledBook(object):
         self._allFills['orderID'][FilledBook._filledCount] = event.orderID
         self._allFills['time'][FilledBook._filledCount] = event.timeindex
         self._allFills['symbol'][FilledBook._filledCount] = event.symbol
-        self._allFills['exchange'][FilledBook._filledCount] = event.exchange
         self._allFills['quantity'][FilledBook._filledCount] = event.quantity
         self._allFills['direction'][FilledBook._filledCount] = event.direction
         self._allFills['fillCost'][FilledBook._filledCount] = event.fillCost

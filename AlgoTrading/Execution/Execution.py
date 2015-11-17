@@ -7,6 +7,7 @@ Created on 2015-7-31
 
 from abc import ABCMeta, abstractmethod
 from math import floor
+import numpy as np
 from AlgoTrading.Finance import Transaction
 from AlgoTrading.Events import FillEvent
 
@@ -25,65 +26,73 @@ class ExecutionHanlder(object):
 
 class SimulatedExecutionHandler(ExecutionHanlder):
 
-    def __init__(self, events, assets, bars, portfolio, logger):
+    def __init__(self, events, bars, portfolio, logger):
         super(SimulatedExecutionHandler, self).__init__(logger=logger)
         self.events = events
-        self.assets = assets
         self.portfolio = portfolio
         self.bars = bars
 
-    def _search_suitable_quantity(self, transPrice, start_quantity, commission_calc):
+    def _search_suitable_quantity(self, transPrice, start_quantity, assetType, direction):
+        multiplier = assetType.multi
+        minimum = assetType.minimum
+        margin = assetType.margin
+        settle = assetType.settle
+
         cash = self.portfolio.currentHoldings['cash']
-        best_amount = floor(cash / transPrice / 100.0) * 100.0
-        if best_amount < 100.0:
+        if direction == 1:
+            best_amount = floor(cash / transPrice / assetType.minimum) * assetType.minimum
+        else:
+            best_amount = np.inf
+
+        if best_amount < assetType.minimum:
             return 0.0
         else:
             try_amount = min(best_amount, start_quantity)
             while True:
-                fillCost = transPrice * try_amount
+                fillCost = transPrice * try_amount * settle * mu
                 trans = Transaction(transPrice,
                                     try_amount,
                                     1)
-                commission = commission_calc.calculate(trans)
+                commission = assetType.commission.calculate(trans)
                 if (fillCost + commission) < cash:
                     return try_amount
-                elif try_amount < 100.0:
+                elif try_amount < assetType.minimum:
                     return 0.0
                 else:
-                    try_amount -= 100.0
+                    try_amount -= assetType.minimum
 
     def executeOrder(self, event):
         if event.type == 'ORDER':
-            exchange = event.symbol.split('.')[-1]
             transPrice = self.bars.getLatestBarValue(event.symbol, 'close')
-            comCals = self.assets[event.symbol].commission
 
-            if event.direction == 1:
-                quantity = self._search_suitable_quantity(transPrice, event.quantity, comCals)
-            elif event.direction == -1:
-                quantity = event.quantity
-            else:
-                raise ValueError("Unknow direction: {0}".format(event.direction))
+            quantity = self._search_suitable_quantity(transPrice, event.quantity, event.assetType, event.direction)
 
-            trans = Transaction(transPrice,
-                                quantity,
-                                event.direction)
-            fillCost = transPrice * quantity * event.direction
+            if quantity != 0:
+                trans = Transaction(transPrice * event.assetType.multiplier,
+                                    quantity,
+                                    event.direction)
+                fillCost = transPrice * quantity * event.direction * event.assetType.settle * event.assetType.multiplier
+                marginCost = transPrice * quantity * event.assetType.margin * event.assetType.multiplier
 
-            commission = comCals.calculate(trans)
-            fill_event = FillEvent(event.orderID,
-                                   event.timeIndex,
-                                   event.symbol,
-                                   exchange,
-                                   quantity,
-                                   event.direction,
-                                   fillCost,
-                                   commission)
+                commission = event.assetType.commission.calculate(trans)
+                fill_event = FillEvent(event.orderID,
+                                       event.timeIndex,
+                                       event.symbol,
+                                       quantity,
+                                       event.direction,
+                                       fillCost,
+                                       commission,
+                                       marginCost)
 
-            self.logger.info("{0}: Order ID: {1} filled at price: ${2} with quantity {3} direction {4}. "
-                        "original order quantity is {5}"
-                        .format(event.timeIndex, event.orderID, transPrice, quantity, event.direction, event.quantity))
+                self.logger.info("{0}: Order ID: {1} filled at price: ${2} with quantity {3} direction {4}. "
+                                 "original order quantity is {5}"
+                                 .format(event.timeIndex,
+                                         event.orderID,
+                                         transPrice,
+                                         quantity,
+                                         event.direction,
+                                         event.quantity))
 
-            return fill_event
+                return fill_event
 
 

@@ -23,13 +23,14 @@ def extractTransactionFromFilledBook(filledBook):
 
 class Portfolio(object):
 
-    def __init__(self, dataHandler, events, startDate, initialCapital=100000.0, benchmark=None):
+    def __init__(self, dataHandler, events, startDate, assets, initialCapital=100000.0, benchmark=None):
         self.dataHandler = dataHandler
         self.events = events
         self.symbolList = self.dataHandler.symbolList
         self.startDate = startDate
         self.initialCapital = initialCapital
         self.benchmark = benchmark
+        self.assets = assets
 
         self.allPositions = self.constructAllPositions()
         self.currentPosition = dict((s, 0) for s in self.symbolList)
@@ -46,6 +47,7 @@ class Portfolio(object):
         d = dict((k, v) for k, v in [(s, 0) for s in self.symbolList])
         d['datetime'] = self.startDate
         d['cash'] = self.initialCapital
+        d['margin'] = 0.0
         d['commission'] = 0.0
         d['total'] = self.initialCapital
         return [d]
@@ -54,6 +56,7 @@ class Portfolio(object):
         d = dict((k, v) for k, v in [(s, 0) for s in self.symbolList])
         d['datetime'] = self.startDate
         d['cash'] = self.initialCapital
+        d['margin'] = 0.0
         d['commission'] = 0.0
         d['total'] = self.initialCapital
         return d
@@ -70,7 +73,9 @@ class Portfolio(object):
         for s in self.symbolList:
             marketValue = 0.0
             if self.currentPosition[s] != 0:
-                marketValue = self.currentPosition[s] * self.dataHandler.getLatestBarValue(s, 'close')
+                marketValue = self.currentPosition[s] \
+                              * self.dataHandler.getLatestBarValue(s, 'close') \
+                              * self.assets[s].multiplier * self.assets[s].settle
             dh[s] = marketValue
             dh['total'] += marketValue
 
@@ -127,9 +132,12 @@ class Portfolio(object):
 
     def outputSummaryStats(self, curve, plot):
         returns = curve['return']
-        benchmarkReturns = self.dataHandler.benchmarkData['return']
-        benchmarkReturns.name = self.benchmark
-        perf_metric, perf_df, rollingRisk = createPerformanceTearSheet(returns=returns, benchmarkReturns=self.dataHandler.benchmarkData['return'], plot=plot)
+        if hasattr(self.dataHandler, "benchmarkData"):
+            benchmarkReturns = self.dataHandler.benchmarkData['return']
+            benchmarkReturns.name = self.benchmark
+        else:
+            benchmarkReturns = None
+        perf_metric, perf_df, rollingRisk = createPerformanceTearSheet(returns=returns, benchmarkReturns=benchmarkReturns, plot=plot)
 
         positons = curve.drop(['commission', 'total', 'return', 'equity_curve'], axis=1)
         aggregated_positons = createPostionTearSheet(positons, plot=plot)

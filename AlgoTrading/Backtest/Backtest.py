@@ -28,7 +28,18 @@ from AlgoTrading.Execution.FilledBook import FilledBook
 from AlgoTrading.Portfolio.Portfolio import Portfolio
 from AlgoTrading.Portfolio.PositionsBook import StocksPositionsBook
 from AlgoTrading.Assets import XSHGStock
+from AlgoTrading.Assets import IndexFutures
 from AlgoTrading.Utilities import CustomLogger
+
+
+def setAssetsConfig(symbolList):
+    res = {}
+    for s in symbolList:
+        if s[0].isalpha():
+            res[s] = IndexFutures
+        else:
+            res[s] = XSHGStock
+    return res
 
 
 class Backtest(object):
@@ -51,7 +62,7 @@ class Backtest(object):
         self.portfolioCls = portfolio
         self.strategyCls = strategy
         self.symbolList = self.dataHandler.symbolList
-        self.assets = {s: XSHGStock for s in self.symbolList}
+        self.assets = setAssetsConfig(self.symbolList)
         self.events = queue.Queue()
         self.dataHandler.setEvents(self.events)
         self.signals = 0
@@ -76,14 +87,14 @@ class Backtest(object):
         self.portfolio = self.portfolioCls(self.dataHandler,
                                            self.events,
                                            self.dataHandler.getStartDate(),
+                                           self.assets,
                                            self.initialCapital,
                                            self.benchmark)
-        self.executionHanlder = self.executionHanlderCls(self.events, self.assets, self.dataHandler, self.portfolio, self.logger)
+        self.executionHanlder = self.executionHanlderCls(self.events, self.dataHandler, self.portfolio, self.logger)
         self.orderBook = OrderBook()
         self.filledBook = FilledBook()
         self.portfolio.filledBook = self.filledBook
-        lags = {s: self.assets[s].lag for s in self.symbolList}
-        self.stocksPositionsBook = StocksPositionsBook(lags)
+        self.stocksPositionsBook = StocksPositionsBook(self.assets)
         self.strategy._port = self.portfolio
         self.strategy._posBook = self.stocksPositionsBook
 
@@ -114,17 +125,19 @@ class Backtest(object):
                         self.portfolio.updateSignal(event)
                     elif event.type == 'ORDER':
                         self.orders += 1
+                        event.assetType = self.assets[event.symbol]
                         self.orderBook.updateFromOrderEvent(event)
                         fill_event = self.executionHanlder.executeOrder(event)
                         self.fills += 1
-                        self.orderBook.updateFromFillEvent(fill_event)
-                        self.portfolio.updateFill(fill_event)
-                        self.portfolio.filledBook.updateFromFillEvent(fill_event)
-                        orderTime = self.orderBook.orderTime(fill_event.orderID)
-                        self.stocksPositionsBook.updatePositionsByFill(fill_event.symbol,
-                                                                       orderTime.date(),
-                                                                       fill_event.quantity,
-                                                                       fill_event.direction)
+                        if fill_event:
+                            self.orderBook.updateFromFillEvent(fill_event)
+                            self.portfolio.updateFill(fill_event)
+                            self.portfolio.filledBook.updateFromFillEvent(fill_event)
+                            orderTime = self.orderBook.orderTime(fill_event.orderID)
+                            self.stocksPositionsBook.updatePositionsByFill(fill_event.symbol,
+                                                                           orderTime.date(),
+                                                                           fill_event.quantity,
+                                                                           fill_event.direction)
 
             time.sleep(self.heartbeat)
 
