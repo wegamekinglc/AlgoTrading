@@ -11,8 +11,8 @@ from AlgoTrading.Finance.Commission import PerValue
 IndexFutures = Asset(lag=0,
                      exchange='SFE',
                      commission=PerValue(buyCost=0.0002, sellCost=0.0002),
-                     multiplier=300,
-                     margin=1.,
+                     multiplier=1,
+                     margin=0.,
                      settle=0.,
                      minimum=1,
                      short=True)

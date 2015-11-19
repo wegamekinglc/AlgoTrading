@@ -19,7 +19,8 @@ class FilledBook(object):
                           'quantity': {},
                           'direction': {},
                           'fillCost': {},
-                          'commission': {}}
+                          'commission': {},
+                          'nominal': {}}
 
     def updateFromFillEvent(self, event):
         self._allFills['orderID'][FilledBook._filledCount] = event.orderID
@@ -29,6 +30,7 @@ class FilledBook(object):
         self._allFills['direction'][FilledBook._filledCount] = event.direction
         self._allFills['fillCost'][FilledBook._filledCount] = event.fillCost
         self._allFills['commission'][FilledBook._filledCount] = event.commission
+        self._allFills['nominal'][FilledBook._filledCount] = event.nominal
         FilledBook._filledCount += 1
 
     def view(self):

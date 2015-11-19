@@ -94,9 +94,8 @@ class Backtest(object):
         self.orderBook = OrderBook()
         self.filledBook = FilledBook()
         self.portfolio.filledBook = self.filledBook
-        self.stocksPositionsBook = StocksPositionsBook(self.assets)
         self.strategy._port = self.portfolio
-        self.strategy._posBook = self.stocksPositionsBook
+        self.strategy._posBook = self.portfolio.positionsBook
 
     def _runBacktest(self):
 
@@ -132,12 +131,6 @@ class Backtest(object):
                         if fill_event:
                             self.orderBook.updateFromFillEvent(fill_event)
                             self.portfolio.updateFill(fill_event)
-                            self.portfolio.filledBook.updateFromFillEvent(fill_event)
-                            orderTime = self.orderBook.orderTime(fill_event.orderID)
-                            self.stocksPositionsBook.updatePositionsByFill(fill_event.symbol,
-                                                                           orderTime.date(),
-                                                                           fill_event.quantity,
-                                                                           fill_event.direction)
 
             time.sleep(self.heartbeat)
 

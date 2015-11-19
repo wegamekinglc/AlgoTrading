@@ -39,7 +39,7 @@ class StocksPositionsBook(object):
             avaliableForSell = 0
             avaliableForBuy = 0
         elif lag == 0:
-            _, positions, locked, existDirections = self._allPositions[symbol]
+            _, positions, locked, existDirections, _ = self._allPositions[symbol]
             avaliableForSell = 0
             avaliableForBuy = 0
             for i, direction in enumerate(existDirections):
@@ -48,7 +48,7 @@ class StocksPositionsBook(object):
                 else:
                     avaliableForBuy += positions[i] - locked[i]
         else:
-            dates, positions, locked, existDirections = self._allPositions[symbol]
+            dates, positions, locked, existDirections, _ = self._allPositions[symbol]
             i = len(dates) - 1
             date = dates[i]
 
@@ -89,7 +89,7 @@ class StocksPositionsBook(object):
             if not self._shortable[symbol] and direction == -1:
                 raise ValueError("Short sell is not allowed for {0}".format(symbol))
         else:
-            dates, positions, locked, existDirections = self._allPositions[symbol]
+            dates, positions, locked, existDirections, _ = self._allPositions[symbol]
 
             toFinish = quantity
             i = 0
@@ -112,11 +112,20 @@ class StocksPositionsBook(object):
 
         self._avaliableForTrade(symbol, currDT)
 
-    def updatePositionsByFill(self, symbol, currDT, quantity, direction):
+    def updatePositionsByFill(self, fill_evevt):
+        posClosed = 0
+        posOpened = 0
+        pnl = 0.
+        symbol = fill_evevt.symbol
+        currDT = fill_evevt.timeindex.date()
+        quantity = fill_evevt.quantity
+        direction = fill_evevt.direction
+        value = fill_evevt.nominal / quantity / direction
         if symbol not in self._allPositions:
-            self._allPositions[symbol] = [currDT], [quantity], [0], [direction]
+            self._allPositions[symbol] = [currDT], [quantity], [0], [direction], [value]
+            posOpened = quantity
         else:
-            dates, positions, locked, existDirections = self._allPositions[symbol]
+            dates, positions, locked, existDirections, existValues = self._allPositions[symbol]
             toFinish = quantity
             for i, d in enumerate(existDirections):
                 if d != direction:
@@ -124,17 +133,23 @@ class StocksPositionsBook(object):
                     if amount >= toFinish:
                         positions[i] -= toFinish
                         locked[i] -= toFinish
+                        posClosed += toFinish
+                        pnl += (value - existValues[i]) * d * toFinish
                         toFinish = 0
                         break
                     else:
                         toFinish -= amount
                         positions[i] = 0
                         locked[i] = 0
+                        posClosed += amount
+                        pnl += (value - existValues[i]) * d * amount
             if toFinish != 0:
                 dates.append(currDT)
                 positions.append(toFinish)
                 locked.append(0)
                 existDirections.append(direction)
+                existValues.append(value)
+                posOpened = toFinish
 
             for k in range(i+1):
                 if positions[k] == 0:
@@ -142,11 +157,26 @@ class StocksPositionsBook(object):
                     del positions[k]
                     del locked[k]
                     del existDirections[k]
+                    del existValues[k]
 
             if not dates:
                 del self._allPositions[symbol]
 
         self._avaliableForTrade(symbol, currDT)
+        return - posClosed * direction, posOpened * direction, pnl
+
+    def getBookValueAndBookPnL(self, symbol, currentPrice):
+
+        if symbol not in self._allPositions:
+            return 0., 0.
+        else:
+            bookValue = 0.
+            bookPnL = 0.
+            _, positions, _, existDirections, existCosts = self._allPositions[symbol]
+            for p, d, c in zip(positions, existDirections, existCosts):
+                bookValue += p * d * currentPrice
+                bookPnL += p * d * (currentPrice - c)
+            return bookValue, bookPnL
 
 
 if __name__ == "__main__":

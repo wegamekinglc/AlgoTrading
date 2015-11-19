@@ -39,7 +39,7 @@ class Strategy(object):
         values = dict()
         criticalFields = set(['open', 'high', 'low', 'close'])
         if self._pNames:
-            for s in self._pNames:
+            for s in self.symbolList:
                 securityValue = {}
                 fields = self._pNames[s]
 
@@ -94,7 +94,7 @@ class Strategy(object):
 
         signals = []
 
-        cashAmount = self._port.currentHoldings['cash']
+        cashAmount = max(self._port.currentHoldings['cash'], 1e-5)
         for order in self._orderRecords:
             symbol = order['symbol']
             quantity = order['quantity']
@@ -114,10 +114,7 @@ class Strategy(object):
             elif direction == -1:
                 amount = self._posBook.avaliableForTrade(symbol, currDT)[0]
 
-            if direction == 1:
-                fill_cost = quantity * currValue * multiplier * settle
-            else:
-                fill_cost = 0.
+            fill_cost = quantity * currValue * multiplier * settle * direction
 
             margin_cost = max(quantity - amount, 0) * currValue * multiplier * margin
             maximumCashCost = max(fill_cost, margin_cost)

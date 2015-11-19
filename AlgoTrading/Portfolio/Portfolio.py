@@ -8,16 +8,18 @@ Created on 2015-7-24
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from PyFin.Utilities import isclose
 from AlgoTrading.Events import OrderEvent
+from AlgoTrading.Portfolio.PositionsBook import StocksPositionsBook
 from VisualPortfolio.Tears import createPerformanceTearSheet
 from VisualPortfolio.Tears import createPostionTearSheet
 from VisualPortfolio.Tears import createTranscationTearSheet
 
 
 def extractTransactionFromFilledBook(filledBook):
-    interestedColumns = filledBook[['time', 'symbol', 'quantity', 'fillCost']]
+    interestedColumns = filledBook[['time', 'symbol', 'quantity', 'nominal']]
     interestedColumns.set_index('time', inplace=True)
-    interestedColumns = interestedColumns.rename(columns={'quantity': 'turnover_volume', 'fillCost': 'turnover_value'})
+    interestedColumns = interestedColumns.rename(columns={'quantity': 'turnover_volume', 'nominal': 'turnover_value'})
     return interestedColumns
 
 
@@ -31,6 +33,7 @@ class Portfolio(object):
         self.initialCapital = initialCapital
         self.benchmark = benchmark
         self.assets = assets
+        self.positionsBook = StocksPositionsBook(assets)
 
         self.allPositions = self.constructAllPositions()
         self.currentPosition = dict((s, 0) for s in self.symbolList)
@@ -68,16 +71,16 @@ class Portfolio(object):
         dh['datetime'] = latestDatetime
         dh['cash'] = self.currentHoldings['cash']
         dh['commission'] = self.currentHoldings['commission']
-        dh['total'] = self.currentHoldings['cash']
+        dh['total'] = self.currentHoldings['total']
 
         for s in self.symbolList:
-            marketValue = 0.0
-            if self.currentPosition[s] != 0:
-                marketValue = self.currentPosition[s] \
-                              * self.dataHandler.getLatestBarValue(s, 'close') \
-                              * self.assets[s].multiplier * self.assets[s].settle
-            dh[s] = marketValue
-            dh['total'] += marketValue
+            bookValue = 0.
+            bookPnL = 0.
+            if self.currentPosition[s]:
+                currentPrice = self.dataHandler.getLatestBarValue(s, 'close')
+                bookValue, bookPnL = self.positionsBook.getBookValueAndBookPnL(s, currentPrice)
+            dh[s] = bookValue
+            dh['total'] += bookPnL
 
         self.allHoldings.append(dh)
 
@@ -85,16 +88,21 @@ class Portfolio(object):
         fillDir = fill.direction
         self.currentPosition[fill.symbol] += fillDir * fill.quantity
 
-    def updateHoldingsFromFill(self, fill):
+    def updateHoldingsFromFill(self, fill, pnl):
         self.currentHoldings[fill.symbol] += fill.fillCost
         self.currentHoldings['commission'] += fill.commission
-        self.currentHoldings['cash'] -= (fill.fillCost + fill.commission)
-        self.currentHoldings['total'] -= (fill.fillCost + fill.commission)
+        if not isclose(fill.fillCost, 0.):
+            self.currentHoldings['cash'] -= (fill.fillCost + fill.commission)
+        else:
+            self.currentHoldings['cash'] += (pnl - fill.commission)
+        self.currentHoldings['total'] += pnl - fill.commission
 
     def updateFill(self, event):
-        if event.type == 'FILL':
-            self.updatePositionFromFill(event)
-            self.updateHoldingsFromFill(event)
+        posClosed, posOpen, pnl = self.positionsBook.updatePositionsByFill(event)
+        self.updatePositionFromFill(event)
+        self.updateHoldingsFromFill(event, pnl)
+
+        self.filledBook.updateFromFillEvent(event)
 
     def generateNaiveOrder(self, signal):
         order = None

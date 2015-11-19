@@ -33,14 +33,13 @@ class SimulatedExecutionHandler(ExecutionHanlder):
         self.bars = bars
 
     def _search_suitable_quantity(self, transPrice, start_quantity, assetType, direction):
-        multiplier = assetType.multi
+        multiplier = assetType.multiplier
         minimum = assetType.minimum
-        margin = assetType.margin
         settle = assetType.settle
 
-        cash = self.portfolio.currentHoldings['cash']
-        if direction == 1:
-            best_amount = floor(cash / transPrice / assetType.minimum) * assetType.minimum
+        cash = max(self.portfolio.currentHoldings['cash'], 1e-5)
+        if direction == 1 and settle != 0.:
+            best_amount = floor(cash / transPrice / settle / minimum / multiplier) * minimum
         else:
             best_amount = np.inf
 
@@ -49,17 +48,13 @@ class SimulatedExecutionHandler(ExecutionHanlder):
         else:
             try_amount = min(best_amount, start_quantity)
             while True:
-                fillCost = transPrice * try_amount * settle * mu
-                trans = Transaction(transPrice,
-                                    try_amount,
-                                    1)
-                commission = assetType.commission.calculate(trans)
-                if (fillCost + commission) < cash:
+                fillCost = transPrice * try_amount * settle * multiplier * direction
+                if fillCost < cash:
                     return try_amount
-                elif try_amount < assetType.minimum:
+                elif try_amount < minimum:
                     return 0.0
                 else:
-                    try_amount -= assetType.minimum
+                    try_amount -= minimum
 
     def executeOrder(self, event):
         if event.type == 'ORDER':
@@ -72,7 +67,7 @@ class SimulatedExecutionHandler(ExecutionHanlder):
                                     quantity,
                                     event.direction)
                 fillCost = transPrice * quantity * event.direction * event.assetType.settle * event.assetType.multiplier
-                marginCost = transPrice * quantity * event.assetType.margin * event.assetType.multiplier
+                nominal = transPrice * quantity * event.direction * event.assetType.multiplier
 
                 commission = event.assetType.commission.calculate(trans)
                 fill_event = FillEvent(event.orderID,
@@ -82,7 +77,7 @@ class SimulatedExecutionHandler(ExecutionHanlder):
                                        event.direction,
                                        fillCost,
                                        commission,
-                                       marginCost)
+                                       nominal)
 
                 self.logger.info("{0}: Order ID: {1} filled at price: ${2} with quantity {3} direction {4}. "
                                  "original order quantity is {5}"
