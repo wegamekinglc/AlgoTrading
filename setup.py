@@ -26,6 +26,7 @@ setup(
               'AlgoTrading.Backtest',
               'AlgoTrading.Data',
               'AlgoTrading.Data.DataProviders',
+              'AlgoTrading.Env',
               'AlgoTrading.Events',
               'AlgoTrading.Execution',
               'AlgoTrading.Finance',

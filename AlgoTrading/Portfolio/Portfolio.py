@@ -8,7 +8,7 @@ Created on 2015-7-24
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from PyFin.Utilities import isclose
+from PyFin.Utilities import isClose
 from AlgoTrading.Events import OrderEvent
 from AlgoTrading.Portfolio.PositionsBook import StocksPositionsBook
 from VisualPortfolio.Tears import createPerformanceTearSheet
@@ -91,7 +91,7 @@ class Portfolio(object):
     def updateHoldingsFromFill(self, fill, pnl):
         self.currentHoldings[fill.symbol] += fill.fillCost
         self.currentHoldings['commission'] += fill.commission
-        if not isclose(fill.fillCost, 0.):
+        if not isClose(fill.fillCost, 0.):
             self.currentHoldings['cash'] -= (fill.fillCost + fill.commission)
         else:
             self.currentHoldings['cash'] += (pnl - fill.commission)

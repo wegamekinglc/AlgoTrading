@@ -26,7 +26,6 @@ from AlgoTrading.Execution.Execution import SimulatedExecutionHandler
 from AlgoTrading.Execution.OrderBook import OrderBook
 from AlgoTrading.Execution.FilledBook import FilledBook
 from AlgoTrading.Portfolio.Portfolio import Portfolio
-from AlgoTrading.Portfolio.PositionsBook import StocksPositionsBook
 from AlgoTrading.Assets import XSHGStock
 from AlgoTrading.Assets import IndexFutures
 from AlgoTrading.Utilities import CustomLogger
