@@ -11,9 +11,9 @@ from AlgoTrading.Strategy.Strategy import Strategy
 from AlgoTrading.Backtest import strategyRunner
 from AlgoTrading.Backtest import DataSource
 from AlgoTrading.Data import set_universe
-from PyFin.API import MA
-from PyFin.API import MAX
-from PyFin.API import MIN
+from PyFin.api import MA
+from PyFin.api import MAX
+from PyFin.api import MIN
 
 
 class MovingAverageCrossStrategy(Strategy):

@@ -10,7 +10,7 @@ import datetime as dt
 from AlgoTrading.Strategy.Strategy import Strategy
 from AlgoTrading.Backtest import strategyRunner
 from AlgoTrading.Backtest import DataSource
-from PyFin.API import MA
+from PyFin.api import MA
 
 
 class MovingAverageCrossStrategy(Strategy):

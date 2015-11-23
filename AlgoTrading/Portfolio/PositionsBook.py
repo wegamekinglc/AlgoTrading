@@ -7,7 +7,7 @@ Created on 2015-9-25
 
 import datetime as dt
 import bisect
-from PyFin.API import bizDatesList
+from PyFin.api import bizDatesList
 
 
 class StocksPositionsBook(object):

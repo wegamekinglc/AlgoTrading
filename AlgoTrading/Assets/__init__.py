@@ -7,8 +7,12 @@ Created on 2015-9-25
 
 from AlgoTrading.Assets.Stocks import XSHGStock
 from AlgoTrading.Assets.Stocks import XSHEStock
-from AlgoTrading.Assets.Futures import IndexFutures
+from AlgoTrading.Assets.Futures import IFFutures
+from AlgoTrading.Assets.Futures import ICFutures
+from AlgoTrading.Assets.Futures import IHFutures
 
 __all__ = ['XSHGStock',
            'XSHEStock',
-           'IndexFutures']
+           'IFFutures',
+           'ICFutures',
+           'IHFutures']

@@ -27,7 +27,9 @@ from AlgoTrading.Execution.OrderBook import OrderBook
 from AlgoTrading.Execution.FilledBook import FilledBook
 from AlgoTrading.Portfolio.Portfolio import Portfolio
 from AlgoTrading.Assets import XSHGStock
-from AlgoTrading.Assets import IndexFutures
+from AlgoTrading.Assets import IFFutures
+from AlgoTrading.Assets import ICFutures
+from AlgoTrading.Assets import IHFutures
 from AlgoTrading.Utilities import CustomLogger
 
 
@@ -35,7 +37,14 @@ def setAssetsConfig(symbolList):
     res = {}
     for s in symbolList:
         if s[0].isalpha():
-            res[s] = IndexFutures
+            if s.startswith('if'):
+                res[s] = IFFutures
+            elif s.startswith('ic'):
+                res[s] = ICFutures
+            elif s.startswith('ih'):
+                res[s] = IHFutures
+            else:
+                raise ValueError("Unknown contract type: {0}".format(s))
         else:
             res[s] = XSHGStock
     return res
@@ -61,7 +70,8 @@ class Backtest(object):
         self.portfolioCls = portfolio
         self.strategyCls = strategy
         self.symbolList = self.dataHandler.symbolList
-        self.assets = setAssetsConfig(self.symbolList)
+        self.tradable = self.dataHandler.tradableAssets
+        self.assets = setAssetsConfig(self.tradable)
         self.events = queue.Queue()
         self.dataHandler.setEvents(self.events)
         self.signals = 0
@@ -102,7 +112,7 @@ class Backtest(object):
         while True:
             i += 1
             if self.dataHandler.continueBacktest:
-                self.strategy.symbolList = self.dataHandler.updateBars()
+                self.strategy.symbolList, self.strategy.tradableAssets = self.dataHandler.updateBars()
             else:
                 break
 

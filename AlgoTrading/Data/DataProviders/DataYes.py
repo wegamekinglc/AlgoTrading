@@ -19,7 +19,7 @@ class DataYesMarketDataHandler(DataFrameDataHandler):
     _req_args = ['token', 'symbolList', 'startDate', 'endDate', 'benchmark']
 
     def __init__(self, **kwargs):
-        super(DataYesMarketDataHandler, self).__init__(kwargs['logger'])
+        super(DataYesMarketDataHandler, self).__init__(kwargs['logger'], kwargs['symbolList'])
         if kwargs['token']:
             ts.set_token(kwargs['token'])
         else:
@@ -30,7 +30,6 @@ class DataYesMarketDataHandler(DataFrameDataHandler):
                 raise ValueError("Please input token or set up DATAYES_TOKEN in the envirement.")
 
         self.idx = ts.Idx()
-        self.symbolList = [s.lower() for s in kwargs['symbolList']]
         self.startDate = kwargs['startDate'].strftime("%Y%m%d")
         self.endDate = kwargs['endDate'].strftime("%Y%m%d")
         self._getDatas()
@@ -63,7 +62,51 @@ class DataYesMarketDataHandler(DataFrameDataHandler):
             logger.info("Symbol {0:s} is ready for back testing.".format(s))
             result[s] = data
 
-        pool.map(getOneSymbolData, [(ts.Market(), s, self.startDate, self.endDate, self.logger, result) for s in self.symbolList])
+        def getOneSymbolIndeData(params):
+            mt = params[0]
+            s = params[1]
+            start = params[2]
+            end = params[3]
+            logger = params[4]
+            result = params[5]
+            data = mt.MktIdxd(indexID=s,
+                              beginDate=start,
+                              endDate=end,
+                              field='tradeDate,openIndex,highestIndex,lowestIndex,turnoverVol,closeIndex')
+            data.index = pd.to_datetime(data['tradeDate'], format="%Y-%m-%d")
+            data.sort_index(inplace=True)
+            data.columns = ['tradeDate', 'open', 'high', 'low', 'volume', 'close']
+            logger.info("Symbol {0:s} is ready for back testing.".format(s))
+            result[s] = data
+
+        def getOneSymbolFutureData(params):
+            mt = params[0]
+            s = params[1]
+            start = params[2]
+            end = params[3]
+            logger = params[4]
+            result = params[5]
+            data = mt.MktFutd(ticker=s,
+                              beginDate=start,
+                              endDate=end,
+                              field='tradeDate,openPrice,highestPrice,lowestPrice,turnoverVol,closePrice')
+            data.index = pd.to_datetime(data['tradeDate'], format="%Y-%m-%d")
+            data.sort_index(inplace=True)
+            data.columns = ['tradeDate', 'open', 'high', 'low', 'volume', 'close']
+            logger.info("Symbol {0:s} is ready for back testing.".format(s))
+            result[s] = data
+
+        if self.category['stocks']:
+            pool.map(getOneSymbolData, [(ts.Market(), s, self.startDate, self.endDate, self.logger, result)
+                                        for s in self.category['stocks']])
+
+        if self.category['indexes']:
+            pool.map(getOneSymbolIndeData, [(ts.Market(), s, self.startDate, self.endDate, self.logger, result)
+                                            for s in self.category['indexes']])
+
+        if self.category['futures']:
+            pool.map(getOneSymbolFutureData, [(ts.Market(), s, self.startDate, self.endDate, self.logger, result)
+                                              for s in self.category['futures']])
 
         for s in result:
             self.symbolData[s] = result[s]

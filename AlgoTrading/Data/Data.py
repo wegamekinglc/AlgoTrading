@@ -18,12 +18,35 @@ def set_universe(code):
     return list(idx.IdxCons(secID=code, field='consID')['consID'])
 
 
+def categorizeSymbols(symbolList):
+
+    lowSymbols = [s.lower() for s in symbolList]
+
+    stocks = []
+    futures = []
+    indexes = []
+
+    for s in lowSymbols:
+        if s.endswith('xshg') or s.endswith('xshe'):
+            stocks.append(s)
+        elif s.endswith('zicn'):
+            indexes.append(s)
+        elif s[0].isalpha():
+            futures.append(s)
+        else:
+            raise ValueError("Unknown securitie name {0}".format(s))
+
+    return {'stocks': stocks, 'futures': futures, 'indexes': indexes}
+
+
 class DataHandler(object):
 
     __metaclass__ = ABCMeta
 
-    def __init__(self, logger):
+    def __init__(self, logger, symbolList):
         self.logger = logger
+        self.symbolList = [s.lower() for s in symbolList]
+        self.category = categorizeSymbols(self.symbolList)
 
     @abstractmethod
     def getLatestBar(self, symbol):
@@ -44,11 +67,15 @@ class DataHandler(object):
     def setEvents(self, events):
         self.events = events
 
+    @property
+    def tradableAssets(self):
+        return list(set(self.category['stocks'] + self.category['futures']))
+
 
 class DataFrameDataHandler(DataHandler):
 
-    def __init__(self, logger):
-        super(DataFrameDataHandler, self).__init__(logger=logger)
+    def __init__(self, logger, symbolList):
+        super(DataFrameDataHandler, self).__init__(logger=logger, symbolList=symbolList)
         self.symbolData = {}
         self.latestSymbolData = {}
         self.continueBacktest = True
@@ -83,28 +110,31 @@ class DataFrameDataHandler(DataHandler):
     def updateBars(self):
         noDataCount = 0
         availableSymbol = set(self.symbolList)
+        tradableAssets = set(self.category['stocks'] + self.category['futures'])
         try:
             currentTimeIndex = self.dateIndex[self.start]
             self.start += 1
         except IndexError:
             self.continueBacktest = False
-            return
+            return None, None
         for s in self.symbolList:
             try:
                 bar = self._getNewBar(s, currentTimeIndex)
             except KeyError:
                 noDataCount += 1
                 availableSymbol.remove(s)
+                if s in tradableAssets:
+                    tradableAssets.remove(s)
             else:
                 if bar is not None:
                     self.latestSymbolData[s] = (currentTimeIndex, bar)
 
         if noDataCount == len(self.symbolList):
             self.continueBacktest = False
-            return
+            return None, None
         self.events.put(MarketEvent())
         self.currentTimeIndex = currentTimeIndex
-        return availableSymbol
+        return availableSymbol, tradableAssets
 
     def _getNewBar(self, symbol, timeIndex):
         return self.symbolData[symbol][timeIndex]

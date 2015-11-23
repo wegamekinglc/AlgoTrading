@@ -11,10 +11,8 @@ from AlgoTrading.Strategy import Strategy
 from AlgoTrading.Backtest import strategyRunner
 from AlgoTrading.Backtest import DataSource
 from AlgoTrading.Data import set_universe
-from PyFin.API import MA
-from PyFin.API import MAX
-from PyFin.API import MIN
-from PyFin.API import HIST
+from PyFin.api import MA
+from PyFin.api import HIST
 
 futures = ['if1412',
            'if1501',

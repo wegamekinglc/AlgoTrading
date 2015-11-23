@@ -16,9 +16,8 @@ class HistoricalCSVDataHandler(DataFrameDataHandler):
     _req_args = ['csvDir', 'symbolList']
 
     def __init__(self, **kwargs):
-        super(HistoricalCSVDataHandler, self).__init__(kwargs['logger'])
+        super(HistoricalCSVDataHandler, self).__init__(kwargs['logger'], kwargs['symbolList'])
         self.csvDir = kwargs['csvDir']
-        self.symbolList = [s.lower() for s in kwargs['symbolList']]
         self._openConvertCSVFiles()
 
     def _openConvertCSVFiles(self):

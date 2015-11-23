@@ -31,7 +31,8 @@ class Strategy(object):
                         self._pNames[name] = set(v.dependency[name])
                 else:
                     for name in self._pNames:
-                        self._pNames[name] = self._pNames[name].union(set(v.dependency[name]))
+                        if name in v.dependency:
+                            self._pNames[name] = self._pNames[name].union(set(v.dependency[name]))
 
     def _updateSubscribing(self):
 
@@ -40,21 +41,22 @@ class Strategy(object):
         criticalFields = set(['open', 'high', 'low', 'close'])
         if self._pNames:
             for s in self.symbolList:
-                securityValue = {}
-                fields = self._pNames[s]
+                if s in self._pNames:
+                    securityValue = {}
+                    fields = self._pNames[s]
 
-                for f in fields:
-                    try:
-                        value = self.bars.getLatestBarValue(s, f)
-                        if not self.current_datetime:
-                            self._current_datetime = self.bars.getLatestBarDatetime(s)
-                        if f not in criticalFields or value != 0.0:
-                            securityValue[f] = value
-                    except:
-                        pass
+                    for f in fields:
+                        try:
+                            value = self.bars.getLatestBarValue(s, f)
+                            if not self.current_datetime:
+                                self._current_datetime = self.bars.getLatestBarDatetime(s)
+                            if f not in criticalFields or value != 0.0:
+                                securityValue[f] = value
+                        except:
+                            pass
 
-                if securityValue:
-                    values[s] = securityValue
+                    if securityValue:
+                        values[s] = securityValue
 
             for subscriber in self._subscribed:
                 subscriber.push(values)
@@ -67,6 +69,14 @@ class Strategy(object):
     @property
     def universe(self):
         return self.symbolList
+
+    @property
+    def tradableAssets(self):
+        return self.assets
+
+    @tradableAssets.setter
+    def tradableAssets(self, value):
+        self.assets = value
 
     def monitoring(self):
         pass
@@ -150,6 +160,11 @@ class Strategy(object):
             self.events.put(signal)
 
     def order(self, symbol, direction, quantity):
+
+        if symbol not in self.tradableAssets:
+            self.logger.warning("Order for {0} with amount {1} and direction as {2} is rejected since {0}"
+                                " is not a tradable asset!".format(symbol, quantity, direction))
+            return
 
         if quantity % self._port.assets[symbol].minimum != 0:
             self.logger.warning("Order for {0} with amount {1} and direction as {2} is not consistent "
