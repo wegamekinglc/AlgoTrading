@@ -11,9 +11,11 @@ except ImportError:
     import queue
 import time
 import os
+import shutil
 import datetime as dt
 from enum import IntEnum
 from enum import unique
+import numpy as np
 from PyFin.Env import Settings
 from AlgoTrading.Data.DataProviders import HistoricalCSVDataHandler
 from AlgoTrading.Data.DataProviders import DataYesMarketDataHandler
@@ -31,6 +33,20 @@ from AlgoTrading.Assets import IFFutures
 from AlgoTrading.Assets import ICFutures
 from AlgoTrading.Assets import IHFutures
 from AlgoTrading.Utilities import CustomLogger
+
+
+@unique
+class DataSource(IntEnum):
+    CSV = 0
+    DataYes = 1
+    DXDataCenter = 2
+    YAHOO = 3
+
+
+@unique
+class PortfolioType(IntEnum):
+    FullNotional = 0
+    CashManageable = 1
 
 
 def setAssetsConfig(symbolList):
@@ -62,7 +78,8 @@ class Backtest(object):
                  logger,
                  benchmark=None,
                  refreshRate=1,
-                 plot=False):
+                 plot=False,
+                 portfolioType=PortfolioType.CashManageable):
         self.initialCapital = initial_capital
         self.heartbeat = heartbeat
         self.dataHandler = data_handler
@@ -83,6 +100,10 @@ class Backtest(object):
         self.counter = 0
         self.plot = plot
         self.logger = logger
+        self.portfolioType = portfolioType
+
+        if portfolioType == PortfolioType.FullNotional:
+            self.initialCapital = np.inf
 
         self._generateTradingInstance()
 
@@ -107,7 +128,6 @@ class Backtest(object):
         self.strategy._posBook = self.portfolio.positionsBook
 
     def _runBacktest(self):
-
         i = 0
         while True:
             i += 1
@@ -159,14 +179,6 @@ class Backtest(object):
         return self._outputPerformance()
 
 
-@unique
-class DataSource(IntEnum):
-    CSV = 0
-    DataYes = 1
-    DXDataCenter = 2
-    YAHOO = 3
-
-
 def strategyRunner(userStrategy,
                    initialCapital=100000,
                    symbolList=['600000.XSHG'],
@@ -178,6 +190,7 @@ def strategyRunner(userStrategy,
                    saveFile=False,
                    plot=False,
                    logLevel='info',
+                   portfolioType=PortfolioType.CashManageable,
                    **kwargs):
 
     logger = CustomLogger(logLevel)
@@ -219,18 +232,21 @@ def strategyRunner(userStrategy,
                         logger,
                         benchmark,
                         refreshRate,
-                        plot=plot)
+                        plot=plot,
+                        portfolioType=portfolioType)
 
     equityCurve, orderBook, filledBook, perf_metric, perf_df, rollingRisk, aggregated_positions, transactions, turnover_rate = backtest.simulateTrading()
 
     # save to a excel file
     if saveFile:
-        if not os.path.isdir('performance/'):
-            os.mkdir('performance')
+        if os.path.isdir('performance/'):
+            shutil.rmtree('performance/')
+        os.mkdir('performance/')
         logger.info("Strategy performance is now saving to local files...")
         perf_metric.to_csv('performance/perf_metrics.csv', float_format='%.4f')
         perf_df.to_csv('performance/perf_series.csv', float_format='%.4f')
-        rollingRisk.to_csv('performance/rollingRisk.csv', float_format='%.4f')
+        if benchmark is not None:
+            rollingRisk.to_csv('performance/rollingRisk.csv', float_format='%.4f')
         equityCurve.to_csv('performance/equity_curve.csv', float_format='%.4f')
         orderBook.to_csv('performance/order_book.csv', float_format='%.4f')
         filledBook.to_csv('performance/filled_book.csv', float_format='%.4f')

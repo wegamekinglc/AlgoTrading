@@ -8,7 +8,9 @@ Created on 2015-9-17
 from AlgoTrading.Backtest.Backtest import Backtest
 from AlgoTrading.Backtest.Backtest import strategyRunner
 from AlgoTrading.Backtest.Backtest import DataSource
+from AlgoTrading.Backtest.Backtest import PortfolioType
 
 __all__ = ['Backtest',
            'strategyRunner',
-           'DataSource']
+           'DataSource',
+           'PortfolioType']
