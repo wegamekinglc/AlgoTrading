@@ -56,6 +56,8 @@ class DataYesMarketDataHandler(DataFrameDataHandler):
                               beginDate=start,
                               endDate=end,
                               field='tradeDate,openPrice,highestPrice,lowestPrice,turnoverVol,closePrice')
+            if data.empty:
+                return
             data.index = pd.to_datetime(data['tradeDate'], format="%Y-%m-%d")
             data.sort_index(inplace=True)
             data.columns = ['tradeDate', 'open', 'high', 'low', 'volume', 'close']
@@ -73,6 +75,8 @@ class DataYesMarketDataHandler(DataFrameDataHandler):
                               beginDate=start,
                               endDate=end,
                               field='tradeDate,openIndex,highestIndex,lowestIndex,turnoverVol,closeIndex')
+            if data.empty:
+                return
             data.index = pd.to_datetime(data['tradeDate'], format="%Y-%m-%d")
             data.sort_index(inplace=True)
             data.columns = ['tradeDate', 'open', 'high', 'low', 'volume', 'close']
@@ -90,6 +94,8 @@ class DataYesMarketDataHandler(DataFrameDataHandler):
                               beginDate=start,
                               endDate=end,
                               field='tradeDate,openPrice,highestPrice,lowestPrice,turnoverVol,closePrice')
+            if data.empty:
+                return
             data.index = pd.to_datetime(data['tradeDate'], format="%Y-%m-%d")
             data.sort_index(inplace=True)
             data.columns = ['tradeDate', 'open', 'high', 'low', 'volume', 'close']
@@ -113,7 +119,7 @@ class DataYesMarketDataHandler(DataFrameDataHandler):
             if combIndex is None:
                 combIndex = self.symbolData[s].index
             else:
-                combIndex.union(self.symbolData[s].index)
+                combIndex = combIndex.union(self.symbolData[s].index)
 
             self.latestSymbolData[s] = []
             self.symbolData[s] = transfromDFtoDict(self.symbolData[s])

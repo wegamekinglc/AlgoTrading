@@ -33,7 +33,7 @@ class HistoricalCSVDataHandler(DataFrameDataHandler):
             if combIndex is None:
                 combIndex = self.symbolData[s].index
             else:
-                combIndex.union(self.symbolData[s].index)
+                combIndex = combIndex.union(self.symbolData[s].index)
 
             self.latestSymbolData[s] = []
             self.symbolData[s] = transfromDFtoDict(self.symbolData[s])
