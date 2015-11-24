@@ -20,3 +20,7 @@ class FillEvent(Event):
         self.fillCost = fillCost
         self.commission = commission
         self.nominal = nominal
+
+    def __str__(self):
+        return "time: {0}, symbole: {1}, direction: {2}, quantity: {3}"\
+            .format(self.timeindex, self.symbol, self.direction, self.quantity)
