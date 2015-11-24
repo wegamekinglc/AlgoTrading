@@ -28,7 +28,7 @@ class Portfolio(object):
     def __init__(self, dataHandler, events, startDate, assets, initialCapital=100000.0, benchmark=None):
         self.dataHandler = dataHandler
         self.events = events
-        self.symbolList = self.dataHandler.symbolList
+        self.tradableAssets = self.dataHandler.tradableAssets
         self.startDate = startDate
         self.initialCapital = initialCapital
         self.benchmark = benchmark
@@ -36,18 +36,18 @@ class Portfolio(object):
         self.positionsBook = StocksPositionsBook(assets)
 
         self.allPositions = self.constructAllPositions()
-        self.currentPosition = dict((s, 0) for s in self.symbolList)
+        self.currentPosition = dict((s, 0) for s in self.tradableAssets)
 
         self.allHoldings = []
         self.currentHoldings = self.constructCurrentHoldings()
 
     def constructAllPositions(self):
-        d = dict((k, v) for k, v in [(s, 0) for s in self.symbolList])
+        d = dict((k, v) for k, v in [(s, 0) for s in self.tradableAssets])
         d['datetime'] = self.startDate
         return [d]
 
     def constructAllHoldings(self):
-        d = dict((k, v) for k, v in [(s, 0) for s in self.symbolList])
+        d = dict((k, v) for k, v in [(s, 0) for s in self.tradableAssets])
         d['datetime'] = self.startDate
         d['cash'] = self.initialCapital
         d['margin'] = 0.0
@@ -56,7 +56,7 @@ class Portfolio(object):
         return [d]
 
     def constructCurrentHoldings(self):
-        d = dict((k, v) for k, v in [(s, 0) for s in self.symbolList])
+        d = dict((k, v) for k, v in [(s, 0) for s in self.tradableAssets])
         d['datetime'] = self.startDate
         d['cash'] = self.initialCapital
         d['margin'] = 0.0
@@ -67,19 +67,21 @@ class Portfolio(object):
     def updateTimeindex(self):
         latestDatetime = self.dataHandler.currentTimeIndex
 
-        dh = dict((s, 0) for s in self.symbolList)
+        dh = dict((s, 0) for s in self.tradableAssets)
         dh['datetime'] = latestDatetime
         dh['cash'] = self.currentHoldings['cash']
         dh['commission'] = self.currentHoldings['commission']
         dh['total'] = self.currentHoldings['total']
+        dh['pnl'] = 0.
 
-        for s in self.symbolList:
+        for s in self.tradableAssets:
             bookValue = 0.
             bookPnL = 0.
             if self.currentPosition[s]:
-                currentPrice = self.dataHandler.getLatestBarValue(s, 'close')
-                bookValue, bookPnL = self.positionsBook.getBookValueAndBookPnL(s, currentPrice)
+                currentCost = self.dataHandler.getLatestBarValue(s, 'close') * self.assets[s].multiplier
+                bookValue, bookPnL = self.positionsBook.getBookValueAndBookPnL(s, currentCost)
             dh[s] = bookValue
+            dh['pnl'] += bookPnL
             dh['total'] += bookPnL
 
         self.allHoldings.append(dh)
@@ -147,7 +149,7 @@ class Portfolio(object):
             benchmarkReturns = None
         perf_metric, perf_df, rollingRisk = createPerformanceTearSheet(returns=returns, benchmarkReturns=benchmarkReturns, plot=plot)
 
-        positons = curve.drop(['commission', 'total', 'return', 'equity_curve'], axis=1)
+        positons = curve.drop(['commission', 'total', 'return', 'equity_curve', 'pnl'], axis=1)
         aggregated_positons = createPostionTearSheet(positons, plot=plot)
 
         transactions = extractTransactionFromFilledBook(self.filledBook.view())
