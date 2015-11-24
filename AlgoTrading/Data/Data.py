@@ -111,6 +111,7 @@ class DataFrameDataHandler(DataHandler):
         noDataCount = 0
         availableSymbol = set(self.symbolList)
         tradableAssets = set(self.category['stocks'] + self.category['futures'])
+
         try:
             currentTimeIndex = self.dateIndex[self.start]
             self.start += 1
