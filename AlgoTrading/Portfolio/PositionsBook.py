@@ -151,13 +151,15 @@ class StocksPositionsBook(object):
                 existValues.append(value)
                 posOpened = toFinish
 
+            deleted = 0
             for k in range(i+1):
-                if positions[k] == 0:
-                    del dates[k]
-                    del positions[k]
-                    del locked[k]
-                    del existDirections[k]
-                    del existValues[k]
+                if positions[k - deleted] == 0:
+                    del dates[k - deleted]
+                    del positions[k - deleted]
+                    del locked[k - deleted]
+                    del existDirections[k - deleted]
+                    del existValues[k - deleted]
+                    deleted += 1
 
             if not dates:
                 del self._allPositions[symbol]
