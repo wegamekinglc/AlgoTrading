@@ -8,7 +8,7 @@ Created on 2015-7-31
 import datetime as dt
 from AlgoTrading.Strategy.Strategy import Strategy
 from AlgoTrading.Backtest import strategyRunner
-from AlgoTrading.Backtest import DataSource
+from AlgoTrading.Enums import DataSource
 from PyFin.api import MA
 from PyFin.api import MAX
 from PyFin.api import MIN

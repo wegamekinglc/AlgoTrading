@@ -9,7 +9,7 @@ import datetime as dt
 
 from AlgoTrading.Strategy.Strategy import Strategy
 from AlgoTrading.Backtest import strategyRunner
-from AlgoTrading.Backtest import DataSource
+from AlgoTrading.Enums import DataSource
 from AlgoTrading.Data import set_universe
 from PyFin.api import MA
 from PyFin.api import MAX

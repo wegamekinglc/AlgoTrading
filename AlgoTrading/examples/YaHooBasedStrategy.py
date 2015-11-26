@@ -9,7 +9,7 @@ import datetime as dt
 
 from AlgoTrading.Strategy.Strategy import Strategy
 from AlgoTrading.Backtest import strategyRunner
-from AlgoTrading.Backtest import DataSource
+from AlgoTrading.Enums import DataSource
 from PyFin.api import MA
 
 
