@@ -8,10 +8,12 @@ Created on 2015-11-13
 from AlgoTrading.Assets.base import Asset
 from AlgoTrading.Finance.Commission import PerValue
 
+_test_cost = 0.0
+
 IFFutures = Asset(lag=0,
                   exchange='CFFEX',
-                  commission=PerValue(buyCost=0.00, sellCost=0.00),
-                  multiplier=300,
+                  commission=PerValue(buyCost=_test_cost, sellCost=_test_cost),
+                  multiplier=6,
                   margin=0.,
                   settle=0.,
                   minimum=1,
@@ -19,8 +21,8 @@ IFFutures = Asset(lag=0,
 
 IHFutures = Asset(lag=0,
                   exchange='CFFEX',
-                  commission=PerValue(buyCost=0.00, sellCost=0.00),
-                  multiplier=300,
+                  commission=PerValue(buyCost=_test_cost, sellCost=_test_cost),
+                  multiplier=8,
                   margin=0.,
                   settle=0.,
                   minimum=1,
@@ -28,8 +30,8 @@ IHFutures = Asset(lag=0,
 
 ICFutures = Asset(lag=0,
                   exchange='CFFEX',
-                  commission=PerValue(buyCost=0.00, sellCost=0.00),
-                  multiplier=200,
+                  commission=PerValue(buyCost=_test_cost, sellCost=_test_cost),
+                  multiplier=3,
                   margin=0.,
                   settle=0.,
                   minimum=1,

@@ -13,10 +13,10 @@ import time
 import os
 import shutil
 import datetime as dt
-from enum import IntEnum
-from enum import unique
 import numpy as np
 from PyFin.Env import Settings
+from AlgoTrading.Enums import DataSource
+from AlgoTrading.Enums import PortfolioType
 from AlgoTrading.Data.DataProviders import HistoricalCSVDataHandler
 from AlgoTrading.Data.DataProviders import DataYesMarketDataHandler
 try:
@@ -35,20 +35,6 @@ from AlgoTrading.Assets import IHFutures
 from AlgoTrading.Utilities import CustomLogger
 
 
-@unique
-class DataSource(IntEnum):
-    CSV = 0
-    DataYes = 1
-    DXDataCenter = 2
-    YAHOO = 3
-
-
-@unique
-class PortfolioType(IntEnum):
-    FullNotional = 0
-    CashManageable = 1
-
-
 def setAssetsConfig(symbolList):
     res = {}
     for s in symbolList:
@@ -60,7 +46,7 @@ def setAssetsConfig(symbolList):
             elif s.startswith('ih'):
                 res[s] = IHFutures
             else:
-                raise ValueError("Unknown contract type: {0}".format(s))
+                res[s] = XSHGStock
         else:
             res[s] = XSHGStock
     return res
@@ -119,7 +105,8 @@ class Backtest(object):
                                            self.dataHandler.getStartDate(),
                                            self.assets,
                                            self.initialCapital,
-                                           self.benchmark)
+                                           self.benchmark,
+                                           self.portfolioType)
         self.executionHanlder = self.executionHanlderCls(self.events, self.dataHandler, self.portfolio, self.logger)
         self.orderBook = OrderBook()
         self.filledBook = FilledBook()
@@ -145,9 +132,9 @@ class Backtest(object):
                     if event.type == 'MARKET':
                         self.counter += 1
                         self.strategy._updateSubscribing()
+                        self.portfolio.updateTimeindex()
                         if self.counter % self.refreshRate == 0:
                             self.strategy._handle_data()
-                        self.portfolio.updateTimeindex()
                     elif event.type == 'SIGNAL':
                         self.signals += 1
                         self.portfolio.updateSignal(event)
@@ -169,7 +156,15 @@ class Backtest(object):
 
         self.portfolio.createEquityCurveDataframe()
         perf_metric, perf_df, rollingRisk, aggregated_positions, transactions, turnover_rate = self.portfolio.outputSummaryStats(self.portfolio.equityCurve, self.plot)
-        return self.portfolio.equityCurve, self.orderBook.view(), self.filledBook.view(), perf_metric, perf_df, rollingRisk, aggregated_positions, transactions, turnover_rate
+        return self.portfolio.equityCurve, \
+               self.orderBook.view(), \
+               self.filledBook.view(), \
+               perf_metric, perf_df, \
+               rollingRisk, \
+               aggregated_positions, \
+               transactions, \
+               turnover_rate, \
+               self.strategy.infoView()
 
     def simulateTrading(self):
         self.logger.info("Start backtesting...")
@@ -235,7 +230,17 @@ def strategyRunner(userStrategy,
                         plot=plot,
                         portfolioType=portfolioType)
 
-    equityCurve, orderBook, filledBook, perf_metric, perf_df, rollingRisk, aggregated_positions, transactions, turnover_rate = backtest.simulateTrading()
+    equityCurve, \
+    orderBook, \
+    filledBook, \
+    perf_metric, \
+    perf_df, \
+    rollingRisk, \
+    aggregated_positions, \
+    transactions, \
+    turnover_rate, \
+    info_view \
+        = backtest.simulateTrading()
 
     # save to a excel file
     if saveFile:
@@ -253,6 +258,7 @@ def strategyRunner(userStrategy,
         aggregated_positions.to_csv('performance/aggregated_positions.csv', float_format='%.4f')
         turnover_rate.to_csv('performance/turnover_rate.csv', float_format='%.4f')
         transactions.to_csv('performance/transactions.csv', float_format='%.4f')
+        info_view.to_csv('performance/strategy_info.csv', float_format='%.4f')
         logger.info("Performance saving is finished!")
 
     return {'equity_curve': equityCurve,
@@ -262,4 +268,5 @@ def strategyRunner(userStrategy,
             'perf_series': perf_df,
             'aggregated_positions': aggregated_positions,
             'transactions': transactions,
-            'turnover_rate': turnover_rate}
+            'turnover_rate': turnover_rate,
+            'user_info': info_view}
