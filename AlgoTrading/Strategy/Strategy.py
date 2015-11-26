@@ -9,6 +9,7 @@ Created on 2015-7-24
 from abc import ABCMeta
 from abc import abstractmethod
 from AlgoTrading.Events import OrderEvent
+from AlgoTrading.Strategy.InfoKeeper import InfoKepper
 from PyFin.Analysis.SecurityValueHolders import SecurityValueHolder
 
 
@@ -21,6 +22,7 @@ class Strategy(object):
         raise NotImplementedError()
 
     def _subscribe(self):
+        self._infoKeeper = InfoKepper()
         self._subscribed = []
         self._pNames = {}
         for k, v in self.__dict__.items():
@@ -84,6 +86,14 @@ class Strategy(object):
     @property
     def current_datetime(self):
         return self._current_datetime
+
+    def keep(self, label, value, time=None):
+        if not time:
+            time = self.current_datetime
+        self._infoKeeper.attach(time, label, value)
+
+    def infoView(self):
+        return self._infoKeeper.view()
 
     @property
     def cash(self):
@@ -159,6 +169,21 @@ class Strategy(object):
                             signal.symbol))
             self.events.put(signal)
 
+    def order_to(self, symbol, direction, quantity):
+        currentPos = self.secPos[symbol]
+        if direction == 1:
+            posNeedToBuy = quantity - currentPos
+            if posNeedToBuy > 0:
+                self.order(symbol, 1, posNeedToBuy)
+            elif posNeedToBuy < 0:
+                self.order(symbol, -1, -posNeedToBuy)
+        elif direction == -1:
+            posNeedToSell = quantity + currentPos
+            if posNeedToSell > 0:
+                self.order(symbol, -1, posNeedToSell)
+            elif posNeedToSell < 0:
+                self.order(symbol, 1, -posNeedToSell)
+
     def order(self, symbol, direction, quantity):
 
         if symbol not in self.tradableAssets:
@@ -182,3 +207,11 @@ class Strategy(object):
     @property
     def secPos(self):
         return self._port.currentPosition
+
+    @property
+    def holdings(self):
+        return self._port.allHoldings[-1]
+
+    @property
+    def realizedHoldings(self):
+        return self._port.currentHoldings
