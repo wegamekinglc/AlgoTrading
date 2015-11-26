@@ -10,6 +10,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from PyFin.Utilities import isClose
 from AlgoTrading.Events import OrderEvent
+from AlgoTrading.Enums import PortfolioType
 from AlgoTrading.Portfolio.PositionsBook import StocksPositionsBook
 from VisualPortfolio.Tears import createPerformanceTearSheet
 from VisualPortfolio.Tears import createPostionTearSheet
@@ -25,7 +26,13 @@ def extractTransactionFromFilledBook(filledBook):
 
 class Portfolio(object):
 
-    def __init__(self, dataHandler, events, startDate, assets, initialCapital=100000.0, benchmark=None):
+    def __init__(self, dataHandler,
+                 events,
+                 startDate,
+                 assets,
+                 initialCapital=100000.0,
+                 benchmark=None,
+                 portfolioType=PortfolioType.CashManageable):
         self.dataHandler = dataHandler
         self.events = events
         self.tradableAssets = self.dataHandler.tradableAssets
@@ -34,11 +41,12 @@ class Portfolio(object):
         self.benchmark = benchmark
         self.assets = assets
         self.positionsBook = StocksPositionsBook(assets)
+        self.portfolioType = portfolioType
 
         self.allPositions = self.constructAllPositions()
         self.currentPosition = dict((s, 0) for s in self.tradableAssets)
 
-        self.allHoldings = []
+        self.allHoldings = self.constructAllHoldings()
         self.currentHoldings = self.constructCurrentHoldings()
 
     def constructAllPositions(self):
@@ -52,6 +60,7 @@ class Portfolio(object):
         d['cash'] = self.initialCapital
         d['margin'] = 0.0
         d['commission'] = 0.0
+        d['pnl'] = 0.
         d['total'] = self.initialCapital
         return [d]
 
@@ -61,6 +70,7 @@ class Portfolio(object):
         d['cash'] = self.initialCapital
         d['margin'] = 0.0
         d['commission'] = 0.0
+        d['pnl'] = 0.
         d['total'] = self.initialCapital
         return d
 
@@ -71,8 +81,9 @@ class Portfolio(object):
         dh['datetime'] = latestDatetime
         dh['cash'] = self.currentHoldings['cash']
         dh['commission'] = self.currentHoldings['commission']
+        dh['margin'] = self.currentHoldings['margin']
         dh['total'] = self.currentHoldings['total']
-        dh['pnl'] = 0.
+        dh['pnl'] = self.currentHoldings['pnl']
 
         for s in self.tradableAssets:
             bookValue = 0.
@@ -97,6 +108,7 @@ class Portfolio(object):
             self.currentHoldings['cash'] -= (fill.fillCost + fill.commission)
         else:
             self.currentHoldings['cash'] += (pnl - fill.commission)
+        self.currentHoldings['pnl'] += pnl - fill.commission
         self.currentHoldings['total'] += pnl - fill.commission
 
     def updateFill(self, event):
@@ -133,11 +145,36 @@ class Portfolio(object):
             orderEvent = self.generateNaiveOrder(event)
             self.events.put(orderEvent)
 
+    def _createFullNotionalEquityCurve(self, curve):
+        rawpos = curve.drop(['cash', 'commission', 'total', 'margin', 'pnl'], axis=1)
+        notionals = rawpos.abs().sum(axis=1).fillna(0)
+        pnldiffs = curve['pnl'].diff()
+        # to handl the case when pnl is shown in null notional day
+        cumPnL = 0.
+        returns = []
+        for notional, pnldiff in zip(notionals, pnldiffs):
+            if not isClose(notional):
+                r = np.log(notional / (notional - pnldiff - cumPnL))
+                returns.append(r)
+                cumPnL = 0.
+            elif not np.isnan(pnldiff):
+                returns.append(0.)
+                cumPnL += pnldiff
+            else:
+                returns.append(0.)
+        curve['return'] = returns
+        curve.fillna(0., inplace=True)
+        curve['equity_curve'] = np.exp(curve['return'].cumsum())
+
     def createEquityCurveDataframe(self):
         curve = pd.DataFrame(self.allHoldings)
         curve.set_index('datetime', inplace=True)
-        curve['return'] = np.log(curve['total'] / curve['total'].shift(1))
-        curve['equity_curve'] = np.exp(curve['return'].cumsum())
+        if self.portfolioType == PortfolioType.FullNotional:
+            self._createFullNotionalEquityCurve(curve)
+        else:
+            curve['return'] = np.log(curve['total'] / curve['total'].shift(1))
+            curve.dropna(inplace=True)
+            curve['equity_curve'] = np.exp(curve['return'].cumsum())
         self.equityCurve = curve.dropna()
 
     def outputSummaryStats(self, curve, plot):
@@ -149,7 +186,10 @@ class Portfolio(object):
             benchmarkReturns = None
         perf_metric, perf_df, rollingRisk = createPerformanceTearSheet(returns=returns, benchmarkReturns=benchmarkReturns, plot=plot)
 
-        positons = curve.drop(['commission', 'total', 'return', 'equity_curve', 'pnl'], axis=1)
+        if self.portfolioType == PortfolioType.FullNotional:
+            positons = curve.drop(['cash', 'commission', 'total', 'return', 'margin', 'equity_curve', 'pnl'], axis=1)
+        else:
+            positons = curve.drop(['commission', 'total', 'return', 'margin', 'equity_curve', 'pnl'], axis=1)
         aggregated_positons = createPostionTearSheet(positons, plot=plot)
 
         transactions = extractTransactionFromFilledBook(self.filledBook.view())
