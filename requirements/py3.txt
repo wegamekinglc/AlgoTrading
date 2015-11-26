@@ -6,4 +6,4 @@ matplotlib>=1.4.3
 pandas_datareader>=0.2.0
 pymssql>=2.1.1
 seaborn>=0.6.0
-VisualPortfolio>=0.1.1
+VisualPortfolio>=0.1.2
