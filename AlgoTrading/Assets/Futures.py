@@ -8,7 +8,7 @@ Created on 2015-11-13
 from AlgoTrading.Assets.base import Asset
 from AlgoTrading.Finance.Commission import PerValue
 
-_test_cost = 0.0
+_test_cost = 0.00015
 
 IFFutures = Asset(lag=0,
                   exchange='CFFEX',

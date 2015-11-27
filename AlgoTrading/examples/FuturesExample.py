@@ -174,7 +174,7 @@ def run_example():
     universe = indexes + futures
     initialCapital = 75000.0
     startDate = dt.datetime(2015, 4, 22)
-    endDate = dt.datetime(2015, 11, 19)
+    endDate = dt.datetime(2015, 11, 13)
 
     strategyRunner(userStrategy=MovingAverageCrossStrategy,
                    initialCapital=initialCapital,
@@ -183,7 +183,7 @@ def run_example():
                    endDate=endDate,
                    dataSource=DataSource.DataYes,
                    saveFile=True,
-                   plot=True,
+                   plot=False,
                    benchmark='000300.zicn',
                    portfolioType=PortfolioType.FullNotional)
 

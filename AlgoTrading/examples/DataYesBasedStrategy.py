@@ -45,8 +45,8 @@ def run_example():
                    dataSource=DataSource.DataYes,
                    freq=0,
                    benchmark='000300.zicn',
-                   saveFile=False,
-                   plot=True)
+                   saveFile=True,
+                   plot=False)
 
 
 if __name__ == "__main__":
