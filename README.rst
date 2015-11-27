@@ -1,5 +1,6 @@
 
-|Join the chat at https://gitter.im/blaze/blaze|
+|Join the chat at 
+https://gitter.im/blaze/blaze|
 
 ## AlgoTrading
 -------------------------
