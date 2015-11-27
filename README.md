@@ -1,3 +1,5 @@
+|Join the chat at https://gitter.im/ChinaQuants/AlgoTrading|
+
 ## AlgoTrading
 -------------------------
 
