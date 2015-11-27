@@ -1,5 +1,5 @@
 
-|Join the chat at https://gitter.im/ChinaQuants/AlgoTrading |
+|Join the chat at https://gitter.im/blaze/blaze|
 
 ## AlgoTrading
 -------------------------
