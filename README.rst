@@ -11,3 +11,7 @@ AlgoTrading
 -----------------
 
 见requirements目录
+
+
+.. |Join the chat at https://gitter.im/chinaquants/algotrading| image:: https://badges.gitter.im/Join%20Chat.svg
+   :target: https://gitter.im/chinaquants/algotrading?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
