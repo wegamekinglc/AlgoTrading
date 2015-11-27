@@ -1,6 +1,6 @@
 
 |Join the chat at 
-https://gitter.im/blaze/blaze|
+https://gitter.im/chinaquants/algotrading|
 
 AlgoTrading
 =================
