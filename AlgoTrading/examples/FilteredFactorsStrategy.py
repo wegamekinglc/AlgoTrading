@@ -9,43 +9,63 @@ import datetime as dt
 
 from AlgoTrading.Strategy.Strategy import Strategy
 from AlgoTrading.Backtest import strategyRunner
-from AlgoTrading.Enums import DataSource
 from AlgoTrading.Data import set_universe
 from PyFin.api import MA
-from PyFin.api import MAX
-from PyFin.api import MIN
+from PyFin.api import nthWeekDay
+from PyFin.api import advanceDateByCalendar
 
 
 class MovingAverageCrossStrategy(Strategy):
+
     def __init__(self):
-        filtering = (MAX(10, 'close') / MIN(10, 'close')) > 1.00
-        indicator = MA(10, 'close') - MA(120, 'close')
-        self.signal = indicator[filtering]
+
+        short_sma = MA(10, 'close')
+        long_sma = MA(60, 'close')
+        self.signal = short_sma - long_sma
 
     def handle_data(self):
-        for s in self.universe:
-            if self.signal[s] > 0. and self.secPos[s] == 0:
-                self.order(s, 1, quantity=1000)
-            elif self.signal[s] < 0. and self.secPos[s] != 0:
-                self.order(s, -1, quantity=1000)
+
+        for s in self.tradableAssets:
+            if s[:2] != 'if':
+                if self.signal[s] > 0 and self.secPos[s] == 0:
+                    self.order(s, 1, 100)
+                elif self.signal[s] < 0 and self.secPos[s] != 0 :
+                    self.order(s, -1, 100)
+
+        # 找到需要使用的主力合约
+        current_time = self.current_datetime
+
+        year = current_time.year
+        month = current_time.month
+
+        delDay = nthWeekDay(3, 6, month, year)
+        changeContractDay = advanceDateByCalendar('China.SSE', delDay, '-1b')
+
+        contract_month = month
+        if current_time.date() >= changeContractDay:
+            contract_month = month + 1
+
+        ifc = 'if15%02d' % contract_month
+        ifcOld = 'if15%02d' % month
+
+        if month < contract_month and self.secPos[ifcOld] != 0:
+            # 需要移仓， 平掉旧合约
+            self.order_to(ifcOld, 1, 0)
+
+        self.order_to(ifc, -1, 1)
 
 
 def run_example():
-    universe = set_universe('000300.zicn')
-    initialCapital = 100000.0
-    startDate = dt.datetime(2000, 1, 2)
-    endDate = dt.datetime(2015, 9, 15)
+    stocks = set_universe('000300.zicn')
+    futures = ['if15%02d' % i for i in range(4, 13)]
+
+    universes = stocks + futures
 
     strategyRunner(userStrategy=MovingAverageCrossStrategy,
-                   initialCapital=initialCapital,
-                   symbolList=universe,
-                   startDate=startDate,
-                   endDate=endDate,
-                   dataSource=DataSource.DataYes,
-                   benchmark='000300.zicn',
-                   saveFile=False,
-                   refreshRate=1,
-                   plot=True)
+                   symbolList=universes,
+                   startDate=dt.datetime(2015, 4, 22),
+                   endDate=dt.datetime(2015, 11, 30),
+                   benchmark='000300.zicn')
 
 
 if __name__ == "__main__":
