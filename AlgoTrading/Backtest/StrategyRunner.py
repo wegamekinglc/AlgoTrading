@@ -32,9 +32,9 @@ def strategyRunner(userStrategy,
                    benchmark=None,
                    refreshRate=1,
                    saveFile=False,
-                   plot=False,
-                   logLevel='info',
-                   portfolioType=PortfolioType.CashManageable,
+                   plot=True,
+                   logLevel='critical',
+                   portfolioType=PortfolioType.FullNotional,
                    **kwargs):
 
     logger = CustomLogger(logLevel)
@@ -55,10 +55,14 @@ def strategyRunner(userStrategy,
                                                benchmark=benchmark,
                                                logger=logger)
     elif dataSource == DataSource.DXDataCenter:
+        try:
+            freq = kwargs['freq']
+        except KeyError:
+            freq = 0
         dataHandler = DXDataCenter(symbolList=symbolList,
                                    startDate=startDate,
                                    endDate=endDate,
-                                   freq=kwargs['freq'],
+                                   freq=freq,
                                    benchmark=benchmark,
                                    logger=logger)
     elif dataSource == DataSource.YAHOO:
