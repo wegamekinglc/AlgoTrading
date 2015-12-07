@@ -69,6 +69,7 @@ class DataHandler(object):
 
     @property
     def tradableAssets(self):
+        self.category = categorizeSymbols(self.symbolList)
         return list(set(self.category['stocks'] + self.category['futures']))
 
 
@@ -110,7 +111,7 @@ class DataFrameDataHandler(DataHandler):
     def updateBars(self):
         noDataCount = 0
         availableSymbol = set(self.symbolList)
-        tradableAssets = set(self.category['stocks'] + self.category['futures'])
+        tradableAssets = set(self.tradableAssets)
 
         try:
             currentTimeIndex = self.dateIndex[self.start]
