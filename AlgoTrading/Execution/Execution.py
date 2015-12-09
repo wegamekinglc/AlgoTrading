@@ -38,7 +38,7 @@ class SimulatedExecutionHandler(ExecutionHanlder):
         settle = assetType.settle
 
         cash = max(self.portfolio.currentHoldings['cash'], 1e-5)
-        if direction == 1 and settle != 0.:
+        if direction == 1 and settle != 0. and cash != np.inf:
             best_amount = floor(cash / transPrice / settle / minimum / multiplier) * minimum
         else:
             best_amount = np.inf
