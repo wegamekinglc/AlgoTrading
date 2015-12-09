@@ -30,6 +30,7 @@ class DataYesMarketDataHandler(DataFrameDataHandler):
                 raise ValueError("Please input token or set up DATAYES_TOKEN in the envirement.")
 
         self.idx = ts.Idx()
+        self.mt = ts.Market()
         self.startDate = kwargs['startDate'].strftime("%Y%m%d")
         self.endDate = kwargs['endDate'].strftime("%Y%m%d")
         self._getDatas()
@@ -102,17 +103,18 @@ class DataYesMarketDataHandler(DataFrameDataHandler):
             logger.info("Symbol {0:s} is ready for back testing.".format(s))
             result[s] = data
 
+        result = {}
         if self.category['stocks']:
-            pool.map(getOneSymbolData, [(ts.Market(), s, self.startDate, self.endDate, self.logger, result)
-                                        for s in self.category['stocks']])
+            for s in self.category['stocks']:
+                getOneSymbolData((self.mt, s, self.startDate, self.endDate, self.logger, result))
 
         if self.category['indexes']:
-            pool.map(getOneSymbolIndeData, [(ts.Market(), s, self.startDate, self.endDate, self.logger, result)
-                                            for s in self.category['indexes']])
+            for s in self.category['futures']:
+                getOneSymbolIndeData((self.mt, s, self.startDate, self.endDate, self.logger, result))
 
         if self.category['futures']:
-            pool.map(getOneSymbolFutureData, [(ts.Market(), s, self.startDate, self.endDate, self.logger, result)
-                                              for s in self.category['futures']])
+            for s in self.category['futures']:
+                getOneSymbolFutureData((self.mt, s, self.startDate, self.endDate, self.logger, result))
 
         for s in result:
             self.symbolData[s] = result[s]
@@ -138,7 +140,7 @@ class DataYesMarketDataHandler(DataFrameDataHandler):
 
         self.logger.info("Start loading benchmark {0:s} data from DataYes source...".format(indexID))
 
-        indexData = ts.Market().MktIdxd(indexID=indexID, beginDate=startTimeStamp, endDate=endTimeStamp, field='tradeDate,closeIndex')
+        indexData = self.mt.MktIdxd(indexID=indexID, beginDate=startTimeStamp, endDate=endTimeStamp, field='tradeDate,closeIndex')
         indexData['tradeDate'] = pd.to_datetime(indexData['tradeDate'], format="%Y-%m-%d")
         indexData.set_index('tradeDate', inplace=True)
         indexData.columns = ['close']
@@ -147,10 +149,3 @@ class DataYesMarketDataHandler(DataFrameDataHandler):
         self.benchmarkData = indexData
 
         self.logger.info("Benchmark data loading finished!")
-
-
-
-
-
-
-
