@@ -18,7 +18,7 @@ from PyFin.api import MIN
 
 class MovingAverageCrossStrategy(Strategy):
     def __init__(self):
-        filtering = (MAX(10, 'close') / MIN(10, 'close')) >= 1.02
+        filtering = (MAX(10, 'close') / MIN(10, 'close')) >= 1.00
         indicator = MA(10, 'close') - MA(120, 'close')
         self.signal = indicator[filtering]
 
@@ -32,7 +32,7 @@ class MovingAverageCrossStrategy(Strategy):
 
 
 def run_example():
-    universe = set_universe('000300.zicn')[:10]
+    universe = set_universe('000300.zicn')[:20]
     startDate = dt.datetime(2006, 1, 1)
     endDate = dt.datetime(2015, 10, 1)
 
@@ -42,6 +42,7 @@ def run_example():
                    endDate=endDate,
                    dataSource=DataSource.DataYes,
                    benchmark='000300.zicn',
+                   logLevel='info',
                    saveFile=True,
                    plot=True)
 

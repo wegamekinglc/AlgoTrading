@@ -41,10 +41,10 @@ class MovingAverageCrossStrategy(Strategy):
 
 def run_example():
     universe = set_universe('000300.zicn')
-    startDate = dt.datetime(2006, 1, 1)
+    startDate = dt.datetime(2012, 1, 1)
     endDate = dt.datetime(2015, 10, 1)
 
-    strategyRunner(userStrategy=MovingAverageCrossStrategy,
+    return strategyRunner(userStrategy=MovingAverageCrossStrategy,
                    symbolList=universe,
                    startDate=startDate,
                    endDate=endDate,
@@ -58,7 +58,7 @@ def run_example():
 if __name__ == "__main__":
     startTime = dt.datetime.now()
     print("Start: %s" % startTime)
-    run_example()
+    res = run_example()
     endTime = dt.datetime.now()
     print("End : %s" % endTime)
     print("Elapsed: %s" % (endTime - startTime))
