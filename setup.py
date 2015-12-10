@@ -35,6 +35,7 @@ setup(
               'AlgoTrading.Strategy',
               'AlgoTrading.examples',
               'AlgoTrading.Utilities',
+              'AlgoTrading.api',
               'AlgoTrading.tests'],
     py_modules=['AlgoTrading.__init__'],
     install_requires=io.open(requirements, encoding='utf8').read(),
