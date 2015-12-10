@@ -114,13 +114,14 @@ class Strategy(object):
 
         signals = []
 
+        currDTTime = self.current_datetime
+        currDT = currDTTime.date()
+
         cashAmount = max(self._port.currentHoldings['cash'], 1e-5)
         for order in self._orderRecords:
             symbol = order['symbol']
             quantity = order['quantity']
             direction = order['direction']
-            currDTTime = self.bars.getLatestBarDatetime(symbol)
-            currDT = currDTTime.date()
             currValue = self.bars.getLatestBarValue(symbol, 'close')
 
             multiplier = self._port.assets[symbol].multiplier
@@ -186,15 +187,17 @@ class Strategy(object):
 
     def order(self, symbol, direction, quantity):
 
+        currDTTime = self.current_datetime
+
         if symbol not in self.tradableAssets:
-            self.logger.warning("Order for {0} with amount {1} and direction as {2} is rejected since {0}"
-                                " is not a tradable asset!".format(symbol, quantity, direction))
+            self.logger.warning("{0}: Order for {1} with amount {2} and direction as {3} is rejected since {1}"
+                                " is not a tradable asset!".format(currDTTime, symbol, quantity, direction))
             return
 
         if quantity % self._port.assets[symbol].minimum != 0:
-            self.logger.warning("Order for {0} with amount {1} and direction as {2} is not consistent "
+            self.logger.warning("{0}: Order for {1} with amount {2} and direction as {3} is not consistent "
                                 "with minimum bucket amount seeting. "
-                                "Order is discarded!".format(symbol, quantity, direction))
+                                "Order is discarded!".format(currDTTime, symbol, quantity, direction))
             return
 
         if quantity > 0:
