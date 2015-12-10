@@ -109,7 +109,7 @@ class DataYesMarketDataHandler(DataFrameDataHandler):
                 getOneSymbolData((self.mt, s, self.startDate, self.endDate, self.logger, result))
 
         if self.category['indexes']:
-            for s in self.category['futures']:
+            for s in self.category['indexes']:
                 getOneSymbolIndeData((self.mt, s, self.startDate, self.endDate, self.logger, result))
 
         if self.category['futures']:
