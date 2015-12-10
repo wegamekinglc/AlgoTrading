@@ -6,9 +6,9 @@ Created on 2015-11-19
 """
 
 import datetime as dt
-from AlgoTrading.Strategy import Strategy
-from AlgoTrading.Backtest import strategyRunner
-from AlgoTrading.Enums import DataSource
+from AlgoTrading.api import Strategy
+from AlgoTrading.api import strategyRunner
+from AlgoTrading.api import DataSource
 from PyFin.api import MA
 
 

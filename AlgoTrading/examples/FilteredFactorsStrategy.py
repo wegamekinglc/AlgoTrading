@@ -7,9 +7,9 @@ Created on 2015-9-22
 
 import datetime as dt
 
-from AlgoTrading.Strategy.Strategy import Strategy
-from AlgoTrading.Backtest import strategyRunner
-from AlgoTrading.Data import set_universe
+from AlgoTrading.api import Strategy
+from AlgoTrading.api import strategyRunner
+from AlgoTrading.api import set_universe
 from PyFin.api import MA
 from PyFin.api import nthWeekDay
 from PyFin.api import advanceDateByCalendar
@@ -57,7 +57,7 @@ class MovingAverageCrossStrategy(Strategy):
 
 def run_example():
     stocks = set_universe('000300.zicn')
-    futures = ['if15%02d' % i for i in range(4, 13)]
+    futures = ['if15%02d' % i for i in range(3, 13)]
 
     universes = stocks + futures
 
@@ -65,6 +65,7 @@ def run_example():
                    symbolList=universes,
                    startDate=dt.datetime(2015, 4, 22),
                    endDate=dt.datetime(2015, 11, 30),
+                   logLevel='info',
                    benchmark='000300.zicn')
 
 
