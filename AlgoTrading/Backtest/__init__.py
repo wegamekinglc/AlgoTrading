@@ -8,6 +8,5 @@ Created on 2015-9-17
 from AlgoTrading.Backtest.StrategyRunner import strategyRunner
 from AlgoTrading.Backtest.SignalRunner import signalRunner
 
-__all__ = ['Backtest',
-           'strategyRunner',
+__all__ = ['strategyRunner',
            'signalRunner']
