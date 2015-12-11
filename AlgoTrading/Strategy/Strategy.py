@@ -8,6 +8,7 @@ Created on 2015-7-24
 
 from abc import ABCMeta
 from abc import abstractmethod
+import datetime as dt
 from AlgoTrading.Events import OrderEvent
 from AlgoTrading.Strategy.InfoKeeper import InfoKepper
 from PyFin.Analysis.SecurityValueHolders import SecurityValueHolder
@@ -36,9 +37,15 @@ class Strategy(object):
                         if name in v.dependency:
                             self._pNames[name] = self._pNames[name].union(set(v.dependency[name]))
 
+    def _updateTime(self):
+        self._current_datetime = None
+        for s in self.symbolList:
+            if not self.current_datetime:
+                self._current_datetime = self.bars.getLatestBarDatetime(s)
+                break
+
     def _updateSubscribing(self):
 
-        self._current_datetime = None
         values = dict()
         criticalFields = set(['open', 'high', 'low', 'close'])
         if self._pNames:
@@ -50,8 +57,6 @@ class Strategy(object):
                     for f in fields:
                         try:
                             value = self.bars.getLatestBarValue(s, f)
-                            if not self.current_datetime:
-                                self._current_datetime = self.bars.getLatestBarDatetime(s)
                             if f not in criticalFields or value != 0.0:
                                 securityValue[f] = value
                         except:
@@ -115,7 +120,10 @@ class Strategy(object):
         signals = []
 
         currDTTime = self.current_datetime
-        currDT = currDTTime.date()
+        if isinstance(currDTTime, dt.datetime):
+            currDT = currDTTime.date()
+        else:
+            currDT = currDTTime
 
         cashAmount = max(self._port.currentHoldings['cash'], 1e-5)
         for order in self._orderRecords:

@@ -117,6 +117,7 @@ class Backtest(object):
                 if event is not None:
                     if event.type == 'MARKET':
                         self.counter += 1
+                        self.strategy._updateTime()
                         self.strategy._updateSubscribing()
                         self.portfolio.updateTimeindex()
                         if self.counter % self.refreshRate == 0:
