@@ -208,12 +208,14 @@ class Strategy(object):
                                 "Order is discarded!".format(currDTTime, symbol, quantity, direction))
             return
 
-        if quantity > 0:
+        if quantity > 0 and abs(direction) == 1:
             self._orderRecords.append({'symbol': symbol, 'quantity': quantity, 'direction': direction})
         elif quantity == 0 and abs(direction) == 1:
             pass
+        elif quantity < 0:
+            raise ValueError("quantity cant't be negative as {0}".format(quantity))
         else:
-            raise ValueError("Unrecognized direction %d" % direction)
+            raise ValueError("Unrecognized direction {0}".format(direction))
 
     @property
     def secPos(self):
