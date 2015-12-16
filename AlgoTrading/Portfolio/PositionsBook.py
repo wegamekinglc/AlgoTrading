@@ -10,6 +10,151 @@ import bisect
 from PyFin.api import bizDatesList
 
 
+class SymbolPositionsHistory(object):
+
+    def __init__(self, symbol, lag, short, currDT, quantity, locked, direction, value):
+        self.lag = lag
+        self.shortable = short
+        self.symbol = symbol
+        self.dates = [currDT]
+        self.positions = [quantity]
+        self.locked = [locked]
+        self.existDirections = [direction]
+        self.existValues = [value]
+
+    def avaliableForTrade(self, currDT, bizDatesList):
+        if self.lag == 0:
+            avaliableForSell = 0
+            avaliableForBuy = 0
+            for i, direction in enumerate(self.existDirections):
+                if direction == 1:
+                    avaliableForSell += self.positions[i] - self.locked[i]
+                else:
+                    avaliableForBuy += self.positions[i] - self.locked[i]
+        else:
+            i = len(self.dates) - 1
+            date = self.dates[i]
+
+            while date > currDT:
+                i -= 1
+                if i < 0:
+                    break
+                date = self.dates[i]
+
+            while i >= 0:
+                startPos = bisect.bisect_left(bizDatesList, date)
+                endPos = bisect.bisect_left(bizDatesList, currDT)
+                bizDates = endPos - startPos + 1
+                if bizDatesList[endPos] == currDT:
+                    bizDates -= 1
+                else:
+                    bizDates -= 2
+                if bizDates >= self.lag:
+                    break
+                i -= 1
+                if i < 0:
+                    break
+                date = self.dates[i]
+
+            avaliableForSell = 0
+            avaliableForBuy = 0
+            if i >= 0:
+                for k in range(i+1):
+                    if self.existDirections[k] == 1:
+                        avaliableForSell += self.positions[k] - self.locked[k]
+                    else:
+                        avaliableForBuy += self.positions[k] - self.locked[k]
+        return avaliableForSell, avaliableForBuy
+
+    def updatePositionsByOrder(self, currDT, quantity, direction):
+
+        toFinish = quantity
+        i = 0
+        while toFinish != 0 and i != len(self.dates):
+            if self.existDirections[i] != direction:
+                amount = self.positions[i] - self.locked[i]
+                if amount >= toFinish:
+                    self.locked[i] += toFinish
+                    toFinish = 0
+                    break
+                else:
+                    self.locked[i] = self.positions[i]
+                    i += 1
+                    toFinish -= amount
+            else:
+                i += 1
+
+        if toFinish > 0 and direction == -1 and not self.shortable:
+            raise ValueError("Existing amount is not enough to cover sell order. Short sell is not allowed for {0}"
+                             .format(self.symbol))
+
+    def updatePositionsByFill(self, currDT, quantity, direction, value):
+        posClosed = 0
+        posOpened = 0
+        pnl = 0.
+        toFinish = quantity
+        for i, d in enumerate(self.existDirections):
+            if d != direction:
+                amount = self.positions[i]
+                if amount >= toFinish:
+                    self.positions[i] -= toFinish
+                    self.locked[i] -= toFinish
+                    posClosed += toFinish
+                    pnl += (value - self.existValues[i]) * d * toFinish
+                    toFinish = 0
+                    break
+                else:
+                    toFinish -= amount
+                    self.positions[i] = 0
+                    self.locked[i] = 0
+                    posClosed += amount
+                    pnl += (value - self.existValues[i]) * d * amount
+
+        if toFinish:
+            if len(self.dates) >= 1 and self.existDirections[-1] == direction and self.dates[-1] == currDT:
+                self.existValues[-1] = \
+                    (self.positions[-1] * self.existValues[-1] + toFinish * value) / (self.positions[-1] + toFinish)
+                self.positions[-1] += toFinish
+                toFinish = 0
+
+            if toFinish and len(self.dates) >= 2 and self.existDirections[-2] == direction and self.dates[-2] == currDT:
+                self.existValues[-2] = \
+                    (self.positions[-2] * self.existValues[-2] + toFinish * value) / (self.positions[-2] + toFinish)
+                self.positions[-2] += toFinish
+                toFinish = 0
+
+            if toFinish:
+                self.dates.append(currDT)
+                self.positions.append(toFinish)
+                self.locked.append(0)
+                self.existDirections.append(direction)
+                self.existValues.append(value)
+                posOpened = toFinish
+
+        deleted = 0
+        for k in range(i+1):
+            if self.positions[k - deleted] == 0:
+                del self.dates[k - deleted]
+                del self.positions[k - deleted]
+                del self.locked[k - deleted]
+                del self.existDirections[k - deleted]
+                del self.existValues[k - deleted]
+                deleted += 1
+
+        return posClosed, posOpened, pnl
+
+    def bookValueAndBookPnL(self, currentPrice):
+        bookValue = 0.
+        bookPnL = 0.
+        for p, d, c in zip(self.positions, self.existDirections, self.existValues):
+            bookValue += p * d * currentPrice
+            bookPnL += p * d * (currentPrice - c)
+        return bookValue, bookPnL
+
+    def empty(self):
+        return len(self.dates) == 0
+
+
 class StocksPositionsBook(object):
 
     _bizDatesList = bizDatesList("China.SSE", dt.datetime(1993, 1, 1), dt.datetime(2025, 12, 31))
@@ -34,53 +179,14 @@ class StocksPositionsBook(object):
             return self._avaliableForTrade(symbol, currDT)
 
     def _avaliableForTrade(self, symbol, currDT):
-        lag = self._lags[symbol]
         if symbol not in self._allPositions:
             avaliableForSell = 0
             avaliableForBuy = 0
-        elif lag == 0:
-            _, positions, locked, existDirections, _ = self._allPositions[symbol]
-            avaliableForSell = 0
-            avaliableForBuy = 0
-            for i, direction in enumerate(existDirections):
-                if direction == 1:
-                    avaliableForSell += positions[i] - locked[i]
-                else:
-                    avaliableForBuy += positions[i] - locked[i]
         else:
-            dates, positions, locked, existDirections, _ = self._allPositions[symbol]
-            i = len(dates) - 1
-            date = dates[i]
-
-            while date > currDT:
-                i -= 1
-                if i < 0:
-                    break
-                date = dates[i]
-
-            while i >= 0:
-                startPos = bisect.bisect_left(StocksPositionsBook._bizDatesList, date)
-                endPos = bisect.bisect_left(StocksPositionsBook._bizDatesList, currDT)
-                bizDates = endPos - startPos + 1
-                if StocksPositionsBook._bizDatesList[endPos] == currDT:
-                    bizDates -= 1
-                else:
-                    bizDates -= 2
-                if bizDates >= lag:
-                    break
-                i -= 1
-                if i < 0:
-                    break
-                date = dates[i]
-
-            avaliableForSell = 0
-            avaliableForBuy = 0
-            if i >= 0:
-                for k in range(i+1):
-                    if existDirections[k] == 1:
-                        avaliableForSell += positions[k] - locked[k]
-                    else:
-                        avaliableForBuy += positions[k] - locked[k]
+            symbolPositionsHistory = self._allPositions[symbol]
+            avaliableForSell, avaliableForBuy =\
+                symbolPositionsHistory.avaliableForTrade(currDT,
+                                                         StocksPositionsBook._bizDatesList)
         self._cachedSaleAmount[symbol] = {'date': currDT, 'amount': (avaliableForSell, avaliableForBuy)}
         return avaliableForSell, avaliableForBuy
 
@@ -89,32 +195,14 @@ class StocksPositionsBook(object):
             if not self._shortable[symbol] and direction == -1:
                 raise ValueError("Short sell is not allowed for {0}".format(symbol))
         else:
-            dates, positions, locked, existDirections, _ = self._allPositions[symbol]
+            symbolPositionsHistory = self._allPositions[symbol]
+            symbolPositionsHistory.updatePositionsByOrder(currDT, quantity, direction)
 
-            toFinish = quantity
-            i = 0
-            while toFinish != 0 and i != len(dates):
-                if existDirections[i] != direction:
-                    amount = positions[i] - locked[i]
-                    if amount >= toFinish:
-                        locked[i] += toFinish
-                        toFinish = 0
-                        break
-                    else:
-                        locked[i] = positions[i]
-                        i += 1
-                        toFinish -= amount
-                else:
-                    i += 1
-
-            if toFinish > 0 and direction == -1 and not self._shortable[symbol]:
-                raise ValueError("Existing amount is not enough to cover sell order. Short sell is not allowed for {0}".format(symbol))
-
+        # update cache for future usage
         self._avaliableForTrade(symbol, currDT)
 
     def updatePositionsByFill(self, fill_evevt):
         posClosed = 0
-        posOpened = 0
         pnl = 0.
         symbol = fill_evevt.symbol
         currDT = fill_evevt.timeindex.date()
@@ -122,63 +210,35 @@ class StocksPositionsBook(object):
         direction = fill_evevt.direction
         value = fill_evevt.nominal / quantity / direction
         if symbol not in self._allPositions:
-            self._allPositions[symbol] = [currDT], [quantity], [0], [direction], [value]
+            lag = self._lags[symbol]
+            short = self._shortable[symbol]
+            self._allPositions[symbol] = SymbolPositionsHistory(symbol,
+                                                                lag,
+                                                                short,
+                                                                currDT,
+                                                                quantity,
+                                                                0,
+                                                                direction,
+                                                                value)
             posOpened = quantity
         else:
-            dates, positions, locked, existDirections, existValues = self._allPositions[symbol]
-            toFinish = quantity
-            for i, d in enumerate(existDirections):
-                if d != direction:
-                    amount = positions[i]
-                    if amount >= toFinish:
-                        positions[i] -= toFinish
-                        locked[i] -= toFinish
-                        posClosed += toFinish
-                        pnl += (value - existValues[i]) * d * toFinish
-                        toFinish = 0
-                        break
-                    else:
-                        toFinish -= amount
-                        positions[i] = 0
-                        locked[i] = 0
-                        posClosed += amount
-                        pnl += (value - existValues[i]) * d * amount
-            if toFinish != 0:
-                dates.append(currDT)
-                positions.append(toFinish)
-                locked.append(0)
-                existDirections.append(direction)
-                existValues.append(value)
-                posOpened = toFinish
+            symbolPositionsHistory = self._allPositions[symbol]
+            posClosed, posOpened, pnl = \
+                symbolPositionsHistory.updatePositionsByFill(currDT, quantity, direction, value)
 
-            deleted = 0
-            for k in range(i+1):
-                if positions[k - deleted] == 0:
-                    del dates[k - deleted]
-                    del positions[k - deleted]
-                    del locked[k - deleted]
-                    del existDirections[k - deleted]
-                    del existValues[k - deleted]
-                    deleted += 1
-
-            if not dates:
+            if symbolPositionsHistory.empty():
                 del self._allPositions[symbol]
 
         self._avaliableForTrade(symbol, currDT)
-        return - posClosed * direction, posOpened * direction, pnl
+        return -posClosed * direction, posOpened * direction, pnl
 
     def getBookValueAndBookPnL(self, symbol, currentPrice):
 
         if symbol not in self._allPositions:
             return 0., 0.
         else:
-            bookValue = 0.
-            bookPnL = 0.
-            _, positions, _, existDirections, existCosts = self._allPositions[symbol]
-            for p, d, c in zip(positions, existDirections, existCosts):
-                bookValue += p * d * currentPrice
-                bookPnL += p * d * (currentPrice - c)
-            return bookValue, bookPnL
+            symbolPositionsHistory = self._allPositions[symbol]
+            return symbolPositionsHistory.bookValueAndBookPnL(currentPrice)
 
 
 if __name__ == "__main__":
