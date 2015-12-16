@@ -10,30 +10,36 @@ from AlgoTrading.Finance.Commission import PerValue
 
 _test_cost = 0.00015
 
-IFFutures = Asset(lag=0,
-                  exchange='CFFEX',
-                  commission=PerValue(buyCost=_test_cost, sellCost=_test_cost),
-                  multiplier=300,
-                  margin=0.,
-                  settle=0.,
-                  minimum=1,
-                  short=True)
 
-IHFutures = Asset(lag=0,
-                  exchange='CFFEX',
-                  commission=PerValue(buyCost=_test_cost, sellCost=_test_cost),
-                  multiplier=300,
-                  margin=0.,
-                  settle=0.,
-                  minimum=1,
-                  short=True)
+class IFFutures(Asset):
+    lag = 0
+    exchange = 'CFFEX'
+    commission = PerValue(buyCost=_test_cost, sellCost=_test_cost)
+    multiplier = 300
+    margin = 0.
+    settle = 0.
+    minimum = 1
+    short = True
 
-ICFutures = Asset(lag=0,
-                  exchange='CFFEX',
-                  commission=PerValue(buyCost=_test_cost, sellCost=_test_cost),
-                  multiplier=200,
-                  margin=0.,
-                  settle=0.,
-                  minimum=1,
-                  short=True)
+
+class IHFutures(Asset):
+    lag = 0
+    exchange = 'CFFEX'
+    commission = PerValue(buyCost=_test_cost, sellCost=_test_cost)
+    multiplier = 300
+    margin = 0.
+    settle = 0.
+    minimum = 1
+    short = True
+
+
+class ICFutures(Asset):
+    lag = 0
+    exchange = 'CFFEX'
+    commission = PerValue(buyCost=_test_cost, sellCost=_test_cost)
+    multiplier = 200
+    margin = 0.
+    settle = 0.
+    minimum = 1
+    short = True
 
