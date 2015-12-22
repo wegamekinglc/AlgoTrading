@@ -7,4 +7,7 @@
    source/introduction.rst
    
    source/helloworld.rst
-   
+
+   source/strategy.rst
+
+   source/assets.rst
