@@ -10,6 +10,11 @@ from AlgoTrading.Finance.Commission import PerValue
 
 
 class XSHGStock(Asset):
+    u"""
+
+    上海证券交易所股票
+
+    """
     lag = 1
     exchange = "XSHG"
     commission = PerValue(buyCost=0.0, sellCost=0.001)
@@ -21,6 +26,11 @@ class XSHGStock(Asset):
 
 
 class XSHEStock(Asset):
+    u"""
+
+    深圳证券交易所股票
+
+    """
     lag = 1
     exchange = "XSHE"
     commission = PerValue(buyCost=0.0, sellCost=0.001)

@@ -75,10 +75,22 @@ class Strategy(object):
 
     @property
     def universe(self):
+        u"""
+
+        获取当前所有代码列表（包括指数等非交易型代码）
+
+        :return: list
+        """
         return self.symbolList
 
     @property
     def tradableAssets(self):
+        u"""
+
+        获取当前所有可交易证券代码列表
+
+        :return: list
+        """
         return self.assets
 
     @tradableAssets.setter
@@ -90,27 +102,75 @@ class Strategy(object):
 
     @property
     def current_datetime(self):
+        u"""
+
+        获取策略当前运行的bar的时间戳
+
+        :return: datetime.datetime
+        """
         return self._current_datetime
 
     def keep(self, label, value, time=None):
+        u"""
+
+        将用户需要保留的信息保存到指定的时间戳下，供回测后查看
+
+        :param label: 指定信息的名称
+        :param value: 指定信息的值
+        :param time: 指定的时间戳，若为None，则使用当前bar的时间戳
+        :return: None
+        """
         if not time:
             time = self.current_datetime
         self._infoKeeper.attach(time, label, value)
 
     def infoView(self):
+        u"""
+
+        返回当前所保留的全部用户信息
+
+        :return: pandas.DataFrame
+        """
         return self._infoKeeper.view()
 
     @property
     def cash(self):
+        u"""
+
+        返回当前账户现金
+
+        :return: float
+        """
         return self._port.currentHoldings['cash']
 
     def avaliableForSale(self, symbol):
+        u"""
+
+        返回指定证券当前可卖出数量
+
+        :param symbol: 证券代码
+        :return: int
+        """
         return self.avaliableForTrade(symbol)[0]
 
     def avaliableForBuyBack(self, symbol):
+        u"""
+
+        返回指定证券当前可买回数量
+
+        :param symbol: 证券代码
+        :return: int
+        """
         return self.avaliableForBuyBack(symbol)[1]
 
     def avaliableForTrade(self, symbol):
+        u"""
+
+        返回指定证券当前账户可交易数量，返回为一个tuple类型，分别为可卖出数量和可买回数量
+
+        :param symbol: 证券代码
+        :return: tuple
+        """
         currDTTime = self.current_datetime
         currDT = currDTTime.date()
         return self._posBook.avaliableForTrade(symbol, currDT)
@@ -179,6 +239,15 @@ class Strategy(object):
             self.events.put(signal)
 
     def order_to(self, symbol, direction, quantity):
+        u"""
+
+        交易指定证券至指定要求的仓位
+
+        :param symbol: 证券代码
+        :param direction: 方向，1为买入，-1为卖出
+        :param quantity: 指定要求的仓位
+        :return: None
+        """
         currentPos = self.secPos[symbol]
         if direction == 1:
             posNeedToBuy = quantity - currentPos
@@ -194,6 +263,15 @@ class Strategy(object):
                 self.order(symbol, 1, -posNeedToSell)
 
     def order(self, symbol, direction, quantity):
+        u"""
+
+        交易指定量的指定证券
+
+        :param symbol: 证券代码
+        :param direction: 方向，1为买入，-1为卖出
+        :param quantity:交易量
+        :return: None
+        """
 
         currDTTime = self.current_datetime
 
@@ -216,6 +294,8 @@ class Strategy(object):
             raise ValueError("quantity cant't be negative as {0}".format(quantity))
         else:
             raise ValueError("Unrecognized direction {0}".format(direction))
+
+
 
     @property
     def secPos(self):

@@ -20,12 +20,6 @@ class PerShare(object):
         self.cost = float(cost)
         self.minTradeCost = None if minTradeCost is None else float(minTradeCost)
 
-    def __repr__(self):
-        return "{className}(cost={cost}, min trade cost={minTradeCost})"\
-            .format(className=self.__class__.__name__,
-                    cost=self.cost,
-                    minTradeCost=self.minTradeCost)
-
     def calculate(self, transaction):
         commission = transaction.quantity * self.cost
         if self.minTradeCost is None:
@@ -33,6 +27,15 @@ class PerShare(object):
         else:
             commission = max(commission, self.minTradeCost)
             return commission
+
+    def __str__(self):
+        return "{className}(cost={cost}, min trade cost={minTradeCost})"\
+            .format(className=self.__class__.__name__,
+                    cost=self.cost,
+                    minTradeCost=self.minTradeCost)
+
+    def __repr__(self):
+        return self.__str__()
 
 
 class PerTrade(object):
@@ -45,6 +48,12 @@ class PerTrade(object):
             return 0.0
 
         return self.cost
+
+    def __str__(self):
+        return "PerTrade(cost={0})".format(self.cost)
+
+    def __repr__(self):
+        return self.__str__()
 
 
 class PerValue(object):
@@ -59,3 +68,9 @@ class PerValue(object):
         else:
             costPerShare = transaction.price * self.sellCost
         return transaction.quantity * costPerShare
+
+    def __str__(self):
+        return "PerValue(buyCost={0}, sellCost={1})".format(self.buyCost, self.sellCost)
+
+    def __repr__(self):
+        return self.__str__()
