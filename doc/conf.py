@@ -17,7 +17,6 @@ import os
 import subprocess
 import re
 import shlex
-import sphinx_bootstrap_theme
 from distutils import sysconfig
 from AlgoTrading import __version__
 
