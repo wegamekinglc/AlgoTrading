@@ -299,10 +299,22 @@ class Strategy(object):
 
     @property
     def secPos(self):
+        u"""
+
+        保存当前证券整体仓位信息(单位，股数）
+
+        :return:
+        """
         return self._port.currentPosition
 
     @property
     def holdings(self):
+        u"""
+
+        保存当前证券仓位信息（单位，元）
+
+        :return:
+        """
         return self._port.allHoldings[-1]
 
     @property

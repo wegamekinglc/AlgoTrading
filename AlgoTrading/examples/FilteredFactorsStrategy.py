@@ -10,6 +10,7 @@ import datetime as dt
 from AlgoTrading.api import Strategy
 from AlgoTrading.api import strategyRunner
 from AlgoTrading.api import set_universe
+from AlgoTrading.api import DataSource
 from PyFin.api import MA
 from PyFin.api import nthWeekDay
 from PyFin.api import advanceDateByCalendar
@@ -28,9 +29,9 @@ class MovingAverageCrossStrategy(Strategy):
         for s in self.tradableAssets:
             if s[:2] != 'if':
                 if self.signal[s] > 0 and self.secPos[s] == 0:
-                    self.order(s, 1, 100)
-                elif self.signal[s] < 0 and self.secPos[s] != 0 :
-                    self.order(s, -1, 100)
+                    self.order(s, 1, 200)
+                elif self.signal[s] < 0 and self.secPos[s] != 0:
+                    self.order(s, -1, 200)
 
         # 找到需要使用的主力合约
         current_time = self.current_datetime
@@ -57,16 +58,18 @@ class MovingAverageCrossStrategy(Strategy):
 
 def run_example():
     stocks = set_universe('000300.zicn')
-    futures = ['if15%02d' % i for i in range(3, 13)]
+    futures = ['if15%02d' % i for i in range(1, 13)]
 
     universes = stocks + futures
 
     strategyRunner(userStrategy=MovingAverageCrossStrategy,
                    symbolList=universes,
-                   startDate=dt.datetime(2015, 4, 22),
-                   endDate=dt.datetime(2015, 11, 30),
+                   startDate=dt.datetime(2015, 1, 1),
+                   endDate=dt.datetime(2015, 12, 5),
                    logLevel='info',
-                   benchmark='000300.zicn')
+                   saveFile=True,
+                   dataSource=DataSource.DataYes,
+                   benchmark='000300.zicn',)
 
 
 if __name__ == "__main__":
