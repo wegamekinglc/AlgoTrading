@@ -12,7 +12,6 @@ doc/_build/*
 *.coverage
 *.html
 *.js
-*.png
 *.dat
 *.css
 *.c
