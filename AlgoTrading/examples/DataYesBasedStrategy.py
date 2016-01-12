@@ -33,14 +33,15 @@ class MovingAverageCrossStrategy(Strategy):
 
 def run_example():
     universe = set_universe('000300.zicn')
-    startDate = dt.datetime(2006, 1, 1)
+    startDate = dt.datetime(2007, 1, 1)
     endDate = dt.datetime(2015, 10, 1)
 
     strategyRunner(userStrategy=MovingAverageCrossStrategy,
                    symbolList=universe,
                    startDate=startDate,
                    endDate=endDate,
-                   dataSource=DataSource.DataYes,
+                   dataSource=DataSource.DXDataCenter,
+                   freq=0,
                    benchmark='000300.zicn',
                    logLevel='info',
                    saveFile=True,

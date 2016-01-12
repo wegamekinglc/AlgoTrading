@@ -31,11 +31,12 @@ def categorizeSymbols(symbolList):
             stocks.append(s)
         elif s.endswith('zicn'):
             indexes.append(s)
-        elif s[0].isalpha():
-            futures.append(s)
         else:
-            raise ValueError("Unknown securitie name {0}".format(s))
-
+            s_com = s.split('.')
+            if len(s_com) < 2:
+                raise ValueError("Unknown securitie name {0}. Security names without"
+                                 " exchange suffix is not allowed in AlgoTrading".format(s))
+            futures.append(s)
     return {'stocks': stocks, 'futures': futures, 'indexes': indexes}
 
 

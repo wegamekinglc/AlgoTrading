@@ -67,7 +67,8 @@ def run_example():
                    startDate=dt.datetime(2015, 1, 1),
                    endDate=dt.datetime(2015, 12, 5),
                    logLevel='info',
-                   saveFile=True,
+                   saveFile=False,
+                   plot=False,
                    dataSource=DataSource.DataYes,
                    benchmark='000300.zicn',)
 

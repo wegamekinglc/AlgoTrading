@@ -5,16 +5,7 @@ Created on 2015-11-30
 @author: cheng.li
 """
 
-
-# -*- coding: utf-8 -*-
-u"""
-Created on 2015-9-23
-
-@author: cheng.li
-"""
-
 import datetime as dt
-
 from AlgoTrading.api import Strategy
 from AlgoTrading.api import strategyRunner
 from AlgoTrading.api import DataSource
@@ -45,14 +36,14 @@ def run_example():
     endDate = dt.datetime(2015, 10, 1)
 
     return strategyRunner(userStrategy=MovingAverageCrossStrategy,
-                   symbolList=universe,
-                   startDate=startDate,
-                   endDate=endDate,
-                   dataSource=DataSource.DXDataCenter,
-                   benchmark='000300.zicn',
-                   saveFile=True,
-                   logLevel='info',
-                   plot=True)
+                          symbolList=universe,
+                          startDate=startDate,
+                          endDate=endDate,
+                          dataSource=DataSource.DXDataCenter,
+                          benchmark='000300.zicn',
+                          saveFile=False,
+                          logLevel='critical',
+                          plot=False)
 
 
 if __name__ == "__main__":

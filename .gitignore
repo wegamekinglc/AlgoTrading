@@ -7,6 +7,7 @@ notebooks/presentation/.ipynb_checkpoints/*
 notebooks/presentation/performance/*
 notebooks/performance/*
 AlgoTrading/examples/performance/*
+AlgoTrading/examples/FuturesExample.py
 *.log
 doc/_build/*
 *.coverage

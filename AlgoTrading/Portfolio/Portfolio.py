@@ -5,6 +5,7 @@ Created on 2015-7-24
 @author: cheng.li
 """
 
+from collections import defaultdict
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -44,7 +45,7 @@ class Portfolio(object):
         self.portfolioType = portfolioType
 
         self.allPositions = self.constructAllPositions()
-        self.currentPosition = dict((s, 0) for s in self.tradableAssets)
+        self.currentPosition = defaultdict(int, [(s, 0) for s in self.tradableAssets])
 
         self.allHoldings = self.constructAllHoldings()
         self.currentHoldings = self.constructCurrentHoldings()
