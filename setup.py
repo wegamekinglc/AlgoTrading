@@ -20,7 +20,7 @@ else:
 
 setup(
     name='AlgoTrading',
-    version='0.1.4',
+    version='0.1.5',
     packages=['AlgoTrading',
               'AlgoTrading.Assets',
               'AlgoTrading.Backtest',
