@@ -24,13 +24,11 @@ class MonitoringIndexStrategy(Strategy):
 
 
 def run_example():
-    universe = ['600000.xshg', '000300.zicn']
-    initialCapital = 1e5
-    startDate = dt.datetime(2014, 12, 1)
+    universe = ['000300.zicn']
+    startDate = dt.datetime(2003, 12, 1)
     endDate = dt.datetime(2015, 11, 1)
 
     strategyRunner(userStrategy=MonitoringIndexStrategy,
-                   initialCapital=initialCapital,
                    symbolList=universe,
                    startDate=startDate,
                    endDate=endDate,

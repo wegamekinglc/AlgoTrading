@@ -46,8 +46,8 @@ class MovingAverageCrossStrategy(Strategy):
         if current_time.date() >= changeContractDay:
             contract_month = month + 1
 
-        ifc = 'if15%02d' % contract_month
-        ifcOld = 'if15%02d' % month
+        ifc = 'if15%02d.cffex' % contract_month
+        ifcOld = 'if15%02d.cffex' % month
 
         if month < contract_month and self.secPos[ifcOld] != 0:
             # 需要移仓， 平掉旧合约
@@ -58,7 +58,7 @@ class MovingAverageCrossStrategy(Strategy):
 
 def run_example():
     stocks = set_universe('000300.zicn')
-    futures = ['if15%02d' % i for i in range(1, 13)]
+    futures = ['if15%02d.cffex' % i for i in range(1, 13)]
 
     universes = stocks + futures
 

@@ -91,7 +91,7 @@ class DataYesMarketDataHandler(DataFrameDataHandler):
             end = params[3]
             logger = params[4]
             result = params[5]
-            data = mt.MktFutd(ticker=s,
+            data = mt.MktFutd(ticker=s[:6],
                               beginDate=start,
                               endDate=end,
                               field='tradeDate,openPrice,highestPrice,lowestPrice,turnoverVol,closePrice')

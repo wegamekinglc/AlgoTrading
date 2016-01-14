@@ -71,7 +71,7 @@ class DataHandler(object):
     @property
     def tradableAssets(self):
         self.category = categorizeSymbols(self.symbolList)
-        return list(set(self.category['stocks'] + self.category['futures']))
+        return list(set(self.category['stocks'] + self.category['futures'] + self.category['indexes']))
 
 
 class DataFrameDataHandler(DataHandler):

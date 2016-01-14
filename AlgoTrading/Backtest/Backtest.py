@@ -15,10 +15,13 @@ from PyFin.Env import Settings
 from AlgoTrading.Enums import PortfolioType
 from AlgoTrading.Execution.OrderBook import OrderBook
 from AlgoTrading.Execution.FilledBook import FilledBook
+from AlgoTrading.Strategy import Strategy
 from AlgoTrading.Assets import XSHGStock
+from AlgoTrading.Assets import XSHEStock
 from AlgoTrading.Assets import IFFutures
 from AlgoTrading.Assets import ICFutures
 from AlgoTrading.Assets import IHFutures
+from AlgoTrading.Assets import EXIndex
 
 
 def setAssetsConfig(symbolList):
@@ -34,7 +37,12 @@ def setAssetsConfig(symbolList):
             else:
                 res[s] = XSHGStock
         else:
-            res[s] = XSHGStock
+            if s.endswith('zicn'):
+                res[s] = EXIndex
+            elif s.endswith('xshg'):
+                res[s] = XSHGStock
+            elif s.endswith('xshe'):
+                res[s] = XSHEStock
     return res
 
 
@@ -51,13 +59,15 @@ class Backtest(object):
                  benchmark=None,
                  refreshRate=1,
                  plot=False,
-                 portfolioType=PortfolioType.CashManageable):
+                 portfolioType=PortfolioType.CashManageable,
+                 strategyParameters=()):
         self.initialCapital = initial_capital
         self.heartbeat = heartbeat
         self.dataHandler = data_handler
         self.executionHanlderCls = execution_handler
         self.portfolioCls = portfolio
         self.strategyCls = strategy
+        self.strategyParameters = strategyParameters
         self.symbolList = self.dataHandler.symbolList
         self.tradable = self.dataHandler.tradableAssets
         self.assets = setAssetsConfig(self.tradable)
@@ -81,7 +91,10 @@ class Backtest(object):
 
     def _generateTradingInstance(self):
         Settings.defaultSymbolList = self.symbolList
-        self.strategy = self.strategyCls()
+        if isinstance(self.strategyCls, Strategy):
+            self.strategy = self.strategyCls
+        else:
+            self.strategy = self.strategyCls(*self.strategyParameters)
         self.strategy.events = self.events
         self.strategy.bars = self.dataHandler
         self.strategy.symbolList = self.symbolList

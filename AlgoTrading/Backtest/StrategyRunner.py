@@ -24,6 +24,7 @@ from AlgoTrading.Backtest.Backtest import Backtest
 
 
 def strategyRunner(userStrategy,
+                   strategyParameters=(),
                    initialCapital=100000,
                    symbolList=['600000.XSHG'],
                    startDate=dt.datetime(2015, 9, 1),
@@ -81,7 +82,8 @@ def strategyRunner(userStrategy,
                         benchmark,
                         refreshRate,
                         plot=plot,
-                        portfolioType=portfolioType)
+                        portfolioType=portfolioType,
+                        strategyParameters=strategyParameters)
 
     equityCurve, \
     orderBook, \
