@@ -13,9 +13,12 @@ from PyFin.Utilities import isClose
 from AlgoTrading.Events import OrderEvent
 from AlgoTrading.Enums import PortfolioType
 from AlgoTrading.Portfolio.PositionsBook import StocksPositionsBook
+from AlgoTrading.Env import Settings
+from AlgoTrading.Utilities import sign
 from VisualPortfolio.Tears import createPerformanceTearSheet
 from VisualPortfolio.Tears import createPostionTearSheet
 from VisualPortfolio.Tears import createTranscationTearSheet
+from VisualPortfolio.Env import Settings as vp_settings
 
 
 def extractTransactionFromFilledBook(filledBook):
@@ -49,6 +52,8 @@ class Portfolio(object):
 
         self.allHoldings = self.constructAllHoldings()
         self.currentHoldings = self.constructCurrentHoldings()
+
+        vp_settings.set_source(Settings.data_source)
 
     def constructAllPositions(self):
         d = dict((k, v) for k, v in [(s, 0) for s in self.tradableAssets])
@@ -149,13 +154,14 @@ class Portfolio(object):
     def _createFullNotionalEquityCurve(self, curve):
         rawpos = curve.drop(['cash', 'commission', 'total', 'margin', 'pnl'], axis=1)
         notionals = rawpos.abs().sum(axis=1).fillna(0)
+        notional_directions = rawpos.sum(axis=1).fillna(0).apply(sign)
         pnldiffs = curve['pnl'].diff()
         # to handl the case when pnl is shown in null notional day
         cumPnL = 0.
         returns = []
-        for notional, pnldiff in zip(notionals, pnldiffs):
+        for notional, pnldiff, direction in zip(notionals, pnldiffs, notional_directions):
             if not isClose(notional):
-                r = np.log(notional / (notional - pnldiff - cumPnL))
+                r = direction * np.log(direction * notional / (direction * notional - pnldiff - cumPnL))
                 returns.append(r)
                 cumPnL = 0.
             elif not np.isnan(pnldiff):
