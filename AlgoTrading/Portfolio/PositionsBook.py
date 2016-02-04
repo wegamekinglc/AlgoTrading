@@ -7,6 +7,7 @@ Created on 2015-9-25
 
 import datetime as dt
 import bisect
+import numpy as np
 from PyFin.api import bizDatesList
 
 
@@ -24,13 +25,14 @@ class SymbolPositionsHistory(object):
 
     def avaliableForTrade(self, currDT, bizDatesList):
         if self.lag == 0:
-            avaliableForSell = 0
-            avaliableForBuy = 0
-            for i, direction in enumerate(self.existDirections):
-                if direction == 1:
-                    avaliableForSell += self.positions[i] - self.locked[i]
-                else:
-                    avaliableForBuy += self.positions[i] - self.locked[i]
+            avaliableForSell, avaliableForBuy = np.inf, np.inf
+            #avaliableForSell = 0
+            #avaliableForBuy = 0
+            #for i, direction in enumerate(self.existDirections):
+            #    if direction == 1:
+            #        avaliableForSell += self.positions[i] - self.locked[i]
+            #    else:
+            #        avaliableForBuy += self.positions[i] - self.locked[i]
         else:
             i = len(self.dates) - 1
             date = self.dates[i]
@@ -179,9 +181,11 @@ class StocksPositionsBook(object):
             return self._avaliableForTrade(symbol, currDT)
 
     def _avaliableForTrade(self, symbol, currDT):
-        if symbol not in self._allPositions:
+        if symbol not in self._allPositions and not self._shortable[symbol]:
             avaliableForSell = 0
             avaliableForBuy = 0
+        elif symbol not in self._allPositions:
+            avaliableForSell, avaliableForBuy = np.inf, np.inf
         else:
             symbolPositionsHistory = self._allPositions[symbol]
             avaliableForSell, avaliableForBuy =\

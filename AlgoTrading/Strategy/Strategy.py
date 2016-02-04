@@ -195,7 +195,6 @@ class Strategy(object):
             multiplier = self._port.assets[symbol].multiplier
             settle = self._port.assets[symbol].settle
             margin = self._port.assets[symbol].margin
-            shortable = self._port.assets[symbol].short
 
             # amount available for buy back or sell
             if direction == 1:
@@ -208,7 +207,7 @@ class Strategy(object):
             margin_cost = max(quantity - amount, 0) * currValue * multiplier * margin
             maximumCashCost = max(fill_cost, margin_cost)
 
-            if maximumCashCost <= cashAmount and (direction == 1 or (quantity <= amount or shortable)):
+            if maximumCashCost <= cashAmount and (direction == 1 or quantity <= amount):
                 signal = OrderEvent(currDTTime, symbol, "MKT", quantity, direction)
                 self._posBook.updatePositionsByOrder(symbol, currDT, quantity, direction)
                 signals.append(signal)
