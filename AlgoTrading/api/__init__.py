@@ -25,6 +25,7 @@ from AlgoTrading.Assets import XSHEStock
 from AlgoTrading.Assets import IFFutures
 from AlgoTrading.Assets import ICFutures
 from AlgoTrading.Assets import IHFutures
+from AlgoTrading.Assets import EXIndex
 
 __all__ = ['Strategy',
            'strategyRunner',
@@ -39,4 +40,5 @@ __all__ = ['Strategy',
            'XSHEStock',
            'IFFutures',
            'ICFutures',
-           'IHFutures']
+           'IHFutures',
+           'EXIndex']
