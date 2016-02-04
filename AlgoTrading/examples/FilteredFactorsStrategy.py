@@ -68,9 +68,9 @@ def run_example():
                    endDate=dt.datetime(2015, 12, 5),
                    logLevel='info',
                    saveFile=False,
-                   plot=False,
-                   dataSource=DataSource.DataYes,
-                   benchmark='000300.zicn',)
+                   plot=True,
+                   dataSource=DataSource.DXDataCenter,
+                   benchmark='000300.zicn')
 
 
 if __name__ == "__main__":
