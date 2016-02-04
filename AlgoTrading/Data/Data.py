@@ -9,13 +9,20 @@ Created on 2015-7-24
 from abc import ABCMeta
 from abc import abstractmethod
 from AlgoTrading.Events import MarketEvent
+from AlgoTrading.Env import Settings
+from AlgoTrading.Enums import DataSource
 
 
-def set_universe(code):
-    import tushare as ts
-    ts.set_token('2bfc4b3b06efa5d8bba2ab9ef83b5d61f1c3887834de729b60eec9f13e1d4df8')
-    idx = ts.Idx()
-    return list(idx.IdxCons(secID=code, field='consID')['consID'])
+def set_universe(code, refDate=None):
+    if Settings.data_source != DataSource.DXDataCenter:
+        import tushare as ts
+        ts.set_token('2bfc4b3b06efa5d8bba2ab9ef83b5d61f1c3887834de729b60eec9f13e1d4df8')
+        idx = ts.Idx()
+        return list(idx.IdxCons(secID=code, field='consID')['consID'])
+    else:
+        from DataAPI import api
+        data = api.GetIndexConstitutionInfo(code, refDate=refDate).sort_values('conSecurityID')
+        return list(data.conSecurityID)
 
 
 def categorizeSymbols(symbolList):
