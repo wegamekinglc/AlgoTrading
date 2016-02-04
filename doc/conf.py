@@ -236,6 +236,7 @@ latex_elements = {
 'babel'     : '',
 'fontpkg': r'''\usepackage{titletoc}
 \usepackage{titlesec}
+\usepackage{longtable}
 \usepackage{times}
 \usepackage{fontspec, xunicode, xltxtra}
 \usepackage{xeCJK}

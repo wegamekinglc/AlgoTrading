@@ -52,7 +52,8 @@
 
    ``order`` 函数按照指定方向交易指定证券，交易的数量由 ``quantity`` 参数确定，例如：
 
-   .. table:: ``order`` 前账户持仓
+   .. table::
+      :class: longtable
 
       ======== ============
       证券代码  数量
@@ -63,7 +64,8 @@
 
    在下达 ``order('600000', direction=1, quantity=300)`` 的指令后：
 
-   .. table:: ``order`` 后账户持仓
+   .. table::
+      :class: longtable
 
       ======== ============
       证券代码  数量
@@ -76,7 +78,8 @@
 
    ``order_to`` 函数按照指定方向交易指定证券，交易的目标由 ``quantity`` 参数确定，例如：
 
-   .. table:: ``order_to`` 前账户持仓
+   .. table::
+      :class: longtable
 
       ======== ============
       证券代码  数量
@@ -87,7 +90,8 @@
 
    在下达 ``order_to('600000', direction=1, quantity=300)`` 的指令后：
 
-   .. table:: ``order_to`` 后账户持仓
+   .. table::
+      :class: longtable
 
       ======== ============
       证券代码  数量
@@ -124,7 +128,8 @@
 
    最后生成的用户信息表可能如下：
 
-   .. table:: 用户记录信息展示
+   .. table::
+      :class: longtable
    
       ========== ============ ============
       timeStamp  signal       index
