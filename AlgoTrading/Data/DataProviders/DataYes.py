@@ -7,7 +7,6 @@ Created on 2015-9-21
 
 import os
 import tushare as ts
-from multiprocessing.pool import ThreadPool
 import numpy as np
 import pandas as pd
 from AlgoTrading.Data.Data import DataFrameDataHandler
@@ -42,9 +41,6 @@ class DataYesMarketDataHandler(DataFrameDataHandler):
         self.logger.info("Start loading bars from DataYes source...")
 
         combIndex = None
-
-        pool = ThreadPool(25)
-        result = {}
 
         def getOneSymbolData(params):
             mt = params[0]
