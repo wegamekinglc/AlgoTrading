@@ -53,6 +53,8 @@ class Portfolio(object):
         self.allHoldings = self.constructAllHoldings()
         self.currentHoldings = self.constructCurrentHoldings()
 
+        self.orderBook = None
+
         vp_settings.set_source(Settings.data_source)
 
     def constructAllPositions(self):
@@ -123,6 +125,9 @@ class Portfolio(object):
         self.updateHoldingsFromFill(event, pnl)
 
         self.filledBook.updateFromFillEvent(event)
+
+    def updateExsitingOrders(self):
+        pass
 
     def generateNaiveOrder(self, signal):
         order = None

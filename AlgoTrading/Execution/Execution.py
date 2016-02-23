@@ -10,6 +10,7 @@ from math import floor
 import numpy as np
 from AlgoTrading.Finance import Transaction
 from AlgoTrading.Events import FillEvent
+from AlgoTrading.Env import Settings
 
 
 class ExecutionHanlder(object):
@@ -32,7 +33,7 @@ class SimulatedExecutionHandler(ExecutionHanlder):
         self.portfolio = portfolio
         self.bars = bars
 
-    def _search_suitable_quantity(self, transPrice, start_quantity, assetType, direction):
+    def _search_suitable_quantity(self, transPrice, start_quantity, assetType, direction, max_quantity):
         multiplier = assetType.multiplier
         minimum = assetType.minimum
         settle = assetType.settle
@@ -40,6 +41,8 @@ class SimulatedExecutionHandler(ExecutionHanlder):
         cash = max(self.portfolio.currentHoldings['cash'], 1e-5)
         if direction == 1 and settle != 0. and cash != np.inf:
             best_amount = floor(cash / transPrice / settle / minimum / multiplier) * minimum
+
+            best_amount = min(best_amount, int(max_quantity / minimum) * minimum)
         else:
             best_amount = np.inf
 
@@ -56,38 +59,50 @@ class SimulatedExecutionHandler(ExecutionHanlder):
                 else:
                     try_amount -= minimum
 
-    def executeOrder(self, event):
-        if event.type == 'ORDER':
-            transPrice = self.bars.getLatestBarValue(event.symbol, 'close')
+    def executeOrder(self, order, asset_type, order_book, portfolio):
+        transVolume = self.bars.getLatestBarValue(order.symbol, 'volume')
+        if transVolume == 0:
+            self.logger.warning("{0}: Order ID: {1}  for {2} can't be filled in market frozen status."
+                                .format(order.timeIndex,
+                                        order.orderID,
+                                        order.symbol))
+            return None
+        transPrice = self.bars.getLatestBarValue(order.symbol, 'close')
+        timeIndex = self.bars.getLatestBarDatetime(order.symbol)
 
-            quantity = self._search_suitable_quantity(transPrice, event.quantity, event.assetType, event.direction)
+        quantity = self._search_suitable_quantity(transPrice,
+                                                  order.quantity - order.filled,
+                                                  asset_type,
+                                                  order.direction,
+                                                  int(transVolume * Settings.market_volume_cap))
 
-            if quantity != 0:
-                trans = Transaction(transPrice * event.assetType.multiplier,
-                                    quantity,
-                                    event.direction)
-                fillCost = transPrice * quantity * event.direction * event.assetType.settle * event.assetType.multiplier
-                nominal = transPrice * quantity * event.direction * event.assetType.multiplier
+        if quantity != 0:
+            trans = Transaction(transPrice * asset_type.multiplier,
+                                quantity,
+                                order.direction)
+            fillCost = transPrice * quantity * order.direction * asset_type.settle * asset_type.multiplier
+            nominal = transPrice * quantity * order.direction * asset_type.multiplier
 
-                commission = event.assetType.commission.calculate(trans)
-                fill_event = FillEvent(event.orderID,
-                                       event.timeIndex,
-                                       event.symbol,
-                                       quantity,
-                                       event.direction,
-                                       fillCost,
-                                       commission,
-                                       nominal)
+            commission = asset_type.commission.calculate(trans)
+            fill_event = FillEvent(order.orderID,
+                                   timeIndex,
+                                   order.symbol,
+                                   quantity,
+                                   order.direction,
+                                   fillCost,
+                                   commission,
+                                   nominal)
 
-                self.logger.info("{0}: Order ID: {1} filled at price: ${2} with quantity {3} direction {4}. "
-                                 "original order quantity is {5}"
-                                 .format(event.timeIndex,
-                                         event.orderID,
-                                         transPrice,
-                                         quantity,
-                                         event.direction,
-                                         event.quantity))
+            self.logger.info("{0}: Order ID: {1} filled at price: ${2} with quantity {3} direction {4}. "
+                             "original order quantity is {5}"
+                             .format(timeIndex,
+                                     order.orderID,
+                                     transPrice,
+                                     quantity,
+                                     order.direction,
+                                     order.quantity))
 
-                return fill_event
+            order_book.updateFromFillEvent(fill_event)
+            portfolio.updateFill(fill_event)
 
 

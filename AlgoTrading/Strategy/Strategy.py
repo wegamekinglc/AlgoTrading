@@ -5,7 +5,7 @@ Created on 2015-7-24
 @author: cheng.li
 """
 
-
+from __future__ import absolute_import
 from abc import ABCMeta
 from abc import abstractmethod
 import datetime as dt
@@ -19,7 +19,7 @@ class Strategy(object):
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def handle_data(self,):
+    def handle_data(self):
         raise NotImplementedError()
 
     def _subscribe(self):
@@ -110,6 +110,26 @@ class Strategy(object):
         """
         return self._current_datetime
 
+    @property
+    def current_date(self):
+        u"""
+
+        获取当前日期的字符串时间戳，格式为YYYY-MM-DD
+
+        :return: str
+        """
+        return self._current_datetime.date().__str__()
+
+    @property
+    def current_time(self):
+        u"""
+
+        获取当前时间的字符串时间戳，格式为HH:MM:SS
+
+        :return: str
+        """
+        return self._current_datetime.time().__str__()
+
     def keep(self, label, value, time=None):
         u"""
 
@@ -142,6 +162,16 @@ class Strategy(object):
         :return: float
         """
         return self._port.currentHoldings['cash']
+
+    @property
+    def portfolioValue(self):
+        u"""
+
+        返回当前账户总净值
+
+        :return: float
+        """
+        return self._port.allHoldings[-1]['total']
 
     def avaliableForSale(self, symbol):
         u"""
@@ -294,6 +324,49 @@ class Strategy(object):
         else:
             raise ValueError("Unrecognized direction {0}".format(direction))
 
+    def order_pct(self, symbol, direction, pct):
+        u"""
+
+        交易占当前资产组合指定比例的证券
+
+        :param symbol: 证券代码
+        :param direction: 方向，1为买入，-1为卖出
+        :param pct: 比例
+        :return: None
+        """
+        currDTTime = self.current_datetime
+        if pct < 0. or pct > 1.0:
+            self.logger.warning("{0:}: Percentage order for {1} with percentage {2} and direction {4} is not allowed. "
+                                "Percentage should be between 0 and 1".format(currDTTime, symbol, pct, direction))
+            return
+
+        portfolio_value = self.portfolioValue
+        currValue = self.bars.getLatestBarValue(symbol, 'close')
+        rought_amount = int(portfolio_value * pct / currValue)
+        actual_amount = rought_amount // self._port.assets[symbol].minimum * self._port.assets[symbol].minimum
+        self.order(symbol, direction, actual_amount)
+
+    def order_to_pct(self, symbol, direction, pct):
+        u"""
+
+        交易证券至占当前组合指定比例
+
+        :param symbol: 证券代码
+        :param direction: 方向，1为买入，-1为卖出
+        :param pct: 目标比例
+        :return: None
+        """
+        currDTTime = self.current_datetime
+        if pct < 0. or pct > 1.0:
+            self.logger.warning("{0:}: Percentage order for {1} with percentage {2} and direction {4} is not allowed. "
+                                "Percentage should be between 0 and 1".format(currDTTime, symbol, pct, direction))
+            return
+
+        portfolio_value = self.portfolioValue
+        currValue = self.bars.getLatestBarValue(symbol, 'close')
+        rought_amount = int(portfolio_value * pct / currValue)
+        actual_amount = rought_amount // self._port.assets[symbol].minimum * self._port.assets[symbol].minimum
+        self.order_to(symbol, direction, actual_amount)
 
 
     @property
@@ -302,7 +375,7 @@ class Strategy(object):
 
         保存当前证券整体仓位信息(单位，股数）
 
-        :return:
+        :return: int
         """
         return self._port.currentPosition
 
@@ -312,7 +385,7 @@ class Strategy(object):
 
         保存当前证券仓位信息（单位，元）
 
-        :return:
+        :return: float
         """
         return self._port.allHoldings[-1]
 
