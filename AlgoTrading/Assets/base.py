@@ -7,7 +7,7 @@ Created on 2015-9-25
 
 from collections import namedtuple
 
-Asset = namedtuple('Asset', 'lag exchange commission multiplier margin settle minimum short')
+Asset = namedtuple('Asset', 'lag exchange commission multiplier margin settle minimum short price_limit')
 
 
 class Asset:

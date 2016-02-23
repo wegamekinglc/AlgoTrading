@@ -25,6 +25,7 @@ class IFFutures(Asset):
     settle = 0.
     minimum = 1
     short = True
+    price_limit = 0.1
 
 
 class IHFutures(Asset):
@@ -41,6 +42,7 @@ class IHFutures(Asset):
     settle = 0.
     minimum = 1
     short = True
+    price_limit = 0.1
 
 
 class ICFutures(Asset):
@@ -57,4 +59,5 @@ class ICFutures(Asset):
     settle = 0.
     minimum = 1
     short = True
+    price_limit = 0.1
 

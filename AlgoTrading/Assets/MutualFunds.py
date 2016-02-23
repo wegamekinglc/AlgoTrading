@@ -23,6 +23,7 @@ class XSHGMutualFund(Asset):
     settle = 1.
     minimum = 100
     short = False
+    price_limit = 0.1
 
 
 class XSHEMutualFund(Asset):
@@ -32,13 +33,14 @@ class XSHEMutualFund(Asset):
 
     """
     lag = 1
-    exchange = "XSH"
+    exchange = "XSHE"
     commission = PerValue(buyCost=0.0, sellCost=0.001)
     multiplier = 1.
     margin = 0.
     settle = 1.
     minimum = 100
     short = False
+    price_limit = 0.1
 
 
 

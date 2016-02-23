@@ -23,3 +23,4 @@ class EXIndex(Asset):
     settle = 1.
     minimum = 1
     short = True
+    price_limit = 0.1
