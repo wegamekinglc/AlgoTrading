@@ -17,8 +17,13 @@ from AlgoTrading.Enums import DataSource
 
 def set_universe(code, refDate=None):
     if Settings.data_source != DataSource.DXDataCenter:
+        import os
         import tushare as ts
-        ts.set_token('2bfc4b3b06efa5d8bba2ab9ef83b5d61f1c3887834de729b60eec9f13e1d4df8')
+
+        try:
+            ts.set_token(os.environ['DATAYES_TOKEN'])
+        except KeyError:
+            raise
         idx = ts.Idx()
         return list(idx.IdxCons(secID=code, field='consID')['consID'])
     else:

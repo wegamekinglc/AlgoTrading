@@ -32,7 +32,7 @@ class MovingAverageCrossStrategy(Strategy):
 
 
 def run_example():
-    universe = set_universe('000300.zicn')
+    universe = set_universe('000300.zicn')[:10]
     startDate = dt.datetime(2007, 1, 1)
     endDate = dt.datetime(2015, 10, 1)
 
@@ -40,7 +40,6 @@ def run_example():
                    symbolList=universe,
                    startDate=startDate,
                    endDate=endDate,
-                   dataSource=DataSource.DataYes,
                    freq=0,
                    benchmark='000300.zicn',
                    logLevel='info',
@@ -49,6 +48,10 @@ def run_example():
 
 
 if __name__ == "__main__":
+    from VisualPortfolio.Env import Settings
+    from AlgoTrading.Env import Settings
+    Settings.set_source(DataSource.DataYes)
+    Settings.set_source(DataSource.DataYes)
     startTime = dt.datetime.now()
     print("Start: %s" % startTime)
     run_example()

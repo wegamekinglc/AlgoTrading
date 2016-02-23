@@ -151,7 +151,7 @@ class Backtest(object):
                                                            self.portfolio.orderBook,
                                                            self.portfolio)
                     elif event.type == 'DAYBEGIN':
-                        print(self.dataHandler.currentTimeIndex)
+                        pass
             time.sleep(self.heartbeat)
 
     def _outputPerformance(self):
