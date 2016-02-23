@@ -74,8 +74,6 @@ class Backtest(object):
         self.events = queue.Queue()
         self.dataHandler.setEvents(self.events)
         self.signals = 0
-        self.orders = 0
-        self.fills = 0
         self.num_strats = 1
         self.benchmark = benchmark
         self.refreshRate = refreshRate
@@ -107,7 +105,7 @@ class Backtest(object):
                                            self.benchmark,
                                            self.portfolioType)
         self.executionHanlder = self.executionHanlderCls(self.events, self.dataHandler, self.portfolio, self.logger)
-        self.orderBook = OrderBook()
+        self.portfolio.orderBook = OrderBook()
         self.filledBook = FilledBook()
         self.portfolio.filledBook = self.filledBook
         self.strategy._port = self.portfolio
@@ -118,6 +116,7 @@ class Backtest(object):
         while True:
             i += 1
             if self.dataHandler.continueBacktest:
+                self.dataHandler.checkingDayBegin()
                 self.strategy.symbolList, self.strategy.tradableAssets = self.dataHandler.updateBars()
             else:
                 break
@@ -133,31 +132,34 @@ class Backtest(object):
                         self.strategy._updateTime()
                         self.strategy._updateSubscribing()
                         self.portfolio.updateTimeindex()
+                        # update still alive orders
+                        for order in self.portfolio.orderBook:
+                            if order.symbol in self.strategy.tradableAssets:
+                                self.executionHanlder.executeOrder(order,
+                                                                   self.assets[order.symbol],
+                                                                   self.portfolio.orderBook,
+                                                                   self.portfolio)
                         if self.counter % self.refreshRate == 0:
                             self.strategy._handle_data()
                     elif event.type == 'SIGNAL':
                         self.signals += 1
                         self.portfolio.updateSignal(event)
                     elif event.type == 'ORDER':
-                        self.orders += 1
-                        event.assetType = self.assets[event.symbol]
-                        self.orderBook.updateFromOrderEvent(event)
-                        fill_event = self.executionHanlder.executeOrder(event)
-                        self.fills += 1
-                        if fill_event:
-                            self.orderBook.updateFromFillEvent(fill_event)
-                            self.portfolio.updateFill(fill_event)
-
+                        self.portfolio.orderBook.updateFromOrderEvent(event)
+                        self.executionHanlder.executeOrder(event.to_order(),
+                                                           self.assets[event.symbol],
+                                                           self.portfolio.orderBook,
+                                                           self.portfolio)
+                    elif event.type == 'DAYBEGIN':
+                        print(self.dataHandler.currentTimeIndex)
             time.sleep(self.heartbeat)
 
     def _outputPerformance(self):
-        self.logger.info("Orders : {0:d}".format(self.orders))
-        self.logger.info("Fills  : {0:d}".format(self.fills))
 
         self.portfolio.createEquityCurveDataframe()
         perf_metric, perf_df, rollingRisk, aggregated_positions, transactions, turnover_rate = self.portfolio.outputSummaryStats(self.portfolio.equityCurve, self.plot)
         return self.portfolio.equityCurve, \
-               self.orderBook.view(), \
+               self.portfolio.orderBook.view(), \
                self.filledBook.view(), \
                perf_metric, perf_df, \
                rollingRisk, \
