@@ -8,7 +8,9 @@ Created on 2015-7-24
 
 from abc import ABCMeta
 from abc import abstractmethod
+import datetime as dt
 from AlgoTrading.Events import MarketEvent
+from AlgoTrading.Events import DayBeginEvent
 from AlgoTrading.Env import Settings
 from AlgoTrading.Enums import DataSource
 
@@ -88,6 +90,8 @@ class DataFrameDataHandler(DataHandler):
         self.symbolData = {}
         self.latestSymbolData = {}
         self.continueBacktest = True
+        self.currentTimeIndex = dt.datetime(1970, 1, 1)
+        self.previousSymbolData = None
 
     def getStartDate(self):
         return self.dateIndex[0]
@@ -115,6 +119,16 @@ class DataFrameDataHandler(DataHandler):
             raise RuntimeError("the symbol {0:s} is not available in the historical data set".format(symbol))
         else:
             return barsList[1][valType]
+
+    def checkingDayBegin(self):
+        try:
+            currentTimeIndex = self.dateIndex[self.start]
+        except IndexError:
+            return None
+        previousTimeIndex = self.currentTimeIndex
+        if currentTimeIndex.date() > previousTimeIndex.date():
+            self.events.put(DayBeginEvent())
+            self.previousSymbolData = self.latestSymbolData
 
     def updateBars(self):
         noDataCount = 0

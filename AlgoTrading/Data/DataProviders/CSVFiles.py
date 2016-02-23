@@ -28,7 +28,8 @@ class HistoricalCSVDataHandler(DataFrameDataHandler):
                                                      header=0,
                                                      index_col=0,
                                                      parse_dates=True,
-                                                     usecols=['datetime', 'open', 'high', 'low', 'close', 'volume']).sort_index()
+                                                     usecols=['datetime', 'open', 'high', 'low', 'close', 'volume'])\
+                .sort_index()
 
             if combIndex is None:
                 combIndex = self.symbolData[s].index
