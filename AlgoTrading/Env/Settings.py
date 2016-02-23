@@ -14,6 +14,7 @@ class SettingsFactory(Singleton):
     def __init__(self, forcedBuild=False):
         self._usingCache = False
         self._data_source = DataSource.DXDataCenter
+        self._market_volume_cap = 0.05
 
     @property
     def usingCache(self):
@@ -62,6 +63,26 @@ class SettingsFactory(Singleton):
         :return: DataSource
         """
         return self._data_source
+
+    @property
+    def market_volume_cap(self):
+        u"""
+
+        返回获得的市场交易量可获取的最大比例
+
+        :return: float
+        """
+        return self._market_volume_cap
+
+    def set_market_volume_cap(self, value):
+        u"""
+
+        设置获得的市场交易量可获取的最大比例
+
+        :param value: 市场交易量可获取的最大比例
+        :return: None
+        """
+        self._market_volume_cap = value
 
 
 Settings = SettingsFactory()
