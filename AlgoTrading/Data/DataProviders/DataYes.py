@@ -119,7 +119,6 @@ class DataYesMarketDataHandler(DataFrameDataHandler):
             else:
                 combIndex = combIndex.union(self.symbolData[s].index)
 
-            self.latestSymbolData[s] = []
             self.symbolData[s] = transfromDFtoDict(self.symbolData[s])
 
             # transform

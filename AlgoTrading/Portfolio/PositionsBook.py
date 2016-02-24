@@ -26,13 +26,6 @@ class SymbolPositionsHistory(object):
     def avaliableForTrade(self, currDT, bizDatesList):
         if self.lag == 0:
             avaliableForSell, avaliableForBuy = np.inf, np.inf
-            #avaliableForSell = 0
-            #avaliableForBuy = 0
-            #for i, direction in enumerate(self.existDirections):
-            #    if direction == 1:
-            #        avaliableForSell += self.positions[i] - self.locked[i]
-            #    else:
-            #        avaliableForBuy += self.positions[i] - self.locked[i]
         else:
             i = len(self.dates) - 1
             date = self.dates[i]
@@ -89,6 +82,15 @@ class SymbolPositionsHistory(object):
         if toFinish > 0 and direction == -1 and not self.shortable:
             raise ValueError("Existing amount is not enough to cover sell order. Short sell is not allowed for {0}"
                              .format(self.symbol))
+
+    def updatePositionsByCancelOrder(self, currDt, quantity, direction):
+        toFinish = quantity
+        i = 0
+        while toFinish != 0 and i != len(self.dates):
+            if self.existDirections[i] != direction:
+                self.locked[i] -= toFinish
+                break
+            i += 1
 
     def updatePositionsByFill(self, currDT, quantity, direction, value):
         posClosed = 0
@@ -201,6 +203,14 @@ class StocksPositionsBook(object):
         else:
             symbolPositionsHistory = self._allPositions[symbol]
             symbolPositionsHistory.updatePositionsByOrder(currDT, quantity, direction)
+
+        # update cache for future usage
+        self._avaliableForTrade(symbol, currDT)
+
+    def updatePositionsByCancelOrder(self, symbol, currDT, quantity, direction):
+        if symbol in self._allPositions:
+            symbolPositionsHistory = self._allPositions[symbol]
+            symbolPositionsHistory.updatePositionsByCancelOrder(currDT, quantity, direction)
 
         # update cache for future usage
         self._avaliableForTrade(symbol, currDT)

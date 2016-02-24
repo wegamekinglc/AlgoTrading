@@ -105,7 +105,7 @@ class Backtest(object):
                                            self.benchmark,
                                            self.portfolioType)
         self.executionHanlder = self.executionHanlderCls(self.events, self.dataHandler, self.portfolio, self.logger)
-        self.portfolio.orderBook = OrderBook()
+        self.portfolio.orderBook = OrderBook(self.logger)
         self.filledBook = FilledBook()
         self.portfolio.filledBook = self.filledBook
         self.strategy._port = self.portfolio
@@ -151,7 +151,8 @@ class Backtest(object):
                                                            self.portfolio.orderBook,
                                                            self.portfolio)
                     elif event.type == 'DAYBEGIN':
-                        pass
+                        self.strategy.checkingPriceLimit()
+                        self.portfolio.cancelOrders(event.timeIndex, self.strategy._posBook)
             time.sleep(self.heartbeat)
 
     def _outputPerformance(self):

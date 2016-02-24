@@ -76,6 +76,10 @@ class DataHandler(object):
         raise NotImplementedError()
 
     @abstractmethod
+    def getPreviousDayValue(self, symbol, valType):
+        raise NotImplementedError()
+
+    @abstractmethod
     def updateBars(self):
         raise NotImplementedError()
 
@@ -97,6 +101,7 @@ class DataFrameDataHandler(DataHandler):
         self.continueBacktest = True
         self.currentTimeIndex = dt.datetime(1970, 1, 1)
         self.previousSymbolData = None
+        self.priceLimitHit = set()
 
     def getStartDate(self):
         return self.dateIndex[0]
@@ -125,6 +130,14 @@ class DataFrameDataHandler(DataHandler):
         else:
             return barsList[1][valType]
 
+    def getPreviousDayValue(self, symbol, valType):
+        try:
+            barsList = self.previousSymbolData[symbol]
+        except KeyError:
+            raise KeyError("the symbol {0:s} is not available in the previous day data set".format(symbol))
+        else:
+            return barsList[1][valType]
+
     def checkingDayBegin(self):
         try:
             currentTimeIndex = self.dateIndex[self.start]
@@ -132,7 +145,7 @@ class DataFrameDataHandler(DataHandler):
             return None
         previousTimeIndex = self.currentTimeIndex
         if currentTimeIndex.date() > previousTimeIndex.date():
-            self.events.put(DayBeginEvent())
+            self.events.put(DayBeginEvent(currentTimeIndex))
             self.previousSymbolData = self.latestSymbolData
 
     def updateBars(self):
@@ -163,6 +176,13 @@ class DataFrameDataHandler(DataHandler):
             return None, None
         self.events.put(MarketEvent())
         self.currentTimeIndex = currentTimeIndex
+
+        availableSymbol = list(availableSymbol)
+        availableSymbol.sort()
+
+        tradableAssets = list(tradableAssets)
+        tradableAssets.sort()
+
         return availableSymbol, tradableAssets
 
     def _getNewBar(self, symbol, timeIndex):

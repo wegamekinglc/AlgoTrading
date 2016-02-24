@@ -10,5 +10,6 @@ from AlgoTrading.Events.Event import Event
 
 class DayBeginEvent(Event):
 
-    def __init__(self):
+    def __init__(self, timeIndex):
         self.type = 'DAYBEGIN'
+        self.timeIndex = timeIndex

@@ -61,14 +61,15 @@ class SimulatedExecutionHandler(ExecutionHanlder):
 
     def executeOrder(self, order, asset_type, order_book, portfolio):
         transVolume = self.bars.getLatestBarValue(order.symbol, 'volume')
+        timeIndex = self.bars.getLatestBarDatetime(order.symbol)
         if transVolume == 0:
-            self.logger.warning("{0}: Order ID: {1}  for {2} can't be filled in market frozen status."
-                                .format(order.timeIndex,
+            self.logger.warning("{0}: Order ID: {1} sent at {2} for {3} can't be filled in market frozen status."
+                                .format(timeIndex,
                                         order.orderID,
+                                        order.timeIndex,
                                         order.symbol))
             return None
         transPrice = self.bars.getLatestBarValue(order.symbol, 'close')
-        timeIndex = self.bars.getLatestBarDatetime(order.symbol)
 
         quantity = self._search_suitable_quantity(transPrice,
                                                   order.quantity - order.filled,
@@ -93,10 +94,11 @@ class SimulatedExecutionHandler(ExecutionHanlder):
                                    commission,
                                    nominal)
 
-            self.logger.info("{0}: Order ID: {1} filled at price: ${2} with quantity {3} direction {4}. "
-                             "original order quantity is {5}"
+            self.logger.info("{0}: Order ID: {1} sent at {2} filled at price: ${3} with quantity {4} direction {5}. "
+                             "original order quantity is {6}"
                              .format(timeIndex,
                                      order.orderID,
+                                     order.timeIndex,
                                      transPrice,
                                      quantity,
                                      order.direction,

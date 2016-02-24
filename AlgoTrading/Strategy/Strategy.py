@@ -9,6 +9,7 @@ from __future__ import absolute_import
 from abc import ABCMeta
 from abc import abstractmethod
 import datetime as dt
+import numpy as np
 from AlgoTrading.Events import OrderEvent
 from AlgoTrading.Strategy.InfoKeeper import InfoKepper
 from PyFin.Analysis.SecurityValueHolders import SecurityValueHolder
@@ -315,6 +316,20 @@ class Strategy(object):
                                 "Order is discarded!".format(currDTTime, symbol, quantity, direction))
             return
 
+        if symbol in self.priceLimitTable:
+            currValue = self.bars.getLatestBarValue(symbol, 'close')
+            low_limit, high_limit = self.priceLimitTable[symbol]
+            if currValue <= low_limit and direction < 0:
+                self.logger.warning("{0}: Order for {1} with amount {2} and direction as {3} is not sent "
+                                    "with market is frozen at {4} lower limit price."
+                                    .format(currDTTime, symbol, quantity, direction, currValue))
+                return
+            elif currValue >= high_limit and direction > 0:
+                self.logger.warning("{0}: Order for {1} with amount {2} and direction as {3} is not sent "
+                                    "with market is frozen at {4} higher limit price."
+                                    .format(currDTTime, symbol, quantity, direction, currValue))
+                return
+
         if quantity > 0 and abs(direction) == 1:
             self._orderRecords.append({'symbol': symbol, 'quantity': quantity, 'direction': direction})
         elif quantity == 0 and abs(direction) == 1:
@@ -392,3 +407,17 @@ class Strategy(object):
     @property
     def realizedHoldings(self):
         return self._port.currentHoldings
+
+    def checkingPriceLimit(self):
+        self.priceLimitTable = {}
+        # only work for securities close at the same time
+        for s in self.tradableAssets:
+            try:
+                previous_day_close = self.bars.getPreviousDayValue(s, 'close')
+            except KeyError:
+                previous_day_close = np.nan
+
+            if not np.isnan(previous_day_close):
+                price_limit = self._port.assets[s].price_limit
+                self.priceLimitTable[s] = (1.005 - price_limit) * previous_day_close, (0.995 + price_limit) * previous_day_close,
+

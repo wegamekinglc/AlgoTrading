@@ -126,8 +126,8 @@ class Portfolio(object):
 
         self.filledBook.updateFromFillEvent(event)
 
-    def updateExsitingOrders(self):
-        pass
+    def cancelOrders(self, timeIndex, posBook):
+        self.orderBook.cancelOrders(timeIndex, posBook)
 
     def generateNaiveOrder(self, signal):
         order = None
