@@ -42,7 +42,7 @@ def run_example():
                           dataSource=DataSource.DXDataCenter,
                           benchmark='000300.zicn',
                           saveFile=False,
-                          logLevel='critical',
+                          logLevel='info',
                           plot=False)
 
 

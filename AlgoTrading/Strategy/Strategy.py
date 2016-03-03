@@ -11,6 +11,7 @@ from abc import abstractmethod
 import datetime as dt
 import numpy as np
 from AlgoTrading.Events import OrderEvent
+from AlgoTrading.Events import OrderDirection
 from AlgoTrading.Strategy.InfoKeeper import InfoKepper
 from PyFin.Analysis.SecurityValueHolders import SecurityValueHolder
 
@@ -22,6 +23,9 @@ class Strategy(object):
     @abstractmethod
     def handle_data(self):
         raise NotImplementedError()
+
+    def day_begin(self):
+        return
 
     def _subscribe(self):
         self._infoKeeper = InfoKepper()
@@ -111,6 +115,10 @@ class Strategy(object):
         """
         return self._current_datetime
 
+    @current_datetime.setter
+    def current_datetime(self, value):
+        self._current_datetime = value
+
     @property
     def current_date(self):
         u"""
@@ -192,7 +200,7 @@ class Strategy(object):
         :param symbol: 证券代码
         :return: int
         """
-        return self.avaliableForBuyBack(symbol)[1]
+        return self.avaliableForTrade(symbol)[1]
 
     def avaliableForTrade(self, symbol):
         u"""
@@ -216,8 +224,9 @@ class Strategy(object):
         else:
             currDT = currDTTime
 
-        cashAmount = max(self._port.currentHoldings['cash'], 1e-5)
+        cashAmount = self._port.currentHoldings['cash']
         for order in self._orderRecords:
+            cashAmount = max(cashAmount, 1.e-5)
             symbol = order['symbol']
             quantity = order['quantity']
             direction = order['direction']
@@ -228,44 +237,45 @@ class Strategy(object):
             margin = self._port.assets[symbol].margin
 
             # amount available for buy back or sell
-            if direction == 1:
-                amount = self._posBook.avaliableForTrade(symbol, currDT)[1]
-            elif direction == -1:
-                amount = self._posBook.avaliableForTrade(symbol, currDT)[0]
+            if direction == OrderDirection.BUY:
+                fill_cost = quantity * currValue * multiplier * settle
+                margin_cost = 0.
+            elif direction == OrderDirection.BUY_BACK:
+                fill_cost = 0.
+                margin_cost = 0.
+            elif direction == OrderDirection.SELL:
+                fill_cost = 0.
+                margin_cost = 0.
+            elif direction == OrderDirection.SELL_SHORT:
+                fill_cost = 0.
+                margin_cost = quantity * currValue * multiplier * margin
 
-            fill_cost = quantity * currValue * multiplier * settle * direction
-
-            margin_cost = max(quantity - amount, 0) * currValue * multiplier * margin
             maximumCashCost = max(fill_cost, margin_cost)
 
-            if maximumCashCost <= cashAmount and (direction == 1 or quantity <= amount):
+            if maximumCashCost <= cashAmount:
                 signal = OrderEvent(currDTTime, symbol, "MKT", quantity, direction)
                 self._posBook.updatePositionsByOrder(symbol, currDT, quantity, direction)
                 signals.append(signal)
                 cashAmount -= maximumCashCost
             elif maximumCashCost > cashAmount:
-                if direction == 1:
+                if direction == OrderDirection.BUY :
                     self.logger.warning("{0}: ${1} cash needed to buy the quantity {2} of {3} "
                                         "is less than available cash ${4}"
                                         .format(currDTTime, maximumCashCost, quantity, symbol, cashAmount))
-                else:
-                    self.logger.warning("{0}: ${1} cash needed to sell the quantity {2} of {3} "
+                elif direction == OrderDirection.SELL_SHORT:
+                    self.logger.warning("{0}: ${1} cash needed to sell short the quantity {2} of {3} "
                                         "is less than available cash ${4}"
                                         .format(currDTTime, maximumCashCost, quantity, symbol, cashAmount))
-            else:
-                self.logger.warning("{0}: short disabled {1} quantity need to be sold {2} "
-                                    "is less then the available for sell amount {3}"
-                                    .format(currDTTime, symbol, quantity, amount))
 
         # log the signal informations
         for signal in signals:
             self.logger.info("{0}: {1} Order ID: {2} is sent with quantity {3} and direction {4} on symbol {5}"
-                    .format(signal.timeIndex,
-                            signal.orderType,
-                            signal.orderID,
-                            signal.quantity,
-                            signal.direction,
-                            signal.symbol))
+                             .format(signal.timeIndex,
+                                     signal.orderType,
+                                     signal.orderID,
+                                     signal.quantity,
+                                     signal.direction,
+                                     signal.symbol))
             self.events.put(signal)
 
     def order_to(self, symbol, direction, quantity):
@@ -330,8 +340,28 @@ class Strategy(object):
                                     .format(currDTTime, symbol, quantity, direction, currValue))
                 return
 
-        if quantity > 0 and abs(direction) == 1:
-            self._orderRecords.append({'symbol': symbol, 'quantity': quantity, 'direction': direction})
+        if quantity > 0 and direction == 1:
+            buyback_amount = self.avaliableForBuyBack(symbol)
+            if buyback_amount >= quantity:
+                self._orderRecords.append({'symbol': symbol, 'quantity': quantity, 'direction': OrderDirection.BUY_BACK})
+            else:
+                if buyback_amount != 0:
+                    self._orderRecords.append({'symbol': symbol, 'quantity': buyback_amount, 'direction': OrderDirection.BUY_BACK})
+                self._orderRecords.append({'symbol': symbol, 'quantity': quantity - buyback_amount, 'direction': OrderDirection.BUY})
+        elif quantity > 0 and direction == -1:
+            sell_amount = self.avaliableForSale(symbol)
+            if sell_amount >= quantity:
+                self._orderRecords.append({'symbol': symbol, 'quantity': quantity, 'direction': OrderDirection.SELL})
+            else:
+                if self._port.assets[symbol].short:
+                    if sell_amount != 0:
+                        self._orderRecords.append({'symbol': symbol, 'quantity': sell_amount, 'direction': OrderDirection.SELL})
+                    self._orderRecords.append({'symbol': symbol, 'quantity': quantity - sell_amount, 'direction': OrderDirection.SELL_SHORT})
+                else:
+                    self.logger.warning("{0}: short disabled {1} quantity need to be sold {2} "
+                                        "is less then the available for sell amount {3}."
+                                        .format(currDTTime, symbol, quantity, sell_amount))
+
         elif quantity == 0 and abs(direction) == 1:
             pass
         elif quantity < 0:

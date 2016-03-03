@@ -5,6 +5,8 @@ Created on 2015-9-24
 @author: cheng.li
 """
 
+from AlgoTrading.Events import OrderDirection
+
 
 class Transaction:
 
@@ -63,7 +65,7 @@ class PerValue(object):
         self.sellCost = float(sellCost)
 
     def calculate(self, transaction):
-        if transaction.direction == 1:
+        if transaction.direction == OrderDirection.BUY or transaction.direction == OrderDirection.BUY_BACK:
             costPerShare = transaction.price * self.buyCost
         else:
             costPerShare = transaction.price * self.sellCost

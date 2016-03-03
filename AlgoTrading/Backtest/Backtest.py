@@ -152,7 +152,9 @@ class Backtest(object):
                                                            self.portfolio)
                     elif event.type == 'DAYBEGIN':
                         self.strategy.checkingPriceLimit()
+                        self.strategy.current_datetime = event.timeIndex
                         self.portfolio.cancelOrders(event.timeIndex, self.strategy._posBook)
+                        self.strategy.day_begin()
             time.sleep(self.heartbeat)
 
     def _outputPerformance(self):

@@ -5,14 +5,16 @@ Created on 2015-9-23
 @author: cheng.li
 """
 
-from enum import IntEnum
+from enum import Enum
 from enum import unique
 from AlgoTrading.Events.Event import Event
 
 @unique
-class OrderDirection(IntEnum):
-    BUY = 1
-    SELL = -1
+class OrderDirection(str, Enum):
+    BUY = "BUY"
+    SELL = "SELL"
+    SELL_SHORT = "SELL_SHORT"
+    BUY_BACK = "BUY_BACK"
 
 
 class Order:

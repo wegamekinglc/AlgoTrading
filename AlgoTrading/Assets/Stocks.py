@@ -17,9 +17,9 @@ class XSHGStock(Asset):
     """
     lag = 1
     exchange = "XSHG"
-    commission = PerValue(buyCost=0.0, sellCost=0.003)
+    commission = PerValue(buyCost=0.001, sellCost=0.002)
     multiplier = 1.
-    margin = 0.
+    margin = 1.
     settle = 1.
     minimum = 100
     short = False
@@ -34,9 +34,9 @@ class XSHEStock(Asset):
     """
     lag = 1
     exchange = "XSHE"
-    commission = PerValue(buyCost=0.0, sellCost=0.003)
+    commission = PerValue(buyCost=0.001, sellCost=0.002)
     multiplier = 1.
-    margin = 0.
+    margin = 1.
     settle = 1.
     minimum = 100
     short = False

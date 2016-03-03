@@ -15,6 +15,7 @@ class SettingsFactory(Singleton):
         self._usingCache = False
         self._data_source = DataSource.DXDataCenter
         self._market_volume_cap = 0.05
+        self._strategy_leverage_cap = 1.0
 
     @property
     def usingCache(self):
@@ -73,6 +74,10 @@ class SettingsFactory(Singleton):
         :return: float
         """
         return self._market_volume_cap
+
+    @property
+    def strategy_leverage_cap(self):
+        return self._strategy_leverage_cap
 
     def set_market_volume_cap(self, value):
         u"""

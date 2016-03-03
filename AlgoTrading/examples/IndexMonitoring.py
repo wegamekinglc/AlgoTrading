@@ -35,7 +35,7 @@ def run_example():
                    dataSource=DataSource.DXDataCenter,
                    freq=0,
                    benchmark='000300.zicn',
-                   logLevel="warning",
+                   logLevel="info",
                    saveFile=True,
                    plot=True)
 

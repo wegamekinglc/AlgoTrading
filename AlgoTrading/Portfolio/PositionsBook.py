@@ -9,6 +9,8 @@ import datetime as dt
 import bisect
 import numpy as np
 from PyFin.api import bizDatesList
+from AlgoTrading.Events import OrderDirection
+from AlgoTrading.Utilities.functions import convertDirection
 
 
 class SymbolPositionsHistory(object):
@@ -25,7 +27,13 @@ class SymbolPositionsHistory(object):
 
     def avaliableForTrade(self, currDT, bizDatesList):
         if self.lag == 0:
-            avaliableForSell, avaliableForBuy = np.inf, np.inf
+            avaliableForSell = 0
+            avaliableForBuy = 0
+            for k in range(len(self.dates)):
+                if self.existDirections[k] == 1:
+                    avaliableForSell += self.positions[k] - self.locked[k]
+                else:
+                    avaliableForBuy += self.positions[k] - self.locked[k]
         else:
             i = len(self.dates) - 1
             date = self.dates[i]
@@ -97,6 +105,7 @@ class SymbolPositionsHistory(object):
         posOpened = 0
         pnl = 0.
         toFinish = quantity
+        direction = convertDirection(direction)
         for i, d in enumerate(self.existDirections):
             if d != direction:
                 amount = self.positions[i]
@@ -150,10 +159,13 @@ class SymbolPositionsHistory(object):
     def bookValueAndBookPnL(self, currentPrice):
         bookValue = 0.
         bookPnL = 0.
+        margin = 0.
         for p, d, c in zip(self.positions, self.existDirections, self.existValues):
             bookValue += p * d * currentPrice
+            if bookValue < 0.:
+                margin -= bookValue
             bookPnL += p * d * (currentPrice - c)
-        return bookValue, bookPnL
+        return bookValue, bookPnL, margin
 
     def empty(self):
         return len(self.dates) == 0
@@ -183,11 +195,8 @@ class StocksPositionsBook(object):
             return self._avaliableForTrade(symbol, currDT)
 
     def _avaliableForTrade(self, symbol, currDT):
-        if symbol not in self._allPositions and not self._shortable[symbol]:
-            avaliableForSell = 0
-            avaliableForBuy = 0
-        elif symbol not in self._allPositions:
-            avaliableForSell, avaliableForBuy = np.inf, np.inf
+        if symbol not in self._allPositions:
+            avaliableForSell, avaliableForBuy = 0, 0
         else:
             symbolPositionsHistory = self._allPositions[symbol]
             avaliableForSell, avaliableForBuy =\
@@ -197,6 +206,7 @@ class StocksPositionsBook(object):
         return avaliableForSell, avaliableForBuy
 
     def updatePositionsByOrder(self, symbol, currDT, quantity, direction):
+        direction = convertDirection(direction)
         if symbol not in self._allPositions:
             if not self._shortable[symbol] and direction == -1:
                 raise ValueError("Short sell is not allowed for {0}".format(symbol))
@@ -208,6 +218,7 @@ class StocksPositionsBook(object):
         self._avaliableForTrade(symbol, currDT)
 
     def updatePositionsByCancelOrder(self, symbol, currDT, quantity, direction):
+        direction = convertDirection(direction)
         if symbol in self._allPositions:
             symbolPositionsHistory = self._allPositions[symbol]
             symbolPositionsHistory.updatePositionsByCancelOrder(currDT, quantity, direction)
@@ -221,7 +232,7 @@ class StocksPositionsBook(object):
         symbol = fill_evevt.symbol
         currDT = fill_evevt.timeindex.date()
         quantity = fill_evevt.quantity
-        direction = fill_evevt.direction
+        direction = convertDirection(fill_evevt.direction)
         value = fill_evevt.nominal / quantity / direction
         if symbol not in self._allPositions:
             lag = self._lags[symbol]
@@ -258,11 +269,10 @@ class StocksPositionsBook(object):
 if __name__ == "__main__":
 
     from AlgoTrading.Assets import XSHEStock
-    from AlgoTrading.Assets import IndexFutures
     pb = StocksPositionsBook({'s': XSHEStock})
-    pb.updatePositionsByOrder('s', dt.date(2015, 9, 23), 300, 1)
+    pb.updatePositionsByOrder('s', dt.date(2015, 9, 23), 300, OrderDirection.BUY)
     print(pb._allPositions)
-    pb.updatePositionsByOrder('s', dt.date(2015, 9, 23), 500, -1)
+    pb.updatePositionsByOrder('s', dt.date(2015, 9, 23), 500, OrderDirection.SELL)
     print(pb._allPositions)
 
 

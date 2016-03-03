@@ -40,3 +40,6 @@ class HistoricalCSVDataHandler(DataFrameDataHandler):
 
         self.dateIndex = combIndex
         self.start = 0
+
+    def updateInternalDate(self):
+        return False

@@ -32,28 +32,6 @@ def set_universe(code, refDate=None):
         return list(data.conSecurityID)
 
 
-def categorizeSymbols(symbolList):
-
-    lowSymbols = [s.lower() for s in symbolList]
-
-    stocks = []
-    futures = []
-    indexes = []
-
-    for s in lowSymbols:
-        if s.endswith('xshg') or s.endswith('xshe'):
-            stocks.append(s)
-        elif s.endswith('zicn'):
-            indexes.append(s)
-        else:
-            s_com = s.split('.')
-            if len(s_com) < 2:
-                raise ValueError("Unknown securitie name {0}. Security names without"
-                                 " exchange suffix is not allowed in AlgoTrading".format(s))
-            futures.append(s)
-    return {'stocks': stocks, 'futures': futures, 'indexes': indexes}
-
-
 class DataHandler(object):
 
     __metaclass__ = ABCMeta
@@ -61,7 +39,6 @@ class DataHandler(object):
     def __init__(self, logger, symbolList):
         self.logger = logger
         self.symbolList = [s.lower() for s in symbolList]
-        self.category = categorizeSymbols(self.symbolList)
 
     @abstractmethod
     def getLatestBar(self, symbol):
@@ -88,8 +65,7 @@ class DataHandler(object):
 
     @property
     def tradableAssets(self):
-        self.category = categorizeSymbols(self.symbolList)
-        return list(set(self.category['stocks'] + self.category['futures'] + self.category['indexes']))
+        return self.symbolList
 
 
 class DataFrameDataHandler(DataHandler):
@@ -157,8 +133,12 @@ class DataFrameDataHandler(DataHandler):
             currentTimeIndex = self.dateIndex[self.start]
             self.start += 1
         except IndexError:
-            self.continueBacktest = False
-            return None, None
+            flag = self.updateInternalDate()
+            if not flag:
+                self.continueBacktest = False
+                return None, None
+            else:
+                return self.updateBars()
         for s in self.symbolList:
             try:
                 bar = self._getNewBar(s, currentTimeIndex)

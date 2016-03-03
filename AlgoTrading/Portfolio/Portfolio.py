@@ -11,6 +11,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from PyFin.Utilities import isClose
 from AlgoTrading.Events import OrderEvent
+from AlgoTrading.Events import OrderDirection
 from AlgoTrading.Enums import PortfolioType
 from AlgoTrading.Portfolio.PositionsBook import StocksPositionsBook
 from AlgoTrading.Env import Settings
@@ -89,17 +90,19 @@ class Portfolio(object):
         dh['datetime'] = latestDatetime
         dh['cash'] = self.currentHoldings['cash']
         dh['commission'] = self.currentHoldings['commission']
-        dh['margin'] = self.currentHoldings['margin']
+        dh['margin'] = 0.
         dh['total'] = self.currentHoldings['total']
         dh['pnl'] = self.currentHoldings['pnl']
 
         for s in self.tradableAssets:
             bookValue = 0.
             bookPnL = 0.
+            margin = 0.
             if self.currentPosition[s]:
                 currentCost = self.dataHandler.getLatestBarValue(s, 'close') * self.assets[s].multiplier
-                bookValue, bookPnL = self.positionsBook.getBookValueAndBookPnL(s, currentCost)
+                bookValue, bookPnL, margin = self.positionsBook.getBookValueAndBookPnL(s, currentCost)
             dh[s] = bookValue
+            dh['margin'] += margin
             dh['pnl'] += bookPnL
             dh['total'] += bookPnL
 
@@ -107,7 +110,10 @@ class Portfolio(object):
 
     def updatePositionFromFill(self, fill):
         fillDir = fill.direction
-        self.currentPosition[fill.symbol] += fillDir * fill.quantity
+        if fillDir == OrderDirection.BUY or fillDir == OrderDirection.BUY_BACK:
+            self.currentPosition[fill.symbol] += fill.quantity
+        else:
+            self.currentPosition[fill.symbol] -= fill.quantity
 
     def updateHoldingsFromFill(self, fill, pnl):
         self.currentHoldings[fill.symbol] += fill.fillCost
@@ -118,6 +124,10 @@ class Portfolio(object):
             self.currentHoldings['cash'] += (pnl - fill.commission)
         self.currentHoldings['pnl'] += pnl - fill.commission
         self.currentHoldings['total'] += pnl - fill.commission
+
+        fillDir = fill.direction
+        if fillDir == OrderDirection.BUY_BACK or fillDir == OrderDirection.SELL_SHORT:
+            self.currentHoldings['margin'] -= fill.fillCost
 
     def updateFill(self, event):
         posClosed, posOpen, pnl = self.positionsBook.updatePositionsByFill(event)

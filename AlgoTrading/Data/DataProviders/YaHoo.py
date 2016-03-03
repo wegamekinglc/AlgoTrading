@@ -45,3 +45,6 @@ class YaHooDataProvider(DataFrameDataHandler):
         for i, s in enumerate(self.symbolList):
             if s not in self.symbolData:
                 del self.symbolList[i]
+
+    def updateInternalDate(self):
+        return False

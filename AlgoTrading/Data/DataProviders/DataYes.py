@@ -11,6 +11,7 @@ import numpy as np
 import pandas as pd
 from AlgoTrading.Data.Data import DataFrameDataHandler
 from AlgoTrading.Utilities import transfromDFtoDict
+from AlgoTrading.Utilities.functions import categorizeSymbols
 
 
 class DataYesMarketDataHandler(DataFrameDataHandler):
@@ -19,6 +20,7 @@ class DataYesMarketDataHandler(DataFrameDataHandler):
 
     def __init__(self, **kwargs):
         super(DataYesMarketDataHandler, self).__init__(kwargs['logger'], kwargs['symbolList'])
+        self.category = categorizeSymbols(self.symbolList)
         if kwargs['token']:
             ts.set_token(kwargs['token'])
         else:
@@ -35,6 +37,11 @@ class DataYesMarketDataHandler(DataFrameDataHandler):
         self._getDatas()
         if kwargs['benchmark']:
             self._getBenchmarkData(kwargs['benchmark'], self.startDate, self.endDate)
+
+    @property
+    def tradableAssets(self):
+        self.category = categorizeSymbols(self.symbolList)
+        return list(set(self.category['stocks'] + self.category['futures'] + self.category['indexes']))
 
     def _getDatas(self):
 
@@ -144,3 +151,6 @@ class DataYesMarketDataHandler(DataFrameDataHandler):
         self.benchmarkData = indexData
 
         self.logger.info("Benchmark data loading finished!")
+
+    def updateInternalDate(self):
+        return False
