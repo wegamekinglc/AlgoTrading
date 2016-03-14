@@ -17,14 +17,19 @@ from AlgoTrading.api import set_universe
 
 class CatchMomentumStrategy(Strategy):
 
-    def __init__(self):
+    def __init__(self, index_code):
         self.hist = HIST(1, 'close')
         self.today_close_list = {}
         self.pre_last_price = {}
         self.today_bought_list = []
         self.today_sold_list = []
+        self.index_code = index_code
 
     def handle_data(self):
+
+        last_index = self.hist[self.index_code][-1]
+        pre_last_10day_index_low = 0
+        pre_last_10day_index_high = 0
 
         if self.current_time == '09:30:00':
             self.today_bought_list = []
@@ -46,18 +51,19 @@ class CatchMomentumStrategy(Strategy):
             sell_list = []
             for s in self.universe:
                 self.today_close_list[s].append(self.hist[s][0])
-            if '000905.zicn' in self.pre_last_price:
-                pre_last_10day_index_high = max(self.pre_last_price['000905.zicn'][-10:])
-                pre_last_10day_index_low = min(self.pre_last_price['000905.zicn'][-10:])
-                last_index = self.today_close_list['000905.zicn'][-1]
+            if self.index_code in self.pre_last_price:
+                pre_last_10day_index_high = max(self.pre_last_price[self.index_code][-10:])
+                pre_last_10day_index_low = min(self.pre_last_price[self.index_code][-10:])
             for s in self.tradableAssets:
-                if s in self.pre_last_price and s != '000905.zicn':
-                    # 买入信号
+                if s in self.pre_last_price and s != self.index_code:
+
                     first_price = self.today_close_list[s][0]
                     last_price = self.today_close_list[s][-1]
                     high_price = max(self.today_close_list[s])
                     low_price = min(self.today_close_list[s])
                     pre_last = self.pre_last_price[s][-1]
+
+                    # 买入信号
                     if last_price > high_price * 0.98 \
                             and first_price > pre_last \
                             and last_price > 1.08 * pre_last \
@@ -67,6 +73,7 @@ class CatchMomentumStrategy(Strategy):
                         buy_list.append(s)
                         self.today_bought_list.append(s)
 
+                    # 卖出信号
                     if last_price < 1.02 * low_price \
                         and first_price < pre_last \
                         and last_price < 0.92 * pre_last \
@@ -76,29 +83,24 @@ class CatchMomentumStrategy(Strategy):
                         sell_list.append(s)
                         self.today_sold_list.append(s)
 
-            #for s in buy_list:
-            #    self.order_to_pct(s, 1, 0.05)
-            for s in sell_list:
-                self.order_to_pct(s, -1, 0.05)
+            for s in buy_list:
+                self.order_to_pct(s, 1, 0.05)
+            #for s in sell_list:
+            #    self.order_to_pct(s, -1, 0.05)
         else:
             for s in self.universe:
                 self.today_close_list[s].append(self.hist[s][0])
 
-        #s = '000028.xshe'
-        #self.keep('close', self.hist[s][0])
-        #self.keep('day_open', self.today_close_list[s][0])
-        #self.keep('day_last_price',  self.today_close_list[s][-1])
-        #if s in self.pre_last_price:
-        #    self.keep('pre_day_close', self.pre_last_price[s][-1])
-
 
 def run_example():
-    universe = set_universe('000905.zicn') + ['000905.zicn']
+    index_code = '000905.zicn'
+    universe = set_universe(index_code, refDate='2015-01-01') + [index_code]
     startDate = dt.datetime(2015, 1, 1)
     endDate = dt.datetime(2016, 2, 29)
     initialCapital = 10000000.
 
     return strategyRunner(userStrategy=CatchMomentumStrategy,
+                          strategyParameters=(index_code,),
                           initialCapital=initialCapital,
                           symbolList=universe,
                           startDate=startDate,
@@ -106,7 +108,7 @@ def run_example():
                           dataSource=DataSource.DXDataCenter,
                           portfolioType=PortfolioType.CashManageable,
                           freq=5,
-                          benchmark='000905.zicn',
+                          benchmark=index_code,
                           logLevel="info",
                           saveFile=True,
                           plot=True)

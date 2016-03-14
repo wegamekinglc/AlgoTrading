@@ -40,7 +40,7 @@ class Portfolio(object):
                  portfolioType=PortfolioType.CashManageable):
         self.dataHandler = dataHandler
         self.events = events
-        self.tradableAssets = self.dataHandler.tradableAssets
+        self.allTradableAssets = self.dataHandler.allTradableAssets
         self.startDate = startDate
         self.initialCapital = initialCapital
         self.benchmark = benchmark
@@ -49,7 +49,7 @@ class Portfolio(object):
         self.portfolioType = portfolioType
 
         self.allPositions = self.constructAllPositions()
-        self.currentPosition = defaultdict(int, [(s, 0) for s in self.tradableAssets])
+        self.currentPosition = defaultdict(int, [(s, 0) for s in self.allTradableAssets])
 
         self.allHoldings = self.constructAllHoldings()
         self.currentHoldings = self.constructCurrentHoldings()
@@ -59,12 +59,12 @@ class Portfolio(object):
         vp_settings.set_source(Settings.data_source)
 
     def constructAllPositions(self):
-        d = dict((k, v) for k, v in [(s, 0) for s in self.tradableAssets])
+        d = dict((k, v) for k, v in [(s, 0) for s in self.allTradableAssets])
         d['datetime'] = self.startDate
         return [d]
 
     def constructAllHoldings(self):
-        d = dict((k, v) for k, v in [(s, 0) for s in self.tradableAssets])
+        d = dict((k, v) for k, v in [(s, 0) for s in self.allTradableAssets])
         d['datetime'] = self.startDate
         d['cash'] = self.initialCapital
         d['margin'] = 0.0
@@ -74,7 +74,7 @@ class Portfolio(object):
         return [d]
 
     def constructCurrentHoldings(self):
-        d = dict((k, v) for k, v in [(s, 0) for s in self.tradableAssets])
+        d = dict((k, v) for k, v in [(s, 0) for s in self.allTradableAssets])
         d['datetime'] = self.startDate
         d['cash'] = self.initialCapital
         d['margin'] = 0.0
@@ -86,7 +86,7 @@ class Portfolio(object):
     def updateTimeindex(self):
         latestDatetime = self.dataHandler.currentTimeIndex
 
-        dh = dict((s, 0) for s in self.tradableAssets)
+        dh = dict((s, 0) for s in self.allTradableAssets)
         dh['datetime'] = latestDatetime
         dh['cash'] = self.currentHoldings['cash']
         dh['commission'] = self.currentHoldings['commission']
@@ -94,7 +94,7 @@ class Portfolio(object):
         dh['total'] = self.currentHoldings['total']
         dh['pnl'] = self.currentHoldings['pnl']
 
-        for s in self.tradableAssets:
+        for s in self.allTradableAssets:
             bookValue = 0.
             bookPnL = 0.
             margin = 0.

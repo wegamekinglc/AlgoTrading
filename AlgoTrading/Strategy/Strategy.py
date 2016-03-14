@@ -22,7 +22,7 @@ class Strategy(object):
 
     @abstractmethod
     def handle_data(self):
-        raise NotImplementedError()
+        return
 
     def day_begin(self):
         return

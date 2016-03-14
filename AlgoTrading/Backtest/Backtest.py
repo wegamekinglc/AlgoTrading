@@ -68,8 +68,8 @@ class Backtest(object):
         self.portfolioCls = portfolio
         self.strategyCls = strategy
         self.strategyParameters = strategyParameters
-        self.symbolList = self.dataHandler.symbolList
-        self.tradable = self.dataHandler.tradableAssets
+        self.symbolList = self.dataHandler.whole_symbols
+        self.tradable = self.dataHandler.allTradableAssets
         self.assets = setAssetsConfig(self.tradable)
         self.events = queue.Queue()
         self.dataHandler.setEvents(self.events)

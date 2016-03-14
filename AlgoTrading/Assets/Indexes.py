@@ -19,7 +19,7 @@ class EXIndex(Asset):
     exchange = "SE"
     commission = PerValue(buyCost=0.0, sellCost=0.0)
     multiplier = 1.
-    margin = 0.
+    margin = 1.
     settle = 1.
     minimum = 1
     short = True
