@@ -96,7 +96,7 @@ def run_example():
     index_code = '000905.zicn'
     universe = set_universe(index_code, refDate='2015-01-01') + [index_code]
     startDate = dt.datetime(2015, 1, 1)
-    endDate = dt.datetime(2016, 2, 29)
+    endDate = dt.datetime(2016, 4, 15)
     initialCapital = 10000000.
 
     return strategyRunner(userStrategy=CatchMomentumStrategy,

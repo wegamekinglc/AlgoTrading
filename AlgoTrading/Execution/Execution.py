@@ -85,7 +85,7 @@ class SimulatedExecutionHandler(ExecutionHanlder):
     def executeOrder(self, order, asset_type, order_book, portfolio):
         transVolume = self.bars.getLatestBarValue(order.symbol, 'volume')
         timeIndex = self.bars.getLatestBarDatetime(order.symbol)
-        if transVolume == 0:
+        if transVolume == 0 or np.isnan(transVolume):
             self.logger.warning("{0}: Order ID: {1} sent at {2} for {3} can't be filled in market frozen status."
                                 .format(timeIndex,
                                         order.orderID,

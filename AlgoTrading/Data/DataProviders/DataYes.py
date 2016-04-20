@@ -20,7 +20,6 @@ class DataYesMarketDataHandler(DataFrameDataHandler):
 
     def __init__(self, **kwargs):
         super(DataYesMarketDataHandler, self).__init__(kwargs['logger'], kwargs['symbolList'])
-        self.category = categorizeSymbols(self.symbolList)
         if kwargs['token']:
             ts.set_token(kwargs['token'])
         else:
@@ -37,11 +36,6 @@ class DataYesMarketDataHandler(DataFrameDataHandler):
         self._getDatas()
         if kwargs['benchmark']:
             self._getBenchmarkData(kwargs['benchmark'], self.startDate, self.endDate)
-
-    @property
-    def tradableAssets(self):
-        self.category = categorizeSymbols(self.symbolList)
-        return list(set(self.category['stocks'] + self.category['futures'] + self.category['indexes']))
 
     def _getDatas(self):
 
@@ -107,16 +101,19 @@ class DataYesMarketDataHandler(DataFrameDataHandler):
             result[s] = data
 
         result = {}
-        if self.category['stocks']:
-            for s in self.category['stocks']:
+
+        category = self.category(self.symbolList)
+
+        if category['stocks']:
+            for s in category['stocks']:
                 getOneSymbolData((self.mt, s, self.startDate, self.endDate, self.logger, result))
 
-        if self.category['indexes']:
-            for s in self.category['indexes']:
+        if category['indexes']:
+            for s in category['indexes']:
                 getOneSymbolIndeData((self.mt, s, self.startDate, self.endDate, self.logger, result))
 
-        if self.category['futures']:
-            for s in self.category['futures']:
+        if category['futures']:
+            for s in category['futures']:
                 getOneSymbolFutureData((self.mt, s, self.startDate, self.endDate, self.logger, result))
 
         for s in result:

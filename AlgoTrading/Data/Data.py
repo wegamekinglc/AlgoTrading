@@ -13,6 +13,7 @@ from AlgoTrading.Events import MarketEvent
 from AlgoTrading.Events import DayBeginEvent
 from AlgoTrading.Env import Settings
 from AlgoTrading.Enums import DataSource
+from AlgoTrading.Utilities.functions import categorizeSymbols
 
 
 def set_universe(code, refDate=None):
@@ -78,6 +79,20 @@ class DataFrameDataHandler(DataHandler):
         self.currentTimeIndex = dt.datetime(1970, 1, 1)
         self.previousSymbolData = None
         self.priceLimitHit = set()
+        self.whole_symbols = self.symbolList[:]
+
+    def category(self, symbols):
+        return categorizeSymbols(symbols)
+
+    @property
+    def tradableAssets(self):
+        category = self.category(self.symbolList)
+        return list(set(category['stocks'] + category['futures'] + category['indexes']))
+
+    @property
+    def allTradableAssets(self):
+        category = self.category(self.whole_symbols)
+        return list(set(category['stocks'] + category['futures'] + category['indexes']))
 
     def getStartDate(self):
         return self.dateIndex[0]

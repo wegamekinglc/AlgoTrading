@@ -29,7 +29,6 @@ class MovingAverageCrossStrategy(Strategy):
     def handle_data(self):
 
         for secID in self.tradableAssets:
-            print(self.RSI.isFull[secID])
             #if not self.MACDDiff.isFull[secID] or not self.RSI.isFull[secID]:
             #    continue
             if self.MACDDiff[secID] > 2 \
