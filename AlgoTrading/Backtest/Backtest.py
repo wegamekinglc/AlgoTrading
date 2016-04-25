@@ -9,6 +9,7 @@ try:
     import Queue as queue
 except ImportError:
     import queue
+
 import time
 import numpy as np
 from PyFin.Env import Settings
@@ -21,6 +22,8 @@ from AlgoTrading.Assets import XSHEStock
 from AlgoTrading.Assets import IFFutures
 from AlgoTrading.Assets import ICFutures
 from AlgoTrading.Assets import IHFutures
+from AlgoTrading.Assets import TFFutures
+from AlgoTrading.Assets import TFutures
 from AlgoTrading.Assets import EXIndex
 
 
@@ -34,6 +37,10 @@ def setAssetsConfig(symbolList):
                 res[s] = ICFutures
             elif s.startswith('ih'):
                 res[s] = IHFutures
+            elif s.startswith('tf'):
+                res[s] = TFFutures
+            elif s.startswith('t') and s.endswith('cffex'):
+                res[s] = TFutures
             else:
                 res[s] = XSHGStock
         else:
