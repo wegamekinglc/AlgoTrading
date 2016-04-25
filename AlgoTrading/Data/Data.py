@@ -87,12 +87,12 @@ class DataFrameDataHandler(DataHandler):
     @property
     def tradableAssets(self):
         category = self.category(self.symbolList)
-        return list(set(category['stocks'] + category['futures'] + category['indexes']))
+        return list(set(category['stocks'] + category['futures'] + category['indexes'] + category['futures_con']))
 
     @property
     def allTradableAssets(self):
         category = self.category(self.whole_symbols)
-        return list(set(category['stocks'] + category['futures'] + category['indexes']))
+        return list(set(category['stocks'] + category['futures'] + category['indexes'] + category['futures_con']))
 
     def getStartDate(self):
         return self.dateIndex[0]

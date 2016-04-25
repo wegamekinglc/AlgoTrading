@@ -41,6 +41,7 @@ def categorizeSymbols(symbolList):
     stocks = []
     futures = []
     indexes = []
+    futures_con = []
 
     for s in lowSymbols:
         if s.endswith('xshg') or s.endswith('xshe'):
@@ -52,7 +53,11 @@ def categorizeSymbols(symbolList):
             if len(s_com) < 2:
                 raise ValueError("Unknown securitie name {0}. Security names without"
                                  " exchange suffix is not allowed in AlgoTrading".format(s))
-            futures.append(s)
-    return {'stocks': stocks, 'futures': futures, 'indexes': indexes}
+
+            if len(s_com[0]) <= 2:
+                futures_con.append(s)
+            else:
+                futures.append(s)
+    return {'stocks': stocks, 'futures': futures, 'indexes': indexes, 'futures_con': futures_con}
 
 
