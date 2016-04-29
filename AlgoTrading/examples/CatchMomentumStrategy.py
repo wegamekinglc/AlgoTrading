@@ -24,6 +24,7 @@ class CatchMomentumStrategy(Strategy):
         self.today_bought_list = []
         self.today_sold_list = []
         self.index_code = index_code
+        self.index_look_back = 5
 
     def handle_data(self):
 
@@ -52,8 +53,8 @@ class CatchMomentumStrategy(Strategy):
             for s in self.universe:
                 self.today_close_list[s].append(self.hist[s][0])
             if self.index_code in self.pre_last_price:
-                pre_last_10day_index_high = max(self.pre_last_price[self.index_code][-10:])
-                pre_last_10day_index_low = min(self.pre_last_price[self.index_code][-10:])
+                pre_look_back_index_high = max(self.pre_last_price[self.index_code][- self.index_look_back:])
+                pre_look_back_index_low = min(self.pre_last_price[self.index_code][- self.index_look_back:])
             for s in self.tradableAssets:
                 if s in self.pre_last_price and s != self.index_code:
 
@@ -67,7 +68,7 @@ class CatchMomentumStrategy(Strategy):
                     if last_price > high_price * 0.98 \
                             and first_price > pre_last \
                             and last_price > 1.08 * pre_last \
-                            and last_index > pre_last_10day_index_high \
+                            and last_index > pre_look_back_index_high \
                             and s not in self.today_bought_list \
                             and self.secPos[s] == 0:
                         buy_list.append(s)
@@ -75,11 +76,11 @@ class CatchMomentumStrategy(Strategy):
 
                     # 卖出信号
                     if last_price < 1.02 * low_price \
-                        and first_price < pre_last \
-                        and last_price < 0.92 * pre_last \
-                        and last_index < pre_last_10day_index_low \
-                        and s not in self.today_sold_list \
-                        and self.secPos[s] == 0:
+                            and first_price < pre_last \
+                            and last_price < 0.92 * pre_last \
+                            and last_index < pre_look_back_index_low \
+                            and s not in self.today_sold_list \
+                            and self.secPos[s] == 0:
                         sell_list.append(s)
                         self.today_sold_list.append(s)
 
@@ -96,7 +97,7 @@ def run_example():
     index_code = '000905.zicn'
     universe = set_universe(index_code, refDate='2015-01-01') + [index_code]
     startDate = dt.datetime(2015, 1, 1)
-    endDate = dt.datetime(2016, 4, 15)
+    endDate = dt.datetime(2016, 4, 25)
     initialCapital = 10000000.
 
     return strategyRunner(userStrategy=CatchMomentumStrategy,
