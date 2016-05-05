@@ -29,8 +29,6 @@ class CatchMomentumStrategy(Strategy):
     def handle_data(self):
 
         last_index = self.hist[self.index_code][-1]
-        pre_last_10day_index_low = 0
-        pre_last_10day_index_high = 0
 
         if self.current_time == '09:30:00':
             self.today_bought_list = []

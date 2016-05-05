@@ -31,7 +31,7 @@ class MovingAverageCrossStrategy(Strategy):
 
 def run_example():
     csvDir = "data"
-    universe = ['aapl', 'msft', 'ibm']
+    universe = ['aapl.us', 'msft.us', 'ibm.us']
     initialCapital = 1000000.0
 
     strategyRunner(userStrategy=MovingAverageCrossStrategy,

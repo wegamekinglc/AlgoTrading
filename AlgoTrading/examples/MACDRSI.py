@@ -51,7 +51,7 @@ def run_example():
                    symbolList=universe,
                    startDate=startDate,
                    endDate=endDate,
-                   dataSource=DataSource.DXDataCenter,
+                   dataSource=DataSource.DataYes,
                    benchmark='000300.zicn',
                    freq=5,
                    logLevel='info',

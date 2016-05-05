@@ -25,7 +25,8 @@ class YaHooDataProvider(DataFrameDataHandler):
     def _getDatas(self):
         combIndex = None
         for s in self.symbolList:
-            self.symbolData[s] = web.get_data_yahoo(s,
+            sname = s.split('.')[0]
+            self.symbolData[s] = web.get_data_yahoo(sname,
                                                     start=self.startDate.strftime("%Y%m%d"),
                                                     end=self.endDate.strftime("%Y%m%d"),
                                                     adjust_price=True).sort_index()

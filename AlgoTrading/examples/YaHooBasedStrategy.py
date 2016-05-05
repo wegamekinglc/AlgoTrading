@@ -27,7 +27,7 @@ class MovingAverageCrossStrategy(Strategy):
 
 
 def run_example():
-    universe = ['aapl', 'msft', 'ibm']
+    universe = ['aapl.us', 'msft.us', 'ibm.us']
     initialCapital = 100000.0
     startDate = dt.datetime(1990, 1, 1)
     endDate = dt.datetime(2015, 9, 15)
