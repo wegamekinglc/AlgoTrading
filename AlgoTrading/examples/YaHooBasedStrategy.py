@@ -21,9 +21,9 @@ class MovingAverageCrossStrategy(Strategy):
     def handle_data(self):
         for s in self.universe:
             if self.short_sma[s] > self.long_sma[s] and self.secPos[s] == 0:
-                self.order(s, 1, quantity=1000)
+                self.order(s, 1, quantity=100)
             elif self.short_sma[s] < self.long_sma[s] and self.secPos[s] != 0:
-                self.order(s, -1, quantity=1000)
+                self.order(s, -1, quantity=100)
 
 
 def run_example():

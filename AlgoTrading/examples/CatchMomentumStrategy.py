@@ -30,7 +30,7 @@ class CatchMomentumStrategy(Strategy):
 
         last_index = self.hist[self.index_code][-1]
 
-        if self.current_time == '09:30:00':
+        if self.current_time == '09:35:00':
             self.today_bought_list = []
             self.today_sold_list = []
             for s in self.secPos:
@@ -39,13 +39,13 @@ class CatchMomentumStrategy(Strategy):
             for s in self.universe:
                 self.today_close_list[s] = []
                 self.today_close_list[s].append(self.hist[s][0])
-        elif self.current_time == '14:55:00':
+        elif self.current_time == '15:00:00':
             for s in self.universe:
                 if s in self.pre_last_price:
                     self.pre_last_price[s].append(self.hist[s][0])
                 else:
                     self.pre_last_price[s] = [self.hist[s][0]]
-        elif self.current_time < '14:55:00':
+        elif self.current_time < '15:00:00':
             buy_list = []
             sell_list = []
             for s in self.universe:
@@ -84,8 +84,7 @@ class CatchMomentumStrategy(Strategy):
 
             for s in buy_list:
                 self.order_to_pct(s, 1, 0.05)
-            #for s in sell_list:
-            #    self.order_to_pct(s, -1, 0.05)
+
         else:
             for s in self.universe:
                 self.today_close_list[s].append(self.hist[s][0])
@@ -114,7 +113,7 @@ def run_example():
 
 
 if __name__ == "__main__":
-    Settings.enableCache()
+    #Settings.enableCache()
     startTime = dt.datetime.now()
     print("Start: %s" % startTime)
     run_example()
