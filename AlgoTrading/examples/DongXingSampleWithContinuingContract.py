@@ -166,7 +166,7 @@ def run_example():
 
     universe = indexes + futures
     startDate = dt.datetime(2015, 5, 1)
-    endDate = dt.datetime(2016, 4, 25)
+    endDate = dt.datetime(2016, 8, 25)
 
     strategyRunner(userStrategy=MovingAverageCrossStrategy,
                    symbolList=universe,

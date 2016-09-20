@@ -33,29 +33,31 @@ class MovingAverageCrossStrategy(Strategy):
             #    continue
             if self.MACDDiff[secID] > 2 \
                     and self.RSI[secID] > 51.:
-                self.order_to(secID, 1, 1)
+                self.order_to(secID, 1, 2)
             elif self.MACDDiff[secID] < -2 \
                     and self.RSI[secID] < 49.:
-                self.order_to(secID, 1, -1)
+                self.order_to(secID, 1, -2)
+            else:
+                self.order_to(secID, 0, 0)
 
 
 def run_example():
     universe = ['000905.zicn'] #set_universe('000300.zicn', refDate='2012-06-01')
 
     startDate = dt.datetime(2013, 1, 1)
-    endDate = dt.datetime(2016, 1, 12)
+    endDate = dt.datetime(2016, 8, 12)
 
     strategyRunner(userStrategy=MovingAverageCrossStrategy,
                    strategyParameters=(39, 78, 27, 42),
-                   #initialCapital=50000.,
+                   initialCapital=50000.,
                    symbolList=universe,
                    startDate=startDate,
                    endDate=endDate,
                    dataSource=DataSource.DataYes,
-                   benchmark='000300.zicn',
+                   benchmark='000905.zicn',
                    freq=5,
                    logLevel='info',
-                   #portfolioType=PortfolioType.CashManageable,
+                   portfolioType=PortfolioType.CashManageable,
                    plot=True,
                    saveFile=False)
 

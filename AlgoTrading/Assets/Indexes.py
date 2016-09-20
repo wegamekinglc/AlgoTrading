@@ -16,11 +16,20 @@ class EXIndex(Asset):
 
     """
     lag = 0
-    exchange = "SE"
-    commission = PerValue(buyCost=0.0, sellCost=0.0)
+    exchange = "ZICN"
+    commission = PerValue(buyCost=0.00, sellCost=0.00)
     multiplier = 1.
     margin = 1.
     settle = 1.
     minimum = 1
     short = True
     price_limit = 0.1
+
+
+if __name__ == "__main__":
+
+    s1 = EXIndex()
+    s2 = EXIndex()
+
+    s1.lag = 20
+    print(s2)

@@ -7,7 +7,7 @@ Created on 2015-9-25
 
 import datetime as dt
 import bisect
-import numpy as np
+import pandas as pd
 from PyFin.api import bizDatesList
 from AlgoTrading.Events import OrderDirection
 from AlgoTrading.Utilities.functions import convertDirection
@@ -24,6 +24,13 @@ class SymbolPositionsHistory(object):
         self.locked = [locked]
         self.existDirections = [direction]
         self.existValues = [value]
+
+    def view(self):
+        return pd.DataFrame({'date': self.dates,
+                             'positions': self.positions,
+                             'locked': self.locked,
+                             'direction': self.existDirections,
+                             'cost': self.existValues})
 
     def avaliableForTrade(self, currDT, bizDatesList):
         if self.lag == 0:
@@ -177,12 +184,14 @@ class StocksPositionsBook(object):
 
     def __init__(self, assets):
 
-        self._allPositions = {}
         self.assets = assets
         self._lags = {s: self.assets[s].lag for s in self.assets.keys()}
         self._shortable = {s: self.assets[s].short for s in self.assets.keys()}
         self._cachedSaleAmount = {}
         self._allPositions = {}
+
+    def positions(self, symbol):
+        return self._allPositions[symbol]
 
     def avaliableForTrade(self, symbol, currDT):
         if symbol in self._cachedSaleAmount:

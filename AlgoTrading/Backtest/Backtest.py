@@ -24,6 +24,7 @@ from AlgoTrading.Assets import ICFutures
 from AlgoTrading.Assets import IHFutures
 from AlgoTrading.Assets import TFFutures
 from AlgoTrading.Assets import TFutures
+from AlgoTrading.Assets import RUFutures
 from AlgoTrading.Assets import EXIndex
 
 
@@ -41,8 +42,10 @@ def setAssetsConfig(symbolList):
                 res[s] = TFFutures
             elif s.startswith('t') and s.endswith('cffex'):
                 res[s] = TFutures
+            elif s.startswith('ru'):
+                res[s] = RUFutures
             else:
-                res[s] = XSHGStock
+                res[s] = XSHEStock
         else:
             if s.endswith('zicn'):
                 res[s] = EXIndex
@@ -167,7 +170,8 @@ class Backtest(object):
     def _outputPerformance(self):
 
         self.portfolio.createEquityCurveDataframe()
-        perf_metric, perf_df, rollingRisk, aggregated_positions, transactions, turnover_rate = self.portfolio.outputSummaryStats(self.portfolio.equityCurve, self.plot)
+        perf_metric, perf_df, rollingRisk, aggregated_positions, transactions, turnover_rate = \
+            self.portfolio.outputSummaryStats(self.portfolio.equityCurve, self.plot)
         return self.portfolio.equityCurve, \
                self.portfolio.orderBook.view(), \
                self.filledBook.view(), \

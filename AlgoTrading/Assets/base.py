@@ -5,12 +5,15 @@ Created on 2015-9-25
 @author: cheng.li
 """
 
-from collections import namedtuple
-
-Asset = namedtuple('Asset', 'lag exchange commission multiplier margin settle minimum short price_limit')
+from PyFin.Patterns.Singleton import Singleton
 
 
-class Asset:
+class Asset(Singleton):
 
-    def __init__(self):
-        pass
+    @classmethod
+    def props(cls):
+        return {i: cls.__dict__[i] for i in cls.__dict__.keys() if i[:1] != '_'}
+
+    @classmethod
+    def __str__(cls):
+        return cls.props().__str__()

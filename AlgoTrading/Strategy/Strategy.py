@@ -10,6 +10,7 @@ from abc import ABCMeta
 from abc import abstractmethod
 import datetime as dt
 import numpy as np
+import pandas as pd
 from AlgoTrading.Events import OrderEvent
 from AlgoTrading.Events import OrderDirection
 from AlgoTrading.Strategy.InfoKeeper import InfoKepper
@@ -258,7 +259,7 @@ class Strategy(object):
                 signals.append(signal)
                 cashAmount -= maximumCashCost
             elif maximumCashCost > cashAmount:
-                if direction == OrderDirection.BUY :
+                if direction == OrderDirection.BUY:
                     self.logger.warning("{0}: ${1} cash needed to buy the quantity {2} of {3} "
                                         "is less than available cash ${4}"
                                         .format(currDTTime, maximumCashCost, quantity, symbol, cashAmount))
@@ -413,6 +414,15 @@ class Strategy(object):
         actual_amount = rought_amount // self._port.assets[symbol].minimum * self._port.assets[symbol].minimum
         self.order_to(symbol, direction, actual_amount)
 
+    @property
+    def liveOrders(self):
+        return self._port.orderBook.liveOrders()
+
+    def secPosDetail(self, secID):
+        try:
+            return self._port.positionsBook.positions(secID).view()
+        except KeyError:
+            return pd.DataFrame()
 
     @property
     def secPos(self):

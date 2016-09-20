@@ -93,8 +93,8 @@ class CatchMomentumStrategy(Strategy):
 def run_example():
     index_code = '000905.zicn'
     universe = set_universe(index_code, refDate='2015-01-01') + [index_code]
-    startDate = dt.datetime(2015, 1, 1)
-    endDate = dt.datetime(2016, 4, 25)
+    startDate = dt.datetime(2013, 1, 1)
+    endDate = dt.datetime(2016, 8, 25)
     initialCapital = 10000000.
 
     return strategyRunner(userStrategy=CatchMomentumStrategy,
@@ -109,7 +109,7 @@ def run_example():
                           benchmark=index_code,
                           logLevel="info",
                           saveFile=True,
-                          plot=True)
+                          plot=False)
 
 
 if __name__ == "__main__":

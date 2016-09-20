@@ -8,8 +8,8 @@ Created on 2015-11-13
 from AlgoTrading.Assets.base import Asset
 from AlgoTrading.Finance.Commission import PerValue
 
-index_future_cost = 0.00015
-bond_future_cost = 0.000003
+index_future_cost = 0.0
+bond_future_cost = 0.0
 
 
 class IFFutures(Asset):
@@ -90,6 +90,18 @@ class TFutures(Asset):
     exchange = 'CFFEX'
     commission = PerValue(buyCost=bond_future_cost, sellCost=bond_future_cost)
     multiplier = 10000
+    margin = 0.
+    settle = 0.
+    minimum = 1
+    short = True
+    price_limit = 0.1
+
+
+class RUFutures(Asset):
+    lag = 0
+    exchange = 'CFFEX'
+    commission = PerValue(buyCost=0.002, sellCost=0.002)
+    multiplier = 1
     margin = 0.
     settle = 0.
     minimum = 1

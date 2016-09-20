@@ -12,6 +12,7 @@ from AlgoTrading.Assets.Futures import ICFutures
 from AlgoTrading.Assets.Futures import IHFutures
 from AlgoTrading.Assets.Futures import TFFutures
 from AlgoTrading.Assets.Futures import TFutures
+from AlgoTrading.Assets.Futures import RUFutures
 from AlgoTrading.Assets.Indexes import EXIndex
 from AlgoTrading.Assets.MutualFunds import XSHGMutualFund
 from AlgoTrading.Assets.MutualFunds import XSHEMutualFund
@@ -23,6 +24,7 @@ __all__ = ['XSHGStock',
            'IHFutures',
            'TFFutures',
            'TFutures',
+           'RUFutures',
            'EXIndex',
            'XSHGMutualFund',
            'XSHEMutualFund']
