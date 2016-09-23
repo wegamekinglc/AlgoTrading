@@ -8,8 +8,7 @@ Created on 2015-11-13
 from AlgoTrading.Assets.base import Asset
 from AlgoTrading.Finance.Commission import PerValue
 
-index_future_cost = 0.0
-bond_future_cost = 0.0
+future_cost = 0.
 
 
 class IFFutures(Asset):
@@ -19,9 +18,9 @@ class IFFutures(Asset):
 
     """
     lag = 0
-    exchange = 'CFFEX'
-    commission = PerValue(buyCost=index_future_cost, sellCost=index_future_cost)
-    multiplier = 300
+    exchange = 'CCFX'
+    commission = PerValue(buyCost=future_cost, sellCost=future_cost)
+    multiplier = 1
     margin = 0.
     settle = 0.
     minimum = 1
@@ -36,9 +35,9 @@ class IHFutures(Asset):
 
     """
     lag = 0
-    exchange = 'CFFEX'
-    commission = PerValue(buyCost=index_future_cost, sellCost=index_future_cost)
-    multiplier = 300
+    exchange = 'CCFX'
+    commission = PerValue(buyCost=future_cost, sellCost=future_cost)
+    multiplier = 1
     margin = 0.
     settle = 0.
     minimum = 1
@@ -53,9 +52,9 @@ class ICFutures(Asset):
 
     """
     lag = 0
-    exchange = 'CFFEX'
-    commission = PerValue(buyCost=index_future_cost, sellCost=index_future_cost)
-    multiplier = 200
+    exchange = 'CCFX'
+    commission = PerValue(buyCost=future_cost, sellCost=future_cost)
+    multiplier = 1
     margin = 0.
     settle = 0.
     minimum = 1
@@ -70,9 +69,9 @@ class TFFutures(Asset):
 
     """
     lag = 0
-    exchange = 'CFFEX'
-    commission = PerValue(buyCost=bond_future_cost, sellCost=bond_future_cost)
-    multiplier = 10000
+    exchange = 'CCFX'
+    commission = PerValue(buyCost=future_cost, sellCost=future_cost)
+    multiplier = 1
     margin = 0.
     settle = 0.
     minimum = 1
@@ -87,9 +86,9 @@ class TFutures(Asset):
 
     """
     lag = 0
-    exchange = 'CFFEX'
-    commission = PerValue(buyCost=bond_future_cost, sellCost=bond_future_cost)
-    multiplier = 10000
+    exchange = 'CCFX'
+    commission = PerValue(buyCost=future_cost, sellCost=future_cost)
+    multiplier = 1
     margin = 0.
     settle = 0.
     minimum = 1
@@ -99,8 +98,8 @@ class TFutures(Asset):
 
 class RUFutures(Asset):
     lag = 0
-    exchange = 'CFFEX'
-    commission = PerValue(buyCost=0.002, sellCost=0.002)
+    exchange = 'XSGE'
+    commission = PerValue(buyCost=future_cost, sellCost=future_cost)
     multiplier = 1
     margin = 0.
     settle = 0.
@@ -108,3 +107,50 @@ class RUFutures(Asset):
     short = True
     price_limit = 0.1
 
+
+class RBFutures(Asset):
+    lag = 0
+    exchange = 'XSGE'
+    commission = PerValue(buyCost=future_cost, sellCost=future_cost)
+    multiplier = 1
+    margin = 0.
+    settle = 0.
+    minimum = 1
+    short = True
+    price_limit = 0.1
+
+
+class AFutures(Asset):
+    lag = 0
+    exchange = 'XDCE'
+    commission = PerValue(buyCost=future_cost, sellCost=future_cost)
+    multiplier = 1
+    margin = 0.
+    settle = 0.
+    minimum = 1
+    short = True
+    price_limit = 0.1
+
+
+class YFutures(Asset):
+    lag = 0
+    exchange = 'XDCE'
+    commission = PerValue(buyCost=future_cost, sellCost=future_cost)
+    multiplier = 1
+    margin = 0.
+    settle = 0.
+    minimum = 1
+    short = True
+    price_limit = 0.1
+
+
+class TAFutures(Asset):
+    lag = 0
+    exchange = 'XZCE'
+    commission = PerValue(buyCost=future_cost, sellCost=future_cost)
+    multiplier = 1
+    margin = 0.
+    settle = 0.
+    minimum = 1
+    short = True
+    price_limit = 0.1

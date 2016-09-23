@@ -20,12 +20,12 @@ class MonitoringIndexStrategy(Strategy):
     def handle_data(self):
 
         for s in self.universe:
-            self.order(s, 1, 100)
+            self.order_to(s, 1, 100)
 
 
 def run_example():
     universe = ['000300.zicn']
-    startDate = dt.datetime(2003, 12, 1)
+    startDate = dt.datetime(2005, 1, 1)
     endDate = dt.datetime(2015, 11, 1)
 
     strategyRunner(userStrategy=MonitoringIndexStrategy,

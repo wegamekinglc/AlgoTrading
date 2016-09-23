@@ -8,6 +8,8 @@ Created on 2015-11-13
 from AlgoTrading.Assets.base import Asset
 from AlgoTrading.Finance.Commission import PerValue
 
+index_cost = 0.
+
 
 class EXIndex(Asset):
     u"""
@@ -17,7 +19,7 @@ class EXIndex(Asset):
     """
     lag = 0
     exchange = "ZICN"
-    commission = PerValue(buyCost=0.00, sellCost=0.00)
+    commission = PerValue(buyCost=index_cost, sellCost=index_cost)
     multiplier = 1.
     margin = 1.
     settle = 1.

@@ -25,34 +25,39 @@ from AlgoTrading.Assets import IHFutures
 from AlgoTrading.Assets import TFFutures
 from AlgoTrading.Assets import TFutures
 from AlgoTrading.Assets import RUFutures
+from AlgoTrading.Assets import RBFutures
+from AlgoTrading.Assets import AFutures
+from AlgoTrading.Assets import YFutures
+from AlgoTrading.Assets import TAFutures
 from AlgoTrading.Assets import EXIndex
+
+
+ASSETS_MAPPING = {
+    ('', 'xshg'): XSHGStock,
+    ('', 'xshe'): XSHEStock,
+    ('', 'zicn'): EXIndex,
+    ('if', 'ccfx'): IFFutures,
+    ('ic', 'ccfx'): ICFutures,
+    ('ih', 'ccfx'): IHFutures,
+    ('tf', 'ccfx'): TFFutures,
+    ('t', 'ccfx'): TFutures,
+    ('ru', 'xsge'): RUFutures,
+    ('rb', 'xsge'): RBFutures,
+    ('a', 'xdce'): AFutures,
+    ('y', 'xdce'): YFutures,
+    ('ta', 'xzce'): TAFutures,
+}
 
 
 def setAssetsConfig(symbolList):
     res = {}
     for s in symbolList:
-        if s[0].isalpha():
-            if s.startswith('if'):
-                res[s] = IFFutures
-            elif s.startswith('ic'):
-                res[s] = ICFutures
-            elif s.startswith('ih'):
-                res[s] = IHFutures
-            elif s.startswith('tf'):
-                res[s] = TFFutures
-            elif s.startswith('t') and s.endswith('cffex'):
-                res[s] = TFutures
-            elif s.startswith('ru'):
-                res[s] = RUFutures
-            else:
-                res[s] = XSHEStock
-        else:
-            if s.endswith('zicn'):
-                res[s] = EXIndex
-            elif s.endswith('xshg'):
-                res[s] = XSHGStock
-            elif s.endswith('xshe'):
-                res[s] = XSHEStock
+        code_com = s.split('.')
+        code = ''.join(filter(str.isalpha, code_com[0]))
+        exchange = code_com[-1]
+        key = (code, exchange)
+
+        res[s] = ASSETS_MAPPING[key]
     return res
 
 
@@ -160,6 +165,9 @@ class Backtest(object):
                                                            self.assets[event.symbol],
                                                            self.portfolio.orderBook,
                                                            self.portfolio)
+                        self.strategy.handle_order(event)
+                    elif event.type == 'FILL':
+                        self.strategy.handle_fill(event)
                     elif event.type == 'DAYBEGIN':
                         self.strategy.checkingPriceLimit()
                         self.strategy.current_datetime = event.timeIndex

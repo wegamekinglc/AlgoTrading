@@ -88,7 +88,7 @@ class HighFrequencyRU(Strategy):
 
 
 def run_example():
-    universe = ['ru.cffex']
+    universe = ['ru.xsge']
 
     startDate = dt.datetime(2016, 7, 1)
     endDate = dt.datetime(2016, 8, 31)

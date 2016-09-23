@@ -57,7 +57,7 @@ class MovingAverageCrossStrategy(Strategy):
         if self.current_datetime.hour == 9 and self.current_datetime.minute < 30:
             return
 
-        ihc, ifc, icc = 'ih.cffex', 'if.cffex', 'ic.cffex'
+        ihc, ifc, icc = 'ih.ccfx', 'if.ccfx', 'ic.ccfx'
 
         if self.instrumentID[ihc] != self.preInstrumentID[ihc]:
             return
@@ -158,9 +158,9 @@ def run_example():
     indexes = ['000016.zicn', '000300.zicn', '000905.zicn']
 
     # futures to trade
-    ihs = ['ih.cffex']
-    ifs = ['if.cffex']
-    ics = ['ic.cffex']
+    ihs = ['ih.ccfx']
+    ifs = ['if.ccfx']
+    ics = ['ic.ccfx']
 
     futures = ihs + ifs + ics
 

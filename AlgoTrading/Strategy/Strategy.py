@@ -25,6 +25,12 @@ class Strategy(object):
     def handle_data(self):
         return
 
+    def handle_fill(self, event):
+        return
+
+    def handle_order(self, event):
+        return
+
     def day_begin(self):
         return
 

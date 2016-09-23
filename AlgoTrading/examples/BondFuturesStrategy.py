@@ -37,7 +37,7 @@ class MovingAverageCrossStrategy(Strategy):
 
 
 def run_example():
-    universe = ['tf.cffex']
+    universe = ['tf.ccfx']
 
     startDate = dt.datetime(2013, 12, 1)
     endDate = dt.datetime(2016, 4, 25)

@@ -58,7 +58,7 @@ class MovingAverageCrossStrategy(Strategy):
 
 def run_example():
     stocks = set_universe('000300.zicn')
-    futures = ['if15%02d.cffex' % i for i in range(1, 13)]
+    futures = ['if15%02d.ccfx' % i for i in range(1, 13)]
 
     universes = stocks + futures
 

@@ -22,5 +22,5 @@ class FillEvent(Event):
         self.nominal = nominal
 
     def __str__(self):
-        return "time: {0}, symbole: {1}, direction: {2}, quantity: {3}"\
-            .format(self.timeindex, self.symbol, self.direction, self.quantity)
+        return "time: {0}, symbol: {1}, direction: {2}, quantity: {3}, norminal: {4}"\
+            .format(self.timeindex, self.symbol, self.direction, self.quantity, self.nominal)

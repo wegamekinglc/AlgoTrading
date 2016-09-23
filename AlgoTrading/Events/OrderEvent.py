@@ -45,12 +45,12 @@ class OrderEvent(Event):
         OrderEvent._orderID += 1
 
     def __str__(self):
-        return "ID: {0:d}, " \
-               "Order: Symbol = {1:s}, " \
-               "Type = {2:s}, " \
-               "Quantity = {3:s}, " \
-               "filled = {4:s}, " \
-               "Direction = {5}}".format(self.orderID,
+        return "ID: {0}, " \
+               "Order: Symbol = {1}, " \
+               "Type = {2}, " \
+               "Quantity = {3}, " \
+               "filled = {4}, " \
+               "Direction = {5}".format(self.orderID,
                                          self.symbol,
                                          self.orderType,
                                          self.quantity,

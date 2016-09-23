@@ -121,6 +121,8 @@ class SimulatedExecutionHandler(ExecutionHanlder):
                                    commission,
                                    nominal)
 
+            self.events.put(fill_event)
+
             self.logger.info("{0}: Order ID: {1} sent at {2} filled at price: ${3} with quantity {4} direction {5}. "
                              "original order quantity is {6}"
                              .format(timeIndex,

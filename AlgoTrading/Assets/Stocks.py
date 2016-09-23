@@ -21,7 +21,7 @@ class XSHGStock(Asset):
     multiplier = 1.
     margin = 1.
     settle = 1.
-    minimum = 100
+    minimum = 1
     short = False
     price_limit = 0.1
 
@@ -38,7 +38,7 @@ class XSHEStock(Asset):
     multiplier = 1.
     margin = 1.
     settle = 1.
-    minimum = 100
+    minimum = 1
     short = False
     price_limit = 0.1
 
