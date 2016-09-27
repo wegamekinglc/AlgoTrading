@@ -17,7 +17,7 @@ from PyFin.api import MA
 from PyFin.api import CLOSE
 
 
-secIDs = ['600000.xshg'] #['ta.xzce', 'y.xdce', 'ru.xsge', 'a.xdce', '000300.zicn', '000905.zicn', '000016.zicn']
+secIDs = ['600000.xshg'] # ['ta.xzce', 'y.xdce', 'ru.xsge', 'a.xdce', '000300.zicn', '000905.zicn', '000016.zicn']
 
 
 class GridTradingStrategy(Strategy):
@@ -26,12 +26,11 @@ class GridTradingStrategy(Strategy):
         self.window = 20
         self.ma = MA(self.window, 'close')
         self.close = CLOSE()
-        self.pack = 500
+        self.pack = 1
         self.upper_direction = -1
         self.lower_direction = 1
         self.step = 0.01
-        self.profit_threshold = 0.005
-        self.lose_threshold = 1.0
+        self.profit_threshold = 0.01
 
         self.position_book = {}
         self.order_queue = {}
@@ -65,9 +64,6 @@ class GridTradingStrategy(Strategy):
                         if close > (1. + self.profit_threshold) * row['cost'] :
                             self.order(secID, -self.lower_direction, self.pack)
                             self.log_order(secID, -self.lower_direction, self.pack, row['cost'], row['date'])
-                        elif close < (1. - self.lose_threshold) * row['cost'] :
-                            self.order(secID, -self.lower_direction, row['positions'])
-                            self.log_order(secID, -self.lower_direction, self.pack, row['cost'], row['date'])
 
                     if current_date not in set(long_positions.date) and close < (1. - self.step) * long_positions['cost'].iloc[0]:
                         self.order(secID, self.lower_direction, self.pack)
@@ -76,9 +72,6 @@ class GridTradingStrategy(Strategy):
                     for i, row in short_positions.iterrows():
                         if close < (1. - self.profit_threshold) * row['cost']:
                             self.order(secID, -self.upper_direction, self.pack)
-                            self.log_order(secID, -self.upper_direction, self.pack, row['cost'], row['date'])
-                        elif close > (1. + self.lose_threshold) * row['cost']:
-                            self.order(secID, -self.upper_direction, row['positions'])
                             self.log_order(secID, -self.upper_direction, self.pack, row['cost'], row['date'])
 
                     if current_date not in set(short_positions.date) and close > (1. + self.step) * short_positions['cost'].iloc[-1]:
@@ -132,7 +125,7 @@ def run_example():
                    dataSource=DataSource.DXDataCenter,
                    portfolioType=PortfolioType.CashManageable,
                    freq=0,
-                   benchmark='000905.zicn',
+                   benchmark=secIDs[0],
                    logLevel="warning",
                    saveFile=False,
                    plot=True)

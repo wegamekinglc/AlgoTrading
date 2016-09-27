@@ -20,7 +20,6 @@ doc/_build/*
 *.csv
 *.mat
 tk.csv
-DongXingDataCenter.py
 DongXingSample.py
 *.xlsx
 
