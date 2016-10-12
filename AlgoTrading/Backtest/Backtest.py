@@ -11,12 +11,14 @@ except ImportError:
     import queue
 
 import time
+import re
 import numpy as np
 from PyFin.Env import Settings
 from AlgoTrading.Enums import PortfolioType
 from AlgoTrading.Execution.OrderBook import OrderBook
 from AlgoTrading.Execution.FilledBook import FilledBook
 from AlgoTrading.Strategy import Strategy
+from AlgoTrading.Assets import USStock
 from AlgoTrading.Assets import XSHGStock
 from AlgoTrading.Assets import XSHEStock
 from AlgoTrading.Assets import IFFutures
@@ -29,35 +31,47 @@ from AlgoTrading.Assets import RBFutures
 from AlgoTrading.Assets import AFutures
 from AlgoTrading.Assets import YFutures
 from AlgoTrading.Assets import TAFutures
+from AlgoTrading.Assets import IFutures
 from AlgoTrading.Assets import EXIndex
 
 
 ASSETS_MAPPING = {
-    ('', 'xshg'): XSHGStock,
-    ('', 'xshe'): XSHEStock,
-    ('', 'zicn'): EXIndex,
-    ('if', 'ccfx'): IFFutures,
-    ('ic', 'ccfx'): ICFutures,
-    ('ih', 'ccfx'): IHFutures,
-    ('tf', 'ccfx'): TFFutures,
-    ('t', 'ccfx'): TFutures,
-    ('ru', 'xsge'): RUFutures,
-    ('rb', 'xsge'): RBFutures,
-    ('a', 'xdce'): AFutures,
-    ('y', 'xdce'): YFutures,
-    ('ta', 'xzce'): TAFutures,
+    ('[0-9A-Za-z]', 'us'): USStock,
+    ('[0-9]', 'xshg'): XSHGStock,
+    ('[0-9]', 'xshe'): XSHEStock,
+    ('[0-9]', 'zicn'): EXIndex,
+    ('if[0-9]*', 'ccfx'): IFFutures,
+    ('ic[0-9]*', 'ccfx'): ICFutures,
+    ('ih[0-9]*', 'ccfx'): IHFutures,
+    ('tf[0-9]*', 'ccfx'): TFFutures,
+    ('t[0-9]*', 'ccfx'): TFutures,
+    ('ru[0-9]*', 'xsge'): RUFutures,
+    ('rb[0-9]*', 'xsge'): RBFutures,
+    ('a[0-9]*', 'xdce'): AFutures,
+    ('y[0-9]*', 'xdce'): YFutures,
+    ('i[0-9]*', 'xdce'): IFutures,
+    ('ta[0-9]*', 'xzce'): TAFutures,
 }
+
+
+def match_pattern(code, exchange):
+    for patterns in ASSETS_MAPPING:
+        code_pattern, exchange_pattern = patterns
+        if re.match(code_pattern, code) and re.match(exchange_pattern, exchange):
+            return ASSETS_MAPPING[patterns]
+            break
+
+    raise ValueError('{0} and {1} pair is not recognized'.format(code, exchange))
 
 
 def setAssetsConfig(symbolList):
     res = {}
     for s in symbolList:
         code_com = s.split('.')
-        code = ''.join(filter(str.isalpha, code_com[0]))
+        code = code_com[0]
         exchange = code_com[-1]
-        key = (code, exchange)
 
-        res[s] = ASSETS_MAPPING[key]
+        res[s] = match_pattern(code, exchange)
     return res
 
 
