@@ -6,7 +6,6 @@ Created on 2016-9-20
 """
 
 import datetime as dt
-import numpy as np
 import pandas as pd
 from AlgoTrading.api import strategyRunner
 from AlgoTrading.api import Strategy
@@ -14,10 +13,13 @@ from AlgoTrading.api import DataSource
 from AlgoTrading.api import PortfolioType
 from AlgoTrading.Events import OrderDirection
 from PyFin.api import MA
+from PyFin.api import VARIANCE
+from PyFin.api import SQRT
 from PyFin.api import CLOSE
+from PyFin.api import RETURNSimple
 
 
-secIDs = ['600000.xshg'] # ['ta.xzce', 'y.xdce', 'ru.xsge', 'a.xdce', '000300.zicn', '000905.zicn', '000016.zicn']
+secIDs = ['ta.xzce', 'y.xdce', 'ru.xsge', 'a.xdce', '000300.zicn', '000905.zicn', '000016.zicn']
 
 
 class GridTradingStrategy(Strategy):
@@ -25,17 +27,26 @@ class GridTradingStrategy(Strategy):
     def __init__(self):
         self.window = 20
         self.ma = MA(self.window, 'close')
+        self.var = SQRT(VARIANCE(20, RETURNSimple('close')))
         self.close = CLOSE()
-        self.pack = 1
+        self.pack = {'ta.xzce': 2,
+                     'y.xdce': 2,
+                     'ru.xsge': 1,
+                     'a.xdce': 2,
+                     '000300.zicn': 2,
+                     '000905.zicn': 1,
+                     '000016.zicn': 3}
         self.upper_direction = -1
         self.lower_direction = 1
-        self.step = 0.01
-        self.profit_threshold = 0.01
+        self.step = 0.005
+        self.profit_threshold = 0.005
 
         self.position_book = {}
         self.order_queue = {}
 
     def handle_data(self):
+
+        print(self.var.value)
 
         for secID in secIDs:
 
@@ -43,17 +54,18 @@ class GridTradingStrategy(Strategy):
                 self.position_book[secID] = pd.DataFrame(columns=['date', 'cost', 'direction', 'positions'])
                 self.order_queue[secID] = []
 
-            positions = self.secPosDetail(secID)
-            #print(positions, '\n', self.position_book[secID])
+            if not self.ma.isFull[secID]:
+                continue
+
             positions = self.position_book[secID]
             close = self.close[secID]
             current_date = self.current_datetime.date()
 
             if positions.empty:
                 if close > (1 + self.step) * self.ma[secID]:
-                    self.order(secID, self.upper_direction, self.pack)
+                    self.order(secID, self.upper_direction, self.pack[secID])
                 elif close < (1 - self.step) * self.ma[secID]:
-                    self.order(secID, self.lower_direction, self.pack)
+                    self.order(secID, self.lower_direction, self.pack[secID])
             else:
                 long_positions = positions[positions.direction == 1].sort_values('cost')
                 short_positions = positions[positions.direction == -1].sort_values('cost')
@@ -61,21 +73,21 @@ class GridTradingStrategy(Strategy):
 
                 if not long_positions.empty:
                     for i, row in long_positions.iterrows():
-                        if close > (1. + self.profit_threshold) * row['cost'] :
-                            self.order(secID, -self.lower_direction, self.pack)
-                            self.log_order(secID, -self.lower_direction, self.pack, row['cost'], row['date'])
+                        if close > (1. + self.profit_threshold) * row['cost']:
+                            self.order(secID, -self.lower_direction, self.pack[secID])
+                            self.log_order(secID, -self.lower_direction, self.pack[secID], row['cost'], row['date'])
 
                     if current_date not in set(long_positions.date) and close < (1. - self.step) * long_positions['cost'].iloc[0]:
-                        self.order(secID, self.lower_direction, self.pack)
+                        self.order(secID, self.lower_direction, self.pack[secID])
 
                 else:
                     for i, row in short_positions.iterrows():
                         if close < (1. - self.profit_threshold) * row['cost']:
-                            self.order(secID, -self.upper_direction, self.pack)
-                            self.log_order(secID, -self.upper_direction, self.pack, row['cost'], row['date'])
+                            self.order(secID, -self.upper_direction, self.pack[secID])
+                            self.log_order(secID, -self.upper_direction, self.pack[secID], row['cost'], row['date'])
 
                     if current_date not in set(short_positions.date) and close > (1. + self.step) * short_positions['cost'].iloc[-1]:
-                        self.order(secID, self.upper_direction, self.pack)
+                        self.order(secID, self.upper_direction, self.pack[secID])
 
     def log_order(self, secID, direction, quantity, cost, date):
         self.order_queue[secID].append([self.current_datetime, secID, direction, quantity, 0, cost, date])
@@ -127,7 +139,7 @@ def run_example():
                    freq=0,
                    benchmark=secIDs[0],
                    logLevel="warning",
-                   saveFile=False,
+                   saveFile=True,
                    plot=True)
 
 

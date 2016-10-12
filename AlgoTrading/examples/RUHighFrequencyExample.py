@@ -71,9 +71,9 @@ class HighFrequencyRU(Strategy):
             mid_lower = np.percentile(histories, 25)
 
             if current_level > upper:
-                self.order_to('ru.cffex', 1, 1)
+                self.order_to('ru.xsge', 1, 1)
             elif current_level < lower:
-                self.order_to('ru.cffex', -1, 1)
+                self.order_to('ru.xsge', -1, 1)
             #elif mid_lower < current_level < mid_upper:
             #    self.order_to('ru.cffex', 1, 0)
 
@@ -82,7 +82,7 @@ class HighFrequencyRU(Strategy):
             self.keep('factor (5%)', lower)
             self.keep('factor (75%)', mid_upper)
             self.keep('factor (25%)', mid_lower)
-            self.keep('ru.cffex', self.close['ru.cffex'])
+            self.keep('ru.xsge', self.close['ru.xsge'])
         else:
             return
 
