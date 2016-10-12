@@ -82,6 +82,7 @@ class Strategy(object):
 
     def _handle_data(self):
         self._orderRecords = []
+        self._posTargets = {}
         self.handle_data()
         self._processOrders()
 
@@ -295,7 +296,13 @@ class Strategy(object):
         :param quantity: 指定要求的仓位
         :return: None
         """
-        currentPos = self.secPos[symbol]
+
+        if symbol not in self._posTargets:
+            currentPos = self.secPos[symbol]
+            self._posTargets[symbol] = currentPos
+        else:
+            currentPos = self._posTargets[symbol]
+
         if direction == 1:
             posNeedToBuy = quantity - currentPos
             if posNeedToBuy > 0:
@@ -347,7 +354,11 @@ class Strategy(object):
                                     .format(currDTTime, symbol, quantity, direction, currValue))
                 return
 
+        if symbol not in self._posTargets:
+            self._posTargets[symbol] = self.secPos[symbol]
+
         if quantity > 0 and direction == 1:
+            self._posTargets[symbol] += quantity
             buyback_amount = self.avaliableForBuyBack(symbol)
             if buyback_amount >= quantity:
                 self._orderRecords.append({'symbol': symbol, 'quantity': quantity, 'direction': OrderDirection.BUY_BACK})
@@ -356,6 +367,7 @@ class Strategy(object):
                     self._orderRecords.append({'symbol': symbol, 'quantity': buyback_amount, 'direction': OrderDirection.BUY_BACK})
                 self._orderRecords.append({'symbol': symbol, 'quantity': quantity - buyback_amount, 'direction': OrderDirection.BUY})
         elif quantity > 0 and direction == -1:
+            self._posTargets[symbol] -= quantity
             sell_amount = self.avaliableForSale(symbol)
             if sell_amount >= quantity:
                 self._orderRecords.append({'symbol': symbol, 'quantity': quantity, 'direction': OrderDirection.SELL})
