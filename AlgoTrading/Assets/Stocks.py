@@ -9,6 +9,18 @@ from AlgoTrading.Assets.base import Asset
 from AlgoTrading.Finance.Commission import PerValue
 
 
+class USStock(Asset):
+    lag = 0
+    exchange = "XSHG"
+    commission = PerValue(buyCost=0.0, sellCost=0.0)
+    multiplier = 1.
+    margin = 1.
+    settle = 1.
+    minimum = 1
+    short = True
+    price_limit = 9999.
+
+
 class XSHGStock(Asset):
     u"""
 

@@ -132,6 +132,18 @@ class AFutures(Asset):
     price_limit = 0.1
 
 
+class IFutures(Asset):
+    lag = 0
+    exchange = 'XDCE'
+    commission = PerValue(buyCost=future_cost, sellCost=future_cost)
+    multiplier = 1
+    margin = 0.
+    settle = 0.
+    minimum = 1
+    short = True
+    price_limit = 0.1
+
+
 class YFutures(Asset):
     lag = 0
     exchange = 'XDCE'
