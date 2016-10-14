@@ -39,15 +39,25 @@ class Strategy(object):
         self._subscribed = []
         self._pNames = {}
         for k, v in self.__dict__.items():
-            if isinstance(v, SecurityValueHolder):
-                self._subscribed.append(v)
-                if not self._pNames:
-                    for name in v.dependency:
-                        self._pNames[name] = set(v.dependency[name])
-                else:
-                    for name in self._pNames:
-                        if name in v.dependency:
-                            self._pNames[name] = self._pNames[name].union(set(v.dependency[name]))
+            if k != '_infoKeeper' and k != '_subscribed' and k != '_pNames':
+                self._subscribeOneItem(v)
+
+    def _subscribeOneItem(self, new_item):
+        if isinstance(new_item, SecurityValueHolder):
+            self._subscribed.append(new_item)
+            if not self._pNames:
+                for name in new_item.dependency:
+                    self._pNames[name] = set(new_item.dependency[name])
+            else:
+                for name in self._pNames:
+                    if name in new_item.dependency:
+                        self._pNames[name] = self._pNames[name].union(set(new_item.dependency[name]))
+        elif isinstance(new_item, list) or isinstance(new_item, set):
+            for v in new_item:
+                self._subscribeOneItem(v)
+        elif isinstance(new_item, dict):
+            for v in new_item.values():
+                self._subscribeOneItem(v)
 
     def _updateTime(self):
         self._current_datetime = None
