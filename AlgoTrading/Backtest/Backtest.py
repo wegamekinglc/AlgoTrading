@@ -95,7 +95,11 @@ class Backtest(object):
         self.dataHandler = data_handler
         self.executionHanlderCls = execution_handler
         self.portfolioCls = portfolio
-        self.strategyCls = strategy
+
+        if not isinstance(strategy, Strategy):
+            self.strategyCls = strategy
+        else:
+            raise TypeError('strategy paramater should be a class type not a strategy instance')
         self.strategyParameters = strategyParameters
         self.symbolList = self.dataHandler.whole_symbols
         self.tradable = self.dataHandler.allTradableAssets
@@ -118,10 +122,7 @@ class Backtest(object):
 
     def _generateTradingInstance(self):
         Settings.defaultSymbolList = self.symbolList
-        if isinstance(self.strategyCls, Strategy):
-            self.strategy = self.strategyCls
-        else:
-            self.strategy = self.strategyCls(*self.strategyParameters)
+        self.strategy = self.strategyCls(*self.strategyParameters)
         self.strategy.events = self.events
         self.strategy.bars = self.dataHandler
         self.strategy.symbolList = self.symbolList
