@@ -27,8 +27,7 @@ class HistoricalCSVDataHandler(DataFrameDataHandler):
             self.symbolData[s] = io.parsers.read_csv(filePath,
                                                      header=0,
                                                      index_col=0,
-                                                     parse_dates=True,
-                                                     usecols=['datetime', 'open', 'high', 'low', 'close', 'volume'])\
+                                                     parse_dates=True)\
                 .sort_index()
 
             if combIndex is None:
