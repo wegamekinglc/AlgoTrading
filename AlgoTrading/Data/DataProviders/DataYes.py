@@ -62,7 +62,7 @@ class DataYesMarketDataHandler(DataFrameDataHandler):
             logger.info("Symbol {0:s} is ready for back testing.".format(s))
             result[s] = data
 
-        def getOneSymbolIndeData(params):
+        def getOneSymbolIndexData(params):
             mt = params[0]
             s = params[1]
             start = params[2]
@@ -100,6 +100,27 @@ class DataYesMarketDataHandler(DataFrameDataHandler):
             logger.info("Symbol {0:s} is ready for back testing.".format(s))
             result[s] = data
 
+        def getOneSymbolFutureContinuesData(params):
+            mt = params[0]
+            s = params[1]
+            product = s.split('.')[0]
+            start = params[2]
+            end = params[3]
+            logger = params[4]
+            result = params[5]
+            data = mt.MktMFutd(contractObject=product,
+                               mainCon=1,
+                               startDate=start,
+                               endDate=end,
+                               field='tradeDate,openPrice,highestPrice,lowestPrice,turnoverVol,closePrice')
+            if data.empty:
+                return
+            data.index = pd.to_datetime(data['tradeDate'], format="%Y-%m-%d")
+            data.sort_index(inplace=True)
+            data.columns = ['tradeDate', 'open', 'high', 'low', 'volume', 'close']
+            logger.info("Symbol {0:s} is ready for back testing.".format(s))
+            result[s] = data
+
         result = {}
 
         category = self.category(self.symbolList)
@@ -110,11 +131,15 @@ class DataYesMarketDataHandler(DataFrameDataHandler):
 
         if category['indexes']:
             for s in category['indexes']:
-                getOneSymbolIndeData((self.mt, s, self.startDate, self.endDate, self.logger, result))
+                getOneSymbolIndexData((self.mt, s, self.startDate, self.endDate, self.logger, result))
 
         if category['futures']:
             for s in category['futures']:
                 getOneSymbolFutureData((self.mt, s, self.startDate, self.endDate, self.logger, result))
+
+        if category['futures_con']:
+            for s in category['futures_con']:
+                getOneSymbolFutureContinuesData((self.mt, s, self.startDate, self.endDate, self.logger, result))
 
         for s in result:
             self.symbolData[s] = result[s]
@@ -125,8 +150,7 @@ class DataYesMarketDataHandler(DataFrameDataHandler):
 
             self.symbolData[s] = transfromDFtoDict(self.symbolData[s])
 
-            # transform
-
+        # transform
         self.dateIndex = combIndex
         self.start = 0
         for i, s in enumerate(self.symbolList):

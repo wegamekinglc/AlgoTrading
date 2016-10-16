@@ -8,6 +8,7 @@ Created on 2015-12-08
 import datetime as dt
 from AlgoTrading.api import Strategy
 from AlgoTrading.api import strategyRunner
+from AlgoTrading.api import DataSource
 
 
 class UserStrategy(Strategy):
@@ -18,9 +19,10 @@ class UserStrategy(Strategy):
             self.order(s, 1, 100)
 
 res = strategyRunner(userStrategy=UserStrategy,
-                     symbolList=['600000.xshg'],
-                     startDate=dt.datetime(2015, 10, 1),
-                     endDate=dt.datetime(2015, 11, 19),
+                     symbolList=['600000.xshg', 'if.ccfx'],
+                     startDate=dt.datetime(2015, 1, 1),
+                     endDate=dt.datetime(2016, 9, 19),
                      benchmark='000300.zicn',
+                     dataSource=DataSource.DataYes,
                      freq=5,
-                     plot=False)
+                     plot=True)
