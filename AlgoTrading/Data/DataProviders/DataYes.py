@@ -68,13 +68,14 @@ class DataYesMarketDataHandler(DataFrameDataHandler):
                 self.logger.info("Symbol {0:s} is ready for back testing.".format(s))
 
         for s in result:
-            self.symbolData[s] = result[s]
-            if combIndex is None:
-                combIndex = self.symbolData[s].index
-            else:
-                combIndex = combIndex.union(self.symbolData[s].index)
+            if not result[s].empty:
+                self.symbolData[s] = result[s]
+                if combIndex is None:
+                    combIndex = self.symbolData[s].index
+                else:
+                    combIndex = combIndex.union(self.symbolData[s].index)
 
-            self.symbolData[s] = transfromDFtoDict(self.symbolData[s])
+                self.symbolData[s] = transfromDFtoDict(self.symbolData[s])
 
         # transform
         self.dateIndex = combIndex
@@ -108,6 +109,7 @@ class DataYesMarketDataHandler(DataFrameDataHandler):
 
     def updateInternalDate(self):
         return False
+<<<<<<< .working
 
 
 def getOneSymbolData(params):
@@ -174,6 +176,76 @@ def getOneSymbolFutureContinuesData(params):
                        field='tradeDate,openPrice,highestPrice,lowestPrice,turnoverVol,closePrice')
     if data.empty:
         return
+    data.index = pd.to_datetime(data['tradeDate'], format="%Y-%m-%d")
+    data.sort_index(inplace=True)
+    data.columns = ['tradeDate', 'open', 'high', 'low', 'volume', 'close']
+    return data
+
+
+def getOneSymbolData(params):
+    mt = params[0]
+    s = params[1]
+    start = params[2]
+    end = params[3]
+    data = mt.MktEqud(secID=s,
+                      beginDate=start,
+                      endDate=end,
+                      field='tradeDate,openPrice,highestPrice,lowestPrice,turnoverVol,closePrice')
+    if data.empty:
+        return data
+    data.index = pd.to_datetime(data['tradeDate'], format="%Y-%m-%d")
+    data.sort_index(inplace=True)
+    data.columns = ['tradeDate', 'open', 'high', 'low', 'volume', 'close']
+    return data
+
+
+def getOneSymbolIndexData(params):
+    mt = params[0]
+    s = params[1]
+    start = params[2]
+    end = params[3]
+    data = mt.MktIdxd(indexID=s,
+                      beginDate=start,
+                      endDate=end,
+                      field='tradeDate,openIndex,highestIndex,lowestIndex,turnoverVol,closeIndex')
+    if data.empty:
+        return data
+    data.index = pd.to_datetime(data['tradeDate'], format="%Y-%m-%d")
+    data.sort_index(inplace=True)
+    data.columns = ['tradeDate', 'open', 'high', 'low', 'volume', 'close']
+    return data
+
+
+def getOneSymbolFutureData(params):
+    mt = params[0]
+    s = params[1]
+    start = params[2]
+    end = params[3]
+    data = mt.MktFutd(ticker=s[:6],
+                      beginDate=start,
+                      endDate=end,
+                      field='tradeDate,openPrice,highestPrice,lowestPrice,turnoverVol,closePrice')
+    if data.empty:
+        return data
+    data.index = pd.to_datetime(data['tradeDate'], format="%Y-%m-%d")
+    data.sort_index(inplace=True)
+    data.columns = ['tradeDate', 'open', 'high', 'low', 'volume', 'close']
+    return data
+
+
+def getOneSymbolFutureContinuesData(params):
+    mt = params[0]
+    s = params[1]
+    product = s.split('.')[0]
+    start = params[2]
+    end = params[3]
+    data = mt.MktMFutd(contractObject=product,
+                       mainCon=1,
+                       startDate=start,
+                       endDate=end,
+                       field='tradeDate,openPrice,highestPrice,lowestPrice,turnoverVol,closePrice')
+    if data.empty:
+        return data
     data.index = pd.to_datetime(data['tradeDate'], format="%Y-%m-%d")
     data.sort_index(inplace=True)
     data.columns = ['tradeDate', 'open', 'high', 'low', 'volume', 'close']
