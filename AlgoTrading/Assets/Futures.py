@@ -11,6 +11,23 @@ from AlgoTrading.Finance.Commission import PerValue
 future_cost = 0.
 
 
+class ICFutures(Asset):
+    u"""
+
+    中金所中证500指数期货
+
+    """
+    lag = 0
+    exchange = 'CCFX'
+    commission = PerValue(buyCost=future_cost, sellCost=future_cost)
+    multiplier = 1
+    margin = 0.
+    settle = 0.
+    minimum = 1
+    short = True
+    price_limit = 0.1
+
+
 class IFFutures(Asset):
     u"""
 
@@ -32,23 +49,6 @@ class IHFutures(Asset):
     u"""
 
     中金所上证50指数期货
-
-    """
-    lag = 0
-    exchange = 'CCFX'
-    commission = PerValue(buyCost=future_cost, sellCost=future_cost)
-    multiplier = 1
-    margin = 0.
-    settle = 0.
-    minimum = 1
-    short = True
-    price_limit = 0.1
-
-
-class ICFutures(Asset):
-    u"""
-
-    中金所中证500指数期货
 
     """
     lag = 0
@@ -96,7 +96,12 @@ class TFutures(Asset):
     price_limit = 0.1
 
 
-class RUFutures(Asset):
+class RBFutures(Asset):
+    u"""
+
+    上期所螺纹钢合约
+
+    """
     lag = 0
     exchange = 'XSGE'
     commission = PerValue(buyCost=future_cost, sellCost=future_cost)
@@ -108,7 +113,12 @@ class RUFutures(Asset):
     price_limit = 0.1
 
 
-class RBFutures(Asset):
+class RUFutures(Asset):
+    u"""
+
+    上期所天然橡胶合约
+
+    """
     lag = 0
     exchange = 'XSGE'
     commission = PerValue(buyCost=future_cost, sellCost=future_cost)
@@ -121,6 +131,11 @@ class RBFutures(Asset):
 
 
 class AFutures(Asset):
+    u"""
+
+    大商所一号大豆合约
+
+    """
     lag = 0
     exchange = 'XDCE'
     commission = PerValue(buyCost=future_cost, sellCost=future_cost)
@@ -133,6 +148,45 @@ class AFutures(Asset):
 
 
 class IFutures(Asset):
+    u"""
+
+    大商所铁矿石合约
+
+    """
+    lag = 0
+    exchange = 'XDCE'
+    commission = PerValue(buyCost=future_cost, sellCost=future_cost)
+    multiplier = 1
+    margin = 0.
+    settle = 0.
+    minimum = 1
+    short = True
+    price_limit = 0.1
+
+
+class JFutures(Asset):
+    u"""
+
+    大商所焦炭合约
+
+    """
+    lag = 0
+    exchange = 'XDCE'
+    commission = PerValue(buyCost=future_cost, sellCost=future_cost)
+    multiplier = 1
+    margin = 0.
+    settle = 0.
+    minimum = 1
+    short = True
+    price_limit = 0.1
+
+
+class JMFutures(Asset):
+    u"""
+
+    大商所焦煤合约
+
+    """
     lag = 0
     exchange = 'XDCE'
     commission = PerValue(buyCost=future_cost, sellCost=future_cost)
@@ -145,6 +199,11 @@ class IFutures(Asset):
 
 
 class YFutures(Asset):
+    u"""
+
+    大商所豆油合约
+
+    """
     lag = 0
     exchange = 'XDCE'
     commission = PerValue(buyCost=future_cost, sellCost=future_cost)
@@ -157,6 +216,28 @@ class YFutures(Asset):
 
 
 class TAFutures(Asset):
+    u"""
+
+    郑商所PTA合约
+
+    """
+    lag = 0
+    exchange = 'XZCE'
+    commission = PerValue(buyCost=future_cost, sellCost=future_cost)
+    multiplier = 1
+    margin = 0.
+    settle = 0.
+    minimum = 1
+    short = True
+    price_limit = 0.1
+
+
+class ZCFutures(Asset):
+    u"""
+
+    郑商所动力煤合约
+
+    """
     lag = 0
     exchange = 'XZCE'
     commission = PerValue(buyCost=future_cost, sellCost=future_cost)
