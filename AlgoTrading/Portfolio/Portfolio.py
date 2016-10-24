@@ -51,7 +51,7 @@ class Portfolio(object):
         self.allPositions = self.constructAllPositions()
         self.currentPosition = defaultdict(int, [(s, 0) for s in self.allTradableAssets])
 
-        self.allHoldings = self.constructAllHoldings()
+        self.allHoldings = [] # self.constructAllHoldings()
         self.currentHoldings = self.constructCurrentHoldings()
 
         self.orderBook = None

@@ -32,6 +32,9 @@ from AlgoTrading.Assets import AFutures
 from AlgoTrading.Assets import YFutures
 from AlgoTrading.Assets import TAFutures
 from AlgoTrading.Assets import IFutures
+from AlgoTrading.Assets import JFutures
+from AlgoTrading.Assets import JMFutures
+from AlgoTrading.Assets import ZCFutures
 from AlgoTrading.Assets import EXIndex
 
 
@@ -50,7 +53,10 @@ ASSETS_MAPPING = {
     ('a[0-9]*', 'xdce'): AFutures,
     ('y[0-9]*', 'xdce'): YFutures,
     ('i[0-9]*', 'xdce'): IFutures,
+    ('j[0-9]*', 'xdce'): JFutures,
+    ('jm[0-9]*', 'xdce'): JMFutures,
     ('ta[0-9]*', 'xzce'): TAFutures,
+    ('zc[0-9]*', 'xzce'): ZCFutures
 }
 
 

@@ -19,7 +19,7 @@ from PyFin.api import CLOSE
 from PyFin.api import RETURNSimple
 
 
-secIDs = ['ta.xzce', 'y.xdce', 'ru.xsge', 'a.xdce', '000300.zicn', '000905.zicn', '000016.zicn']
+secIDs = ['ta.xzce', 'y.xdce', 'ru.xsge', 'a.xdce', 'ic.ccfx', 'if.ccfx', 'ih.ccfx']
 
 
 class GridTradingStrategy(Strategy):
@@ -29,13 +29,13 @@ class GridTradingStrategy(Strategy):
         self.ma = MA(self.window, 'close')
         self.var = SQRT(VARIANCE(20, RETURNSimple('close')))
         self.close = CLOSE()
-        self.pack = {'ta.xzce': 2,
-                     'y.xdce': 2,
+        self.pack = {'ta.xzce': 1,
+                     'y.xdce': 1,
                      'ru.xsge': 1,
-                     'a.xdce': 2,
-                     '000300.zicn': 2,
-                     '000905.zicn': 1,
-                     '000016.zicn': 3}
+                     'a.xdce': 1,
+                     'ic.ccfx': 1,
+                     'if.ccfx': 1,
+                     'ih.ccfx': 1}
         self.upper_direction = -1
         self.lower_direction = 1
         self.step = 0.005
@@ -45,8 +45,6 @@ class GridTradingStrategy(Strategy):
         self.order_queue = {}
 
     def handle_data(self):
-
-        print(self.var.value)
 
         for secID in secIDs:
 
@@ -138,9 +136,9 @@ def run_example():
                    portfolioType=PortfolioType.CashManageable,
                    freq=0,
                    benchmark=secIDs[0],
-                   logLevel="warning",
-                   saveFile=True,
-                   plot=True)
+                   logLevel="info",
+                   saveFile=False,
+                   plot=False)
 
 
 if __name__ == "__main__":

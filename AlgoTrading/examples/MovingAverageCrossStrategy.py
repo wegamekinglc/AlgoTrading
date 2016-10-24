@@ -40,6 +40,7 @@ def run_example():
                    dataSource=DataSource.CSV,
                    csvDir=csvDir,
                    saveFile=False,
+                   logLevel='info',
                    plot=True)
 
 
