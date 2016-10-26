@@ -199,14 +199,18 @@ class Portfolio(object):
             curve['equity_curve'] = np.exp(curve['return'].cumsum())
         self.equityCurve = curve.dropna()
 
-    def outputSummaryStats(self, curve, plot):
+    def outputSummaryStats(self, curve, other_curves, plot):
         returns = curve['return']
         if hasattr(self.dataHandler, "benchmarkData"):
             benchmarkReturns = self.dataHandler.benchmarkData['return']
             benchmarkReturns.name = self.benchmark
         else:
             benchmarkReturns = None
-        perf_metric, perf_df, rollingRisk = createPerformanceTearSheet(returns=returns, benchmarkReturns=benchmarkReturns, plot=plot)
+
+        perf_metric, perf_df, rollingRisk = createPerformanceTearSheet(returns=returns,
+                                                                       benchmarkReturns=benchmarkReturns,
+                                                                       other_curves=other_curves,
+                                                                       plot=plot)
 
         if self.portfolioType == PortfolioType.FullNotional:
             positons = curve.drop(['cash', 'commission', 'total', 'return', 'margin', 'equity_curve', 'pnl'], axis=1)

@@ -197,10 +197,10 @@ class Backtest(object):
             time.sleep(self.heartbeat)
 
     def _outputPerformance(self):
-
         self.portfolio.createEquityCurveDataframe()
+        other_curves = self.strategy.plotCurves()
         perf_metric, perf_df, rollingRisk, aggregated_positions, transactions, turnover_rate = \
-            self.portfolio.outputSummaryStats(self.portfolio.equityCurve, self.plot)
+            self.portfolio.outputSummaryStats(self.portfolio.equityCurve, other_curves, self.plot)
         return self.portfolio.equityCurve, \
                self.portfolio.orderBook.view(), \
                self.filledBook.view(), \

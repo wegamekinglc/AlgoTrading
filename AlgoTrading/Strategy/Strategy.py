@@ -14,6 +14,7 @@ import pandas as pd
 from AlgoTrading.Events import OrderEvent
 from AlgoTrading.Events import OrderDirection
 from AlgoTrading.Strategy.InfoKeeper import InfoKepper
+from AlgoTrading.Strategy.InfoKeeper import PlotInfoKeeper
 from PyFin.Analysis.SecurityValueHolders import SecurityValueHolder
 
 
@@ -36,6 +37,7 @@ class Strategy(object):
 
     def _subscribe(self):
         self._infoKeeper = InfoKepper()
+        self._plotKeeper = PlotInfoKeeper()
         self._subscribed = []
         self._pNames = {}
         for k, v in self.__dict__.items():
@@ -157,7 +159,7 @@ class Strategy(object):
         """
         return self._current_datetime.time().__str__()
 
-    def keep(self, label, value, time=None):
+    def keep(self, name, value, time=None):
         u"""
 
         将用户需要保留的信息保存到指定的时间戳下，供回测后查看
@@ -169,7 +171,24 @@ class Strategy(object):
         """
         if not time:
             time = self.current_datetime
-        self._infoKeeper.attach(time, label, value)
+        self._infoKeeper.attach(time, name, value)
+
+    def plot(self, name, value, marker=None, line_style='solid', time=None):
+        u"""
+
+        将用户需要保留的信息保存到指定的时间戳下，供绘图使用
+
+        :param label: 指定信息的名称
+        :param value: 指定信息的值
+        :param time: 指定的时间戳，若为None，则使用当前bar的时间戳
+        :param marker: 数据点类型
+        :param line_style: 线型
+        :return: None
+        """
+
+        if not time:
+            time = self.current_datetime
+        self._plotKeeper.attach(time, name, value, marker, line_style)
 
     def infoView(self):
         u"""
@@ -179,6 +198,15 @@ class Strategy(object):
         :return: pandas.DataFrame
         """
         return self._infoKeeper.view()
+
+    def plotCurves(self):
+        u"""
+
+        返回当前所保留的全部绘图用信息
+
+        :return: pandas.DataFrame
+        """
+        return self._plotKeeper.curves()
 
     @property
     def cash(self):
