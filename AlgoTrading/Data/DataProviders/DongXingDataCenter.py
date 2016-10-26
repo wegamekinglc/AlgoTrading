@@ -16,7 +16,6 @@ from PyFin.api import adjustDateByCalendar
 from PyFin.api import BizDayConventions
 from AlgoTrading.Data.Data import DataFrameDataHandler
 from AlgoTrading.Env import Settings
-from AlgoTrading.Utilities.functions import categorizeSymbols
 
 
 @unique
@@ -212,7 +211,6 @@ class DXDataCenter(DataFrameDataHandler):
     def _getBenchmarkData(self, indexID, startTimeStamp, endTimeStamp):
 
         self.logger.info("Starting load benchmark {0:s} daily bar data from DX data center...".format(indexID))
-
         indexIDComp = indexID.split('.')
 
         if indexIDComp[1] == 'zicn':

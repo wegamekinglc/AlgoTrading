@@ -59,5 +59,3 @@ def categorizeSymbols(symbolList):
             else:
                 futures.append(s)
     return {'stocks': stocks, 'futures': futures, 'indexes': indexes, 'futures_con': futures_con}
-
-
