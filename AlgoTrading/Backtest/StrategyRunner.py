@@ -133,7 +133,7 @@ def strategyRunner(userStrategy,
         logger.info("Strategy performance is now saving to local files...")
         perf_metric.to_csv('performance/perf_metrics.csv', float_format='%.4f')
         perf_df.to_csv('performance/perf_series.csv', float_format='%.4f')
-        if benchmark is not None:
+        if benchmark is not None and rollingRisk is not None:
             rollingRisk.to_csv('performance/rollingRisk.csv', float_format='%.4f')
         equityCurve.to_csv('performance/equity_curve.csv', float_format='%.4f')
         orderBook.to_csv('performance/order_book.csv', float_format='%.4f')

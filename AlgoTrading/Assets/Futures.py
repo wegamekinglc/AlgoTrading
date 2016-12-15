@@ -8,7 +8,7 @@ Created on 2015-11-13
 from AlgoTrading.Assets.base import Asset
 from AlgoTrading.Finance.Commission import PerValue
 
-future_cost = 0.
+future_cost = 0.00015
 
 
 class ICFutures(Asset):

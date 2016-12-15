@@ -43,8 +43,17 @@ class DXDataCenter(DataFrameDataHandler):
 
     def __init__(self, **kwargs):
         super(DXDataCenter, self).__init__(kwargs['logger'], kwargs['symbolList'])
-        self.fields = ['productID', 'instrumentID', 'tradingDate', 'tradingTime', 'openPrice', 'highPrice', 'lowPrice',
-                       'closePrice', 'volume', 'multiplier']
+        self.fields = ['productID',
+                       'instrumentID',
+                       'tradingDate',
+                       'tradingTime',
+                       'openPrice',
+                       'highPrice',
+                       'lowPrice',
+                       'closePrice',
+                       'volume',
+                       'multiplier',
+                       'openInterest']
         self.startDate = kwargs['startDate']
         self.endDate = kwargs['endDate']
         self._freq = kwargs['freq']
@@ -148,6 +157,9 @@ class DXDataCenter(DataFrameDataHandler):
         res = res.append(index_res)
         res = res.append(future_con_res)
 
+        if 'openInterest' not in res:
+            res['openInterest'] = np.nan
+
         timeIndexList = []
         dataList = []
 
@@ -161,7 +173,8 @@ class DXDataCenter(DataFrameDataHandler):
                        'closePrice',
                        'volume',
                        'instrumentID',
-                       'multiplier']]
+                       'multiplier',
+                       'openInterest']]
         else:
             res = res[['securityID',
                        'tradingDate',
@@ -171,7 +184,8 @@ class DXDataCenter(DataFrameDataHandler):
                        'lowPrice',
                        'closePrice',
                        'volume',
-                       'instrumentID']]
+                       'instrumentID',
+                       'openInterest']]
         res = res.as_matrix()
         for row in res:
             s = row[0]
@@ -179,21 +193,23 @@ class DXDataCenter(DataFrameDataHandler):
                 self.symbolData[s] = {}
 
             timeIndexList.append(row[1] + " " + row[2][0:8] + "+0000")
-            if len(row) >= 10:
+            if len(row) >= 11:
                 dataList.append((s, {'open': row[3],
                                      'high': row[4],
                                      'low': row[5],
                                      'close': row[6],
                                      'volume': row[7],
                                      'instrumentid': row[8],
-                                     'multiplier': row[9]}))
+                                     'multiplier': row[9],
+                                     'openinterest': row[10]}))
             else:
                 dataList.append((s, {'open': row[3],
                                      'high': row[4],
                                      'low': row[5],
                                      'close': row[6],
                                      'volume': row[7],
-                                     'instrumentid': row[8]}))
+                                     'instrumentid': row[8],
+                                     'openinterest': row[9]}))
 
         timeIndexList = np.array(timeIndexList, dtype='datetime64').astype(dt.datetime)
         for timeIndex, data in zip(timeIndexList, dataList):

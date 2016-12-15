@@ -19,27 +19,28 @@ from PyFin.api import CLOSE
 from PyFin.api import RETURNSimple
 
 
-secIDs = ['ta.xzce', 'y.xdce', 'ru.xsge', 'a.xdce', 'ic.ccfx', 'if.ccfx', 'ih.ccfx']
+secIDs = ['j.xdce']#, 'jm.xdce', 'zc.xzce']
 
 
 class GridTradingStrategy(Strategy):
 
     def __init__(self):
-        self.window = 20
+        self.window = 10
         self.ma = MA(self.window, 'close')
-        self.var = SQRT(VARIANCE(20, RETURNSimple('close')))
+        self.std = SQRT(VARIANCE(10, RETURNSimple('close')))
         self.close = CLOSE()
         self.pack = {'ta.xzce': 1,
+                     'zc.xzce': 1,
                      'y.xdce': 1,
                      'ru.xsge': 1,
                      'a.xdce': 1,
+                     'j.xdce': 1,
+                     'jm.xdce': 1,
                      'ic.ccfx': 1,
                      'if.ccfx': 1,
                      'ih.ccfx': 1}
         self.upper_direction = -1
         self.lower_direction = 1
-        self.step = 0.005
-        self.profit_threshold = 0.005
 
         self.position_book = {}
         self.order_queue = {}
@@ -52,17 +53,20 @@ class GridTradingStrategy(Strategy):
                 self.position_book[secID] = pd.DataFrame(columns=['date', 'cost', 'direction', 'positions'])
                 self.order_queue[secID] = []
 
-            if not self.ma.isFull[secID]:
+            if not self.ma.isFull[secID] or not self.std.isFull[secID]:
                 continue
 
             positions = self.position_book[secID]
             close = self.close[secID]
             current_date = self.current_datetime.date()
 
+            step = self.std[secID]
+            profit = self.std[secID]
+
             if positions.empty:
-                if close > (1 + self.step) * self.ma[secID]:
+                if close > (1 + step) * self.ma[secID]:
                     self.order(secID, self.upper_direction, self.pack[secID])
-                elif close < (1 - self.step) * self.ma[secID]:
+                elif close < (1 - step) * self.ma[secID]:
                     self.order(secID, self.lower_direction, self.pack[secID])
             else:
                 long_positions = positions[positions.direction == 1].sort_values('cost')
@@ -71,20 +75,20 @@ class GridTradingStrategy(Strategy):
 
                 if not long_positions.empty:
                     for i, row in long_positions.iterrows():
-                        if close > (1. + self.profit_threshold) * row['cost']:
+                        if close > (1. + profit) * row['cost']:
                             self.order(secID, -self.lower_direction, self.pack[secID])
                             self.log_order(secID, -self.lower_direction, self.pack[secID], row['cost'], row['date'])
 
-                    if current_date not in set(long_positions.date) and close < (1. - self.step) * long_positions['cost'].iloc[0]:
+                    if current_date not in set(long_positions.date) and close < (1. - step) * long_positions['cost'].iloc[0]:
                         self.order(secID, self.lower_direction, self.pack[secID])
 
                 else:
                     for i, row in short_positions.iterrows():
-                        if close < (1. - self.profit_threshold) * row['cost']:
+                        if close < (1. - profit) * row['cost']:
                             self.order(secID, -self.upper_direction, self.pack[secID])
                             self.log_order(secID, -self.upper_direction, self.pack[secID], row['cost'], row['date'])
 
-                    if current_date not in set(short_positions.date) and close > (1. + self.step) * short_positions['cost'].iloc[-1]:
+                    if current_date not in set(short_positions.date) and close > (1. + step) * short_positions['cost'].iloc[-1]:
                         self.order(secID, self.upper_direction, self.pack[secID])
 
     def log_order(self, secID, direction, quantity, cost, date):
@@ -138,7 +142,7 @@ def run_example():
                    benchmark=secIDs[0],
                    logLevel="info",
                    saveFile=False,
-                   plot=False)
+                   plot=True)
 
 
 if __name__ == "__main__":
