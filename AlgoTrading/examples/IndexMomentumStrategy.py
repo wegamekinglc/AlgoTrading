@@ -53,8 +53,8 @@ def run_example():
                    benchmark='000001.zicn',
                    freq=5,
                    logLevel='info',
-                   plot=False,
-                   saveFile=True)
+                   plot=True,
+                   saveFile=False)
 
 
 if __name__ == "__main__":
