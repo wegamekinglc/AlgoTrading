@@ -42,16 +42,17 @@ def run_example():
                    endDate=endDate,
                    freq=0,
                    benchmark='000300.zicn',
+                   dataSource=DataSource.DataYes,
                    logLevel='info',
                    saveFile=True,
                    plot=True)
 
 
 if __name__ == "__main__":
-    # from VisualPortfolio.Env import Settings
-    # from AlgoTrading.Env import Settings
-    # Settings.set_source(DataSource.DataYes)
-    # Settings.set_source(DataSource.DataYes)
+    from VisualPortfolio.Env import Settings
+    from AlgoTrading.Env import Settings
+    Settings.set_source(DataSource.DataYes)
+    Settings.set_source(DataSource.DataYes)
     startTime = dt.datetime.now()
     print("Start: %s" % startTime)
     run_example()
