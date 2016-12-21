@@ -1,5 +1,5 @@
 DataAPI>=0.4.1
-Finance-Python>=0.4.1
+Finance-Python>=0.4.2
 lxml>=3.4.4
 tushare>=0.3.9
 matplotlib>=1.4.3
