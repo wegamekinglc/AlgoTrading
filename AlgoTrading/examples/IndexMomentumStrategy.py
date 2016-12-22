@@ -19,6 +19,7 @@ class IndexMomentumStrategy(Strategy):
     def __init__(self):
         self.preMax = MAX(10, 'close').shift(1)
         self.preMin = MIN(10, 'close').shift(1)
+        self.maxOI = MAX(10, 'openInterest')
         self.current = CLOSE()
         self.count = 0
 
@@ -39,10 +40,10 @@ class IndexMomentumStrategy(Strategy):
 
 
 def run_example():
-    universe = ['000001.zicn']
+    universe = ['if1701.ccfx']
 
-    startDate = dt.datetime(2000, 1, 7)
-    endDate = dt.datetime(2005, 1, 4)
+    startDate = dt.datetime(2016, 10, 7)
+    endDate = dt.datetime(2016, 12, 4)
 
     strategyRunner(userStrategy=IndexMomentumStrategy,
                    symbolList=universe,
@@ -50,10 +51,10 @@ def run_example():
                    endDate=endDate,
                    dataSource=DataSource.DXDataCenter,
                    benchmark='000001.zicn',
-                   freq=0,
+                   freq=5,
                    logLevel='info',
                    plot=True,
-                   saveFile=True)
+                   saveFile=False)
 
 
 if __name__ == "__main__":

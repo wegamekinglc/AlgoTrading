@@ -51,7 +51,9 @@ class MovingAverageCrossStrategy(Strategy):
 
     def handle_data(self):
 
-        if np.isnan(self.closeDLastClose['000016.zicn']):
+        print(self.closeDLastClose.value)
+
+        if '000016.zicn' not in self.closeDLastClose.value or np.isnan(self.closeDLastClose['000016.zicn']):
             return
 
         if self.current_datetime.hour == 9 and self.current_datetime.minute < 30:

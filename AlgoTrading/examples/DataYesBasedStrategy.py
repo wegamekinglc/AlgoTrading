@@ -42,6 +42,7 @@ def run_example():
                    endDate=endDate,
                    freq=0,
                    benchmark='000300.zicn',
+                   dataSource=DataSource.DataYes,
                    logLevel='info',
                    saveFile=True,
                    plot=True)

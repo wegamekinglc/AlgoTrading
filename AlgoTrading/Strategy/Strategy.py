@@ -39,7 +39,7 @@ class Strategy(object):
         self._infoKeeper = InfoKepper()
         self._plotKeeper = PlotInfoKeeper()
         self._subscribed = []
-        self._pNames = {}
+        self._pNames = set()
         for k, v in self.__dict__.items():
             if k != '_infoKeeper' and k != '_subscribed' and k != '_pNames':
                 self._subscribeOneItem(v)
@@ -47,13 +47,7 @@ class Strategy(object):
     def _subscribeOneItem(self, new_item):
         if isinstance(new_item, SecurityValueHolder):
             self._subscribed.append(new_item)
-            if not self._pNames:
-                for name in new_item.dependency:
-                    self._pNames[name] = set(new_item.dependency[name])
-            else:
-                for name in self._pNames:
-                    if name in new_item.dependency:
-                        self._pNames[name] = self._pNames[name].union(set(new_item.dependency[name]))
+            self._pNames = self._pNames.union(new_item._dependency)
         elif isinstance(new_item, list) or isinstance(new_item, set):
             for v in new_item:
                 self._subscribeOneItem(v)
@@ -71,23 +65,19 @@ class Strategy(object):
     def _updateSubscribing(self):
 
         values = dict()
-        criticalFields = set(['open', 'high', 'low', 'close'])
         if self._pNames:
             for s in self.symbolList:
-                if s in self._pNames:
-                    securityValue = {}
-                    fields = self._pNames[s]
+                securityValue = {}
 
-                    for f in fields:
-                        try:
-                            value = self.bars.getLatestBarValue(s, f)
-                            if f not in criticalFields or value != 0.0:
-                                securityValue[f] = value
-                        except:
-                            pass
+                for f in self._pNames:
+                    try:
+                        value = self.bars.getLatestBarValue(s, f)
+                        securityValue[f] = value
+                    except:
+                        pass
 
-                    if securityValue:
-                        values[s] = securityValue
+                if securityValue:
+                    values[s] = securityValue
 
             for subscriber in self._subscribed:
                 subscriber.push(values)
