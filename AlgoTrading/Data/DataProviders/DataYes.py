@@ -109,7 +109,6 @@ class DataYesMarketDataHandler(DataFrameDataHandler):
 
     def updateInternalDate(self):
         return False
-<<<<<<< .working
 
 
 def getOneSymbolData(params):
