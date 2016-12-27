@@ -52,7 +52,6 @@ if __name__ == "__main__":
     from VisualPortfolio.Env import Settings
     from AlgoTrading.Env import Settings
     Settings.set_source(DataSource.DataYes)
-    Settings.set_source(DataSource.DataYes)
     startTime = dt.datetime.now()
     print("Start: %s" % startTime)
     run_example()
