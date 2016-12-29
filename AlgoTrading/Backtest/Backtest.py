@@ -26,8 +26,16 @@ from AlgoTrading.Assets import ICFutures
 from AlgoTrading.Assets import IHFutures
 from AlgoTrading.Assets import TFFutures
 from AlgoTrading.Assets import TFutures
+from AlgoTrading.Assets import CUFutures
+from AlgoTrading.Assets import ZNFutures
+from AlgoTrading.Assets import SNFutures
+from AlgoTrading.Assets import NIFutures
+from AlgoTrading.Assets import AUFutures
+from AlgoTrading.Assets import AGFutures
+from AlgoTrading.Assets import HCFutures
 from AlgoTrading.Assets import RUFutures
 from AlgoTrading.Assets import RBFutures
+from AlgoTrading.Assets import PBFutures
 from AlgoTrading.Assets import AFutures
 from AlgoTrading.Assets import YFutures
 from AlgoTrading.Assets import TAFutures
@@ -50,6 +58,14 @@ ASSETS_MAPPING = {
     ('t[0-9]*', 'ccfx'): TFutures,
     ('ru[0-9]*', 'xsge'): RUFutures,
     ('rb[0-9]*', 'xsge'): RBFutures,
+    ('cu[0-9]*', 'xsge'): CUFutures,
+    ('zn[0-9]*', 'xsge'): ZNFutures,
+    ('au[0-9]*', 'xsge'): AUFutures,
+    ('ag[0-9]*', 'xsge'): AGFutures,
+    ('ni[0-9]*', 'xsge'): NIFutures,
+    ('sn[0-9]*', 'xsge'): SNFutures,
+    ('pb[0-9]*', 'xsge'): PBFutures,
+    ('hc[0-9]*', 'xsge'): HCFutures,
     ('a[0-9]*', 'xdce'): AFutures,
     ('y[0-9]*', 'xdce'): YFutures,
     ('i[0-9]*', 'xdce'): IFutures,
@@ -169,12 +185,16 @@ class Backtest(object):
                         self.strategy._updateSubscribing()
                         self.portfolio.updateTimeindex()
                         # update still alive orders
-                        for order in self.portfolio.orderBook:
-                            if order.symbol in self.strategy.tradableAssets:
-                                self.executionHanlder.executeOrder(order,
-                                                                   self.assets[order.symbol],
-                                                                   self.portfolio.orderBook,
-                                                                   self.portfolio)
+                        # for order in self.portfolio.orderBook:
+                        #     if order.symbol in self.strategy.tradableAssets:
+                        #         self.executionHanlder.executeOrder(order,
+                        #                                            self.assets[order.symbol],
+                        #                                            self.portfolio.orderBook,
+                        #                                            self.portfolio)
+
+                        # cancel all the legacy orders
+                        self.portfolio.cancelOrders(event.timeIndex, self.strategy._posBook)
+
                         if self.counter % self.refreshRate == 0:
                             self.strategy._handle_data()
                     elif event.type == 'SIGNAL':
@@ -192,7 +212,6 @@ class Backtest(object):
                     elif event.type == 'DAYBEGIN':
                         self.strategy.checkingPriceLimit()
                         self.strategy.current_datetime = event.timeIndex
-                        self.portfolio.cancelOrders(event.timeIndex, self.strategy._posBook)
                         self.strategy.day_begin()
             time.sleep(self.heartbeat)
 

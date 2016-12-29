@@ -15,7 +15,15 @@ from AlgoTrading.Assets.Futures import IHFutures
 from AlgoTrading.Assets.Futures import TFFutures
 from AlgoTrading.Assets.Futures import TFutures
 from AlgoTrading.Assets.Futures import RBFutures
+from AlgoTrading.Assets.Futures import PBFutures
 from AlgoTrading.Assets.Futures import RUFutures
+from AlgoTrading.Assets.Futures import CUFutures
+from AlgoTrading.Assets.Futures import ZNFutures
+from AlgoTrading.Assets.Futures import SNFutures
+from AlgoTrading.Assets.Futures import NIFutures
+from AlgoTrading.Assets.Futures import AUFutures
+from AlgoTrading.Assets.Futures import AGFutures
+from AlgoTrading.Assets.Futures import HCFutures
 from AlgoTrading.Assets.Futures import AFutures
 from AlgoTrading.Assets.Futures import IFutures
 from AlgoTrading.Assets.Futures import JFutures
@@ -40,6 +48,14 @@ __all__ = ['XSHEStock',
            'TFutures',
            'RBFutures',
            'RUFutures',
+           'CUFutures',
+           'SNFutures',
+           'NIFutures',
+           'AGFutures',
+           'AUFutures',
+           'HCFutures',
+           'ZNFutures',
+           'PBFutures',
            'AFutures',
            'IFutures',
            'JFutures',

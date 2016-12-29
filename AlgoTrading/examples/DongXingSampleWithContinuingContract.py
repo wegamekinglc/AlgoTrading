@@ -51,8 +51,6 @@ class MovingAverageCrossStrategy(Strategy):
 
     def handle_data(self):
 
-        print(self.closeDLastClose.value)
-
         if '000016.zicn' not in self.closeDLastClose.value or np.isnan(self.closeDLastClose['000016.zicn']):
             return
 
