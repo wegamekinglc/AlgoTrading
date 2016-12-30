@@ -10,5 +10,6 @@ from AlgoTrading.Events.Event import Event
 
 class MarketEvent(Event):
 
-    def __init__(self):
+    def __init__(self, currentTimeIndex):
         self.type = 'MARKET'
+        self.timeIndex = currentTimeIndex

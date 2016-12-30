@@ -157,6 +157,9 @@ class DXDataCenter(DataFrameDataHandler):
         res = res.append(index_res)
         res = res.append(future_con_res)
 
+        if not res.empty:
+            res = res[(res.tradingTime >= '09:00:00') & (res.tradingTime <= '16:00:00')]
+
         if 'openInterest' not in res:
             res['openInterest'] = np.nan
 

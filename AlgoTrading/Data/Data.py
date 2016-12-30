@@ -169,7 +169,7 @@ class DataFrameDataHandler(DataHandler):
         if noDataCount == len(self.symbolList):
             self.continueBacktest = False
             return None, None
-        self.events.put(MarketEvent())
+        self.events.put(MarketEvent(currentTimeIndex))
         self.currentTimeIndex = currentTimeIndex
 
         availableSymbol = list(availableSymbol)

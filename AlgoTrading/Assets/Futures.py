@@ -96,6 +96,142 @@ class TFutures(Asset):
     price_limit = 0.1
 
 
+class CUFutures(Asset):
+    u"""
+
+    上期所铜合约
+
+    """
+    lag = 0
+    exchange = 'XSGE'
+    commission = PerValue(buyCost=future_cost, sellCost=future_cost)
+    multiplier = 1
+    margin = 0.
+    settle = 0.
+    minimum = 1
+    short = True
+    price_limit = 0.1
+
+
+class ZNFutures(Asset):
+    u"""
+
+    上期所锌合约
+
+    """
+    lag = 0
+    exchange = 'XSGE'
+    commission = PerValue(buyCost=future_cost, sellCost=future_cost)
+    multiplier = 1
+    margin = 0.
+    settle = 0.
+    minimum = 1
+    short = True
+    price_limit = 0.1
+
+
+class AUFutures(Asset):
+    u"""
+
+    上期所黄金合约
+
+    """
+    lag = 0
+    exchange = 'XSGE'
+    commission = PerValue(buyCost=future_cost, sellCost=future_cost)
+    multiplier = 1
+    margin = 0.
+    settle = 0.
+    minimum = 1
+    short = True
+    price_limit = 0.1
+
+
+class AGFutures(Asset):
+    u"""
+
+    上期所白银合约
+
+    """
+    lag = 0
+    exchange = 'XSGE'
+    commission = PerValue(buyCost=future_cost, sellCost=future_cost)
+    multiplier = 1
+    margin = 0.
+    settle = 0.
+    minimum = 1
+    short = True
+    price_limit = 0.1
+
+
+class NIFutures(Asset):
+    u"""
+
+    上期所镍合约
+
+    """
+    lag = 0
+    exchange = 'XSGE'
+    commission = PerValue(buyCost=future_cost, sellCost=future_cost)
+    multiplier = 1
+    margin = 0.
+    settle = 0.
+    minimum = 1
+    short = True
+    price_limit = 0.1
+
+
+class SNFutures(Asset):
+    u"""
+
+    上期所锡合约
+
+    """
+    lag = 0
+    exchange = 'XSGE'
+    commission = PerValue(buyCost=future_cost, sellCost=future_cost)
+    multiplier = 1
+    margin = 0.
+    settle = 0.
+    minimum = 1
+    short = True
+    price_limit = 0.1
+
+
+class PBFutures(Asset):
+    u"""
+
+    上期所铅合约
+
+    """
+    lag = 0
+    exchange = 'XSGE'
+    commission = PerValue(buyCost=future_cost, sellCost=future_cost)
+    multiplier = 1
+    margin = 0.
+    settle = 0.
+    minimum = 1
+    short = True
+    price_limit = 0.1
+
+
+class HCFutures(Asset):
+    u"""
+
+    上期所热轧卷板合约
+
+    """
+    lag = 0
+    exchange = 'XSGE'
+    commission = PerValue(buyCost=future_cost, sellCost=future_cost)
+    multiplier = 1
+    margin = 0.
+    settle = 0.
+    minimum = 1
+    short = True
+    price_limit = 0.1
+
+
 class RBFutures(Asset):
     u"""
 
