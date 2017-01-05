@@ -219,7 +219,11 @@ class Portfolio(object):
         aggregated_positons = createPostionTearSheet(positons, plot=plot)
 
         transactions = extractTransactionFromFilledBook(self.filledBook.view())
-        turnover_rate = createTranscationTearSheet(transactions, positons, plot=plot)
+
+        if hasattr(self.dataHandler, "_freq"):
+            turnover_rate = createTranscationTearSheet(transactions, positons, freq=self.dataHandler._freq, plot=plot)
+        else:
+            turnover_rate = createTranscationTearSheet(transactions, positons, plot=plot)
 
         if plot:
             plt.show()
