@@ -1,5 +1,5 @@
 DataAPI>=0.4.1
-Finance-Python>=0.4.2
+Finance-Python>=0.4.3
 lxml>=3.4.4
 tushare>=0.3.9
 matplotlib>=1.4.3
@@ -8,4 +8,4 @@ pandas_datareader>=0.2.0
 pymssql>=2.1.1
 seaborn>=0.6.0
 sphinxcontrib-bibtex>=0.3.3
-VisualPortfolio>=0.2.1
+VisualPortfolio>=0.2.2
