@@ -239,7 +239,7 @@ class StocksPositionsBook(object):
         posClosed = 0
         pnl = 0.
         symbol = fill_evevt.symbol
-        currDT = fill_evevt.timeindex.date()
+        currDT = dt.datetime(fill_evevt.timeindex.year, fill_evevt.timeindex.month, fill_evevt.timeindex.day)
         quantity = fill_evevt.quantity
         direction = convertDirection(fill_evevt.direction)
         value = fill_evevt.nominal / quantity / direction

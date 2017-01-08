@@ -92,10 +92,7 @@ class OrderBook(object):
                 remainingQuantity = self._allOrders['quantity'][key] - self._allOrders['filled'][key]
                 direction = self._allOrders['direction'][key]
                 currDTTime = self._allOrders['time'][key]
-                if isinstance(currDTTime, dt.datetime):
-                    currDT = currDTTime.date()
-                else:
-                    currDT = currDTTime
+                currDT = dt.datetime(currDTTime.year, currDTTime.month, currDTTime.day)
                 posBook.updatePositionsByCancelOrder(self._allOrders['symbol'][key], currDT, remainingQuantity, direction)
                 self.logger.warning("{0}: {1} Legacy Order ID: {2} sent "
                                     "with time {3} and quantity {4} and direction {5} on symbol {6} "

@@ -11,7 +11,6 @@ import numpy as np
 import pandas as pd
 from AlgoTrading.Data.Data import DataFrameDataHandler
 from AlgoTrading.Utilities import transfromDFtoDict
-from AlgoTrading.Utilities.functions import categorizeSymbols
 
 
 class DataYesMarketDataHandler(DataFrameDataHandler):
