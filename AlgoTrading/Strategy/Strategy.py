@@ -247,7 +247,7 @@ class Strategy(object):
         :return: tuple
         """
         currDTTime = self.current_datetime
-        currDT = currDTTime.date()
+        currDT = dt.datetime(currDTTime.year, currDTTime.month, currDTTime.day)
         return self._posBook.avaliableForTrade(symbol, currDT)
 
     def _processOrders(self):
@@ -255,10 +255,7 @@ class Strategy(object):
         signals = []
 
         currDTTime = self.current_datetime
-        if isinstance(currDTTime, dt.datetime):
-            currDT = currDTTime.date()
-        else:
-            currDT = currDTTime
+        currDT = dt.datetime(currDTTime.year, currDTTime.month, currDTTime.day)
 
         cashAmount = self._port.currentHoldings['cash']
         for order in self._orderRecords:
