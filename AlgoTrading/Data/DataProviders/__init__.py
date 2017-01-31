@@ -16,4 +16,5 @@ from AlgoTrading.Data.DataProviders.YaHoo import YaHooDataProvider
 __all__ = ["HistoricalCSVDataHandler",
            "DataYesMarketDataHandler",
            "DXDataCenter",
-           "YaHooDataProvider"]
+           "YaHooDataProvider",
+           "WindMarketDataHandler"]
