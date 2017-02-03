@@ -2,22 +2,29 @@
 
 import pandas as pd
 import numpy as np
+from enum import IntEnum
 from AlgoTrading.Data.Data import DataFrameDataHandler
 from AlgoTrading.Utilities import transfromDFtoDict
 from WindPy import w
 
 
-_windSecIDMap = {'xshg': 'sh',
+_windExchangeMap = {'xshg': 'sh',
                  'xshe': 'sz',
                  'ccfx': 'cfe',# 中国金融期货交易所
                  'xsge': 'shf', # 上海期货交易所
                  'xzce': 'czc', # 郑州商品交易所
                  'xdce':'dce'} # 大连期货交易所
 
+@unique
+class FreqType(IntEnum):
+    MIN1 = 1
+    MIN5 = 5
+    EOD = 0
+
 
 class WindMarketDataHandler(DataFrameDataHandler):
 
-    _req_args = ['symbolList', 'startDate', 'endDate', 'benchmark']
+    _req_args = ['symbolList', 'startDate', 'endDate', 'freq', 'benchmark']
 
     def __init__(self, **kwargs):
         super(WindMarketDataHandler, self).__init__(kwargs['logger'], kwargs['symbolList'])
@@ -25,6 +32,7 @@ class WindMarketDataHandler(DataFrameDataHandler):
         self.symbolList = [s.replace('xshe', 'sz') for s in self.symbolList]
         self.startDate = kwargs['startDate'].strftime("%Y%m%d")
         self.endDate = kwargs['endDate'].strftime("%Y%m%d")
+        self._freq = kwargs['freq']
         self._getDatas()
         if kwargs['benchmark']:
             self._getBenchmarkData(kwargs['benchmark'], self.startDate, self.endDate)
@@ -76,11 +84,19 @@ def getOneSymbolData(params):
     s = params[0]
     start = params[1]
     end = params[2]
-    rawData = w.wsd(s,
-                 'open,high,low,close,volums',
-                 start,
-                 end,
-                 'Fill=Previous')
+    freq = params[3]
+    if freq == FreqType.EOD:
+        rawData = w.wsd(s,
+                     'open,high,low,close,volums',
+                     start,
+                     end,
+                     'Fill=Previous')
+    else:
+        rawData = w.wsi(s,
+                        'open,high,low,close,volums',
+                        start,
+                        end,
+                        'Fill=Previous,Barsize='+str(freq))
 
     if len(rawData.Data) == 0:
         return rawData
@@ -92,7 +108,8 @@ def getOneSymbolData(params):
                 'close':rawData.Data[3],
                 'volume':rawData.Data[4]}
     data = pd.DataFrame(output)
-    data['tradeDate'] = data['tradeDate'].apply(lambda x: x.strftime('%Y-%m-%d'))
+    if freq == FreqType.EOD:
+        data['tradeDate'] = data['tradeDate'].apply(lambda x: x.strftime('%Y-%m-%d'))
     data = data.reset_index('tradeDate')
     data.sort_index(inplace=True)
     data.columns = ['open', 'high', 'low', 'close', 'volume']
