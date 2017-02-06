@@ -22,9 +22,9 @@ def set_universe(code, refDate=None):
         if not w.isconnected():
             w.start()
         if not refDate:
-            rawData = w.wset('IndexConstituent', 'windcode='+code)
+            rawData = w.wset('IndexConstituent', 'windcode='+code, 'field=wind_code')
         else:
-            rawData = w.wset('IndexConstituent', 'date='+refDate, 'windcode='+code)
+            rawData = w.wset('IndexConstituent', 'date='+refDate, 'windcode='+code, 'field=wind_code')
         if len(rawData.Data) == 0:
             return
         return rawData.Data[0]
