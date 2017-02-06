@@ -17,7 +17,18 @@ from AlgoTrading.Utilities.functions import categorizeSymbols
 
 
 def set_universe(code, refDate=None):
-    if Settings.data_source != DataSource.DXDataCenter:
+    if Settings.data_source == DataSource.WIND:
+        from WindPy import w
+        if not w.isconnected():
+            w.start()
+        if not refDate:
+            rawData = w.wset('IndexConstituent', 'windcode='+code)
+        else:
+            rawData = w.wset('IndexConstituent', 'date='+refDate, 'windcode='+code)
+        if len(rawData.Data) == 0:
+            return
+        return rawData.Data[0]
+    elif Settings.data_source != DataSource.DXDataCenter:
         import os
         import tushare as ts
 

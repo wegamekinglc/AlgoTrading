@@ -3,6 +3,7 @@
 import pandas as pd
 import numpy as np
 from enum import IntEnum
+from enum import unique
 from AlgoTrading.Data.Data import DataFrameDataHandler
 from AlgoTrading.Utilities import transfromDFtoDict
 from WindPy import w
@@ -28,6 +29,8 @@ class WindMarketDataHandler(DataFrameDataHandler):
 
     def __init__(self, **kwargs):
         super(WindMarketDataHandler, self).__init__(kwargs['logger'], kwargs['symbolList'])
+        if not w.isconnected():
+            w.start()
         self.symbolList = [s.replace('xshg', 'sh') for s in self.symbolList]
         self.symbolList = [s.replace('xshe', 'sz') for s in self.symbolList]
         self.startDate = kwargs['startDate'].strftime("%Y%m%d")
@@ -90,7 +93,7 @@ def getOneSymbolData(params):
                      'open,high,low,close,volums',
                      start,
                      end,
-                     'Fill=Previous')
+                     'Fill=Previous, PriceAdj=F')
     else:
         rawData = w.wsi(s,
                         'open,high,low,close,volums',
