@@ -6,19 +6,9 @@ from enum import IntEnum
 from enum import unique
 from AlgoTrading.Data.Data import DataFrameDataHandler
 from AlgoTrading.Utilities import transfromDFtoDict
+from AlgoTrading.Utilities.functions import convert2WindSymbol
 from WindPy import w
 
-
-_windExchangeDict = {'xshg': 'sh',
-                 'xshe': 'sz',
-                 'ccfx': 'cfe',# 中国金融期货交易所
-                 'xsge': 'shf', # 上海期货交易所
-                 'xzce': 'czc', # 郑州商品交易所
-                 'xdce':'dce'} # 大连期货交易所
-
-_windIndexExchangeMap = {'000': 'sh', # 上证指数
-                          '399': 'sz', # 深证指数、国证规模指数
-                          '899': 'csi'} # 三板指数
 
 @unique
 class FreqType(IntEnum):
@@ -35,7 +25,6 @@ class WindMarketDataHandler(DataFrameDataHandler):
         super(WindMarketDataHandler, self).__init__(kwargs['logger'], kwargs['symbolList'])
         if not w.isconnected():
             w.start()
-        self._windSymbolList = convert2WindSymbol(self.symbolList)
         self.startDate = kwargs['startDate'].strftime("%Y%m%d")
         self.endDate = kwargs['endDate'].strftime("%Y%m%d")
         self._freq = kwargs['freq']
@@ -86,7 +75,7 @@ class WindMarketDataHandler(DataFrameDataHandler):
 
 
 def getOneSymbolData(params):
-    s = params[0]
+    s = convert2WindSymbol(params[0])
     start = params[1]
     end = params[2]
     freq = params[3]
@@ -115,21 +104,9 @@ def getOneSymbolData(params):
     data = pd.DataFrame(output)
     if freq == FreqType.EOD:
         data['tradeDate'] = data['tradeDate'].apply(lambda x: x.strftime('%Y-%m-%d'))
+        data['tradeDate'] = pd.to_datetime(data['tradeDate'])
     data = data.set_index('tradeDate')
     data.sort_index(inplace=True)
     return data
 
 
-def convert2WindSymbol(symbolList):
-    #TODO handle index exchange conversion
-    windSymbolList = []
-    for s in symbolList:
-        s_com = s.split('.')
-        if s_com[1] == 'zicn':
-            #TODO
-            pass
-        else:
-            s_wind = s_com[0] + _windExchangeDict[s_com[1]]
-        windSymbolList.append(s_wind)
-
-    return windSymbolList
