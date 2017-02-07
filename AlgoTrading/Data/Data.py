@@ -14,7 +14,7 @@ from AlgoTrading.Events import DayBeginEvent
 from AlgoTrading.Env import Settings
 from AlgoTrading.Enums import DataSource
 from AlgoTrading.Utilities.functions import categorizeSymbols
-
+from AlgoTrading.Utilities.functions import convert2WindSymbol
 
 def set_universe(code, refDate=None):
     if Settings.data_source == DataSource.WIND:
@@ -22,12 +22,15 @@ def set_universe(code, refDate=None):
         if not w.isconnected():
             w.start()
         if not refDate:
-            rawData = w.wset('IndexConstituent', 'windcode='+code, 'field=wind_code')
+            rawData = w.wset('IndexConstituent', 'windcode='+convert2WindSymbol(code), 'field=wind_code')
         else:
-            rawData = w.wset('IndexConstituent', 'date='+refDate, 'windcode='+code, 'field=wind_code')
+            rawData = w.wset('IndexConstituent', 'date='+refDate, 'windcode='+convert2WindSymbol(code), 'field=wind_code')
         if len(rawData.Data) == 0:
             return
-        return rawData.Data[0]
+        # convert to .xshg/.xshe suffix
+        idx = [s.replace('SH', 'xshg') for s in rawData.Data[0]]
+        idx = [s.replace('SZ', 'xshe') for s in idx]
+        return idx
     elif Settings.data_source != DataSource.DXDataCenter:
         import os
         import tushare as ts
