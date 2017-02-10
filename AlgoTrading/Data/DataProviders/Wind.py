@@ -84,7 +84,7 @@ def getOneSymbolData(params):
                      'open,high,low,close,volume',
                      start,
                      end,
-                     'Fill=Previous, PriceAdj=F')
+                     'PriceAdj=F')
     else:
         rawData = w.wsi(s,
                         'open,high,low,close,volume',
