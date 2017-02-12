@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 
+# ref: http://wenku.baidu.com/view/1327f45bba1aa8114531d94f.html
+# ref: http://wenku.baidu.com/link?url=Z4CIfS1TD5vFdC9e17pQB5AgfcqF1qRK_VyFtnNeq9L6x1cSm3lth1tPreu37KByHJr7B7iqAhPlwsakN9VB2vhaNPF_qssgVHFfH2Z9DAC
 import pandas as pd
 import numpy as np
-from enum import IntEnum
+from enum import Enum
 from enum import unique
 from AlgoTrading.Data.Data import DataFrameDataHandler
 from AlgoTrading.Utilities import transfromDFtoDict
@@ -10,16 +12,32 @@ from AlgoTrading.Utilities.functions import convert2WindSymbol
 from WindPy import w
 
 
+class StrEnum(str, Enum):
+    pass
+
+
 @unique
-class FreqType(IntEnum):
-    MIN1 = 1
-    MIN5 = 5
-    EOD = 0
+class FreqType(StrEnum):
+    MIN1 = 'min1'
+    MIN5 = 'min5'
+    MIN10 = 'min10'
+    EOD = 'D'
+    EOW = 'W'
+    EOM = 'M'
+    EOQ = 'Q'
+    EOSY = 'S'
+    EOY = 'Y'
+
+@unique
+class PriceAdjType(StrEnum):
+    NoAdj = 'N'
+    Forward = 'F'   # 前复权
+    Backward = 'B'  # 后复权
 
 
 class WindMarketDataHandler(DataFrameDataHandler):
 
-    _req_args = ['symbolList', 'startDate', 'endDate', 'freq', 'benchmark']
+    _req_args = ['symbolList', 'startDate', 'endDate', 'freq', 'benchmark','priceAdj']
 
     def __init__(self, **kwargs):
         super(WindMarketDataHandler, self).__init__(kwargs['logger'], kwargs['symbolList'])
@@ -28,9 +46,10 @@ class WindMarketDataHandler(DataFrameDataHandler):
         self.startDate = kwargs['startDate'].strftime("%Y%m%d")
         self.endDate = kwargs['endDate'].strftime("%Y%m%d")
         self._freq = kwargs['freq']
+        self.priceAdj = kwargs['priceAdj']
         self._getDatas()
         if kwargs['benchmark']:
-            self._getBenchmarkData(kwargs['benchmark'], self.startDate, self.endDate, self._freq)
+            self._getBenchmarkData(kwargs['benchmark'], self.startDate, self.endDate, self._freq, self.priceAdj)
 
     def _getDatas(self):
         self.logger.info("Start loading bars from Wind source...")
@@ -38,7 +57,7 @@ class WindMarketDataHandler(DataFrameDataHandler):
         result = {}
 
         for s in self.symbolList:
-            result[s] = getOneSymbolData((s, self.startDate, self.endDate, self._freq))
+            result[s] = getOneSymbolData((s, self.startDate, self.endDate, self._freq, self.priceAdj))
             self.logger.info("Symbol {0:s} is ready for back testing.".format(s))
 
         for s in result:
@@ -60,10 +79,10 @@ class WindMarketDataHandler(DataFrameDataHandler):
 
         self.logger.info("Bars loading finished!")
 
-    def _getBenchmarkData(self, indexID, startDate, endDate, freq):
+    def _getBenchmarkData(self, indexID, startDate, endDate, freq, priceAdj):
         self.logger.info("Start loading benchmark {0:s} data from Wind source...".format(indexID))
 
-        indexData = getOneSymbolData((indexID, startDate, endDate, freq))
+        indexData = getOneSymbolData((indexID, startDate, endDate, freq, priceAdj))
         indexData['return'] = np.log(indexData['close'] / indexData['close'].shift(1))
         indexData = indexData.dropna()
         self.benchmarkData = indexData
@@ -79,18 +98,20 @@ def getOneSymbolData(params):
     start = params[1]
     end = params[2]
     freq = params[3]
-    if freq == FreqType.EOD:
+    priceAdj = params[4]
+    if freq == FreqType.EOD or freq == FreqType.EOW or freq == FreqType.EOM or freq == FreqType.EOQ or freq == FreqType.EOSY \
+            or freq == FreqType.EOSY or freq == FreqType.EOY:
         rawData = w.wsd(s,
                      'open,high,low,close,volume',
                      start,
                      end,
-                     'PriceAdj=F')
+                     'PriceAdj='+priceAdj, 'Period='+freq)
     else:
         rawData = w.wsi(s,
                         'open,high,low,close,volume',
                         start,
                         end,
-                        'Fill=Previous,Barsize='+str(freq))
+                        'Barsize='+freq[3:])
 
     if len(rawData.Data) == 0:
         return rawData

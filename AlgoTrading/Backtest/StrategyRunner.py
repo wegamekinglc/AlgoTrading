@@ -104,12 +104,21 @@ def strategyRunner(userStrategy,
         try:
             freq = kwargs['freq']
         except KeyError:
-            freq = 0
-            logger.info("No `freq` keyword arguments found. using default value as freq=0")
+            freq = 'D'
+            logger.info("No `freq` keyword arguments found. using default value as freq='D")
+
+        try:
+            priceAdj = kwargs['priceAdj']
+        except KeyError:
+            priceAdj = 'N'
+            logger.info("No `priceAdj` keyword arguments found. using default value as priceAdj='N")
+
+
         dataHandler = WindMarketDataHandler(symbolList=symbolList,
                                              startDate=startDate,
                                              endDate=endDate,
                                              freq=freq,
+                                             priceAdj=priceAdj,
                                              benchmark=benchmark,
                                              logger=logger)
 
