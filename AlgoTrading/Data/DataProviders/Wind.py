@@ -105,13 +105,13 @@ def getOneSymbolData(params):
                      'open,high,low,close,volume',
                      start,
                      end,
-                     'PriceAdj='+priceAdj, 'Period='+freq)
+                     'PriceAdj='+priceAdj, 'Period='+freq, 'Fill=Previous')
     else:
         rawData = w.wsi(s,
                         'open,high,low,close,volume',
                         start,
                         end,
-                        'Barsize='+freq[3:])
+                        'Barsize='+freq[3:], 'Fill=Previous')
 
     if len(rawData.Data) == 0:
         return rawData
