@@ -32,8 +32,8 @@ class MovingAverageCrossStrategy(Strategy):
 
 
 def run_example():
-    universe = set_universe('000300.zicn')[:200]
-    startDate = dt.datetime(2001, 12, 1)
+    universe = set_universe('000300.zicn', refDate='2015-01-01')[:200]
+    startDate = dt.datetime(2015, 1, 1)
     endDate = dt.datetime(2017, 1, 1)
 
     strategyRunner(userStrategy=MovingAverageCrossStrategy,
