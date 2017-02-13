@@ -30,7 +30,7 @@ class FreqType(StrEnum):
 
 @unique
 class PriceAdjType(StrEnum):
-    NoAdj = 'N'
+    NoAdj = '0'
     Forward = 'F'   # 前复权
     Backward = 'B'  # 后复权
 
