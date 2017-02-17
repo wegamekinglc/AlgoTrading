@@ -14,6 +14,7 @@ class DataSource(IntEnum):
     DataYes = 1
     DXDataCenter = 2
     YAHOO = 3
+    WIND = 4
 
 
 @unique

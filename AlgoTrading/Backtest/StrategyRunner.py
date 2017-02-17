@@ -13,6 +13,7 @@ from AlgoTrading.Enums import PortfolioType
 from AlgoTrading.Utilities import CustomLogger
 from AlgoTrading.Data.DataProviders import HistoricalCSVDataHandler
 from AlgoTrading.Data.DataProviders import DataYesMarketDataHandler
+from AlgoTrading.Data.DataProviders import WindMarketDataHandler
 try:
     from AlgoTrading.Data.DataProviders import DXDataCenter
 except ImportError:
@@ -99,6 +100,27 @@ def strategyRunner(userStrategy,
                                         startDate=startDate,
                                         endDate=endDate,
                                         logger=logger)
+    elif dataSource == DataSource.WIND:
+        try:
+            freq = kwargs['freq']
+        except KeyError:
+            freq = 'D'
+            logger.info("No `freq` keyword arguments found. using default value as freq=D")
+
+        try:
+            priceAdj = kwargs['priceAdj']
+        except KeyError:
+            priceAdj = '0'
+            logger.info("No `priceAdj` keyword arguments found. using default value as priceAdj=0")
+
+
+        dataHandler = WindMarketDataHandler(symbolList=symbolList,
+                                             startDate=startDate,
+                                             endDate=endDate,
+                                             freq=freq,
+                                             priceAdj=priceAdj,
+                                             benchmark=benchmark,
+                                             logger=logger)
 
     backtest = Backtest(initialCapital,
                         0.0,
