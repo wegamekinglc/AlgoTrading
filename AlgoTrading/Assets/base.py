@@ -5,10 +5,7 @@ Created on 2015-9-25
 @author: cheng.li
 """
 
-from PyFin.Patterns.Singleton import Singleton
-
-
-class Asset(Singleton):
+class Asset(object):
 
     @classmethod
     def props(cls):

@@ -221,7 +221,13 @@ class Portfolio(object):
         transactions = extractTransactionFromFilledBook(self.filledBook.view())
 
         if hasattr(self.dataHandler, "_freq"):
-            turnover_rate = createTranscationTearSheet(transactions, positons, freq=self.dataHandler._freq, plot=plot)
+
+            if self.dataHandler._freq == 0:
+                freq = 'M'
+            else:
+                freq = 'D'
+
+            turnover_rate = createTranscationTearSheet(transactions, positons, freq=freq, plot=plot)
         else:
             turnover_rate = createTranscationTearSheet(transactions, positons, plot=plot)
 

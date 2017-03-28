@@ -26,7 +26,7 @@ class MovingAverageCrossStrategy(Strategy):
     def handle_data(self):
 
         for secID in self.tradableAssets:
-            if not self.MACDDiff.isFull[secID] or not self.RSI.isFull[secID]:
+            if not self.MACDDiff.isFullByName(secID) or not self.RSI.isFullByName(secID):
                 continue
             if self.MACDDiff[secID] > 0.01 \
                     and self.RSI[secID] > 51.:
@@ -37,7 +37,7 @@ class MovingAverageCrossStrategy(Strategy):
 
 
 def run_example():
-    universe = ['tf.ccfx']
+    universe = ['if.ccfx']
 
     startDate = dt.datetime(2013, 12, 1)
     endDate = dt.datetime(2016, 4, 25)

@@ -43,7 +43,7 @@ class MovingAverageCrossStrategy(Strategy):
         changeContractDay = advanceDateByCalendar('China.SSE', delDay, '-1b')
 
         contract_month = month
-        if current_time.date() >= changeContractDay:
+        if current_time >= changeContractDay:
             contract_month = month + 1
 
         ifc = 'if15%02d.cffex' % contract_month
