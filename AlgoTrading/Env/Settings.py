@@ -5,11 +5,10 @@ Created on 2015-11-20
 @author: cheng.li
 """
 
-from PyFin.Patterns.Singleton import Singleton
 from AlgoTrading.Enums import DataSource
 
 
-class SettingsFactory(Singleton):
+class SettingsFactory(object):
 
     def __init__(self, forcedBuild=False):
         self._usingCache = False

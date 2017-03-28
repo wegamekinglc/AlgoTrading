@@ -11,7 +11,7 @@ from AlgoTrading.api import strategyRunner
 from AlgoTrading.api import DataSource
 from AlgoTrading.api import set_universe
 from AlgoTrading.api import PortfolioType
-from PyFin.api import MA
+from PyFin.api import *
 from PyFin.api import MACD
 from PyFin.api import RSI
 from PyFin.api import EMA
@@ -25,6 +25,8 @@ class MovingAverageCrossStrategy(Strategy):
         self.RSI = RSI(RSILength, 'close')
         self.total_length = max(slow + MACDLength, RSILength)
         self.count = 0
+
+        self.test_ret = SUM(10, RETURNSimple('close'))
 
     def handle_data(self):
 
@@ -53,7 +55,7 @@ def run_example():
                    symbolList=universe,
                    startDate=startDate,
                    endDate=endDate,
-                   dataSource=DataSource.DataYes,
+                   dataSource=DataSource.DXDataCenter,
                    benchmark='000905.zicn',
                    freq=5,
                    logLevel='info',
