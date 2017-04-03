@@ -15,6 +15,7 @@ class DataSource(IntEnum):
     DXDataCenter = 2
     YAHOO = 3
     WIND = 4
+    TUSHARE = 5
 
 
 @unique

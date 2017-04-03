@@ -15,6 +15,7 @@ from AlgoTrading.Env import Settings
 from AlgoTrading.Enums import DataSource
 from AlgoTrading.Utilities.functions import categorizeSymbols
 from AlgoTrading.Utilities.functions import convert2WindSymbol
+from AlgoTrading.Utilities.functions import equityCodeToSecurityID
 
 def set_universe(code, refDate=None):
     if Settings.data_source == DataSource.WIND:
@@ -31,9 +32,23 @@ def set_universe(code, refDate=None):
         idx = [s.replace('SH', 'xshg') for s in rawData.Data[0]]
         idx = [s.replace('SZ', 'xshe') for s in idx]
         return idx
+    elif Settings.data_source == DataSource.TUSHARE:
+        import tushare as ts
+        tsSymbol = code.split('.')[0]
+        if tsSymbol == '000300':
+            idx = ts.get_hs300s()['code']
+        elif tsSymbol == '000016':
+            idx = ts.get_sz50s()['code']
+        elif tsSymbol == '000905' or tsSymbol == '399905':
+            idx = ts.get_zz500s()['code']
+        else:
+            raise NotImplementedError
+        idx = [equityCodeToSecurityID(s) for s in idx.tolist()]
+        return idx
+
     elif Settings.data_source != DataSource.DXDataCenter:
         import os
-        import tushare as ts
+        import Tushare as ts
 
         try:
             ts.set_token(os.environ['DATAYES_TOKEN'])

@@ -7,7 +7,11 @@ Created on 2015-9-21
 
 from AlgoTrading.Data.DataProviders.CSVFiles import HistoricalCSVDataHandler
 from AlgoTrading.Data.DataProviders.DataYes import DataYesMarketDataHandler
-from AlgoTrading.Data.DataProviders.Wind import WindMarketDataHandler
+try:
+    from AlgoTrading.Data.DataProviders.Wind import WindMarketDataHandler
+except ImportError:
+    pass
+from AlgoTrading.Data.DataProviders.Tushare import TushareMarketDataHandler
 try:
     from AlgoTrading.Data.DataProviders.DongXingDataCenter import DXDataCenter
 except ImportError:
@@ -18,4 +22,5 @@ __all__ = ["HistoricalCSVDataHandler",
            "DataYesMarketDataHandler",
            "DXDataCenter",
            "YaHooDataProvider",
-           "WindMarketDataHandler"]
+           "WindMarketDataHandler",
+           "TushareMarketDataHandler"]

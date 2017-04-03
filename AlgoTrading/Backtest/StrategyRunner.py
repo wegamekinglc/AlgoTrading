@@ -13,7 +13,11 @@ from AlgoTrading.Enums import PortfolioType
 from AlgoTrading.Utilities import CustomLogger
 from AlgoTrading.Data.DataProviders import HistoricalCSVDataHandler
 from AlgoTrading.Data.DataProviders import DataYesMarketDataHandler
-from AlgoTrading.Data.DataProviders import WindMarketDataHandler
+try:
+    from AlgoTrading.Data.DataProviders import WindMarketDataHandler
+except ImportError:
+    pass
+from AlgoTrading.Data.DataProviders import TushareMarketDataHandler
 try:
     from AlgoTrading.Data.DataProviders import DXDataCenter
 except ImportError:
@@ -105,7 +109,7 @@ def strategyRunner(userStrategy,
             freq = kwargs['freq']
         except KeyError:
             freq = 'D'
-            logger.info("No `freq` keyword arguments found. using default value as freq=D")
+            logger.info("No `freq` keyword arguments found. using default value as freq='D'")
 
         try:
             priceAdj = kwargs['priceAdj']
@@ -121,6 +125,27 @@ def strategyRunner(userStrategy,
                                              priceAdj=priceAdj,
                                              benchmark=benchmark,
                                              logger=logger)
+    elif dataSource == DataSource.TUSHARE:
+        try:
+            freq = kwargs['freq']
+        except KeyError:
+            freq = 'D'
+            logger.info("No `freq` keyword arguments found. using default value as freq='D'")
+
+        try:
+            priceAdj = kwargs['priceAdj']
+        except KeyError:
+            priceAdj = 'qfq'
+            logger.info("No `priceAdj` keyword arguments found. using default value as priceAdj='qfq'")
+
+        dataHandler = TushareMarketDataHandler(symbolList=symbolList,
+                                               startDate=startDate,
+                                               endDate=endDate,
+                                               freq=freq,
+                                               priceAdj=priceAdj,
+                                               benchmark=benchmark,
+                                               logger=logger)
+
 
     backtest = Backtest(initialCapital,
                         0.0,

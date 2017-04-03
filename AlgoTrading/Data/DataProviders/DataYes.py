@@ -6,7 +6,7 @@ Created on 2015-9-21
 """
 
 import os
-import tushare as ts
+import Tushare as ts
 import numpy as np
 import pandas as pd
 from AlgoTrading.Data.Data import DataFrameDataHandler
