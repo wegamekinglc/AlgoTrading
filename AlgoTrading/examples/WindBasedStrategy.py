@@ -41,7 +41,6 @@ def run_example():
                    startDate=startDate,
                    endDate=endDate,
                    benchmark='000300.zicn',
-                   dataSource=DataSource.WIND,
                    logLevel='info',
                    saveFile=True,
                    plot=True,
