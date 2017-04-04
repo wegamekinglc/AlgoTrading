@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 u"""
-Created on 2015-9-23
+Created on 2017-4-2
 
-@author: cheng.li
+@author: iLampard
 """
 
 import datetime as dt
-
 from AlgoTrading.api import Strategy
 from AlgoTrading.api import strategyRunner
 from AlgoTrading.api import DataSource
@@ -32,7 +31,7 @@ class MovingAverageCrossStrategy(Strategy):
 
 
 def run_example():
-    universe = set_universe('000300.zicn', refDate='2015-01-01')[:200]
+    universe = set_universe('000300.zicn')[:200]
     startDate = dt.datetime(2015, 1, 1)
     endDate = dt.datetime(2017, 1, 1)
 
@@ -50,7 +49,7 @@ def run_example():
 if __name__ == "__main__":
     from VisualPortfolio.Env import Settings
     from AlgoTrading.Env import Settings
-    Settings.set_source(DataSource.WIND)
+    Settings.set_source(DataSource.TUSHARE)
     startTime = dt.datetime.now()
     print("Start: %s" % startTime)
     run_example()
