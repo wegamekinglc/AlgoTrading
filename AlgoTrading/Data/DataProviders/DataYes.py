@@ -6,7 +6,7 @@ Created on 2015-9-21
 """
 
 import os
-import Tushare as ts
+import tushare as ts
 import numpy as np
 import pandas as pd
 from AlgoTrading.Data.Data import DataFrameDataHandler
@@ -67,7 +67,7 @@ class DataYesMarketDataHandler(DataFrameDataHandler):
                 self.logger.info("Symbol {0:s} is ready for back testing.".format(s))
 
         for s in result:
-            if not result[s].empty:
+            if result[s] is not None and not result[s].empty:
                 self.symbolData[s] = result[s]
                 if combIndex is None:
                     combIndex = self.symbolData[s].index
@@ -100,11 +100,14 @@ class DataYesMarketDataHandler(DataFrameDataHandler):
         elif indexIDComp[1] == 'xshg' or indexIDComp[1] == 'xshe':
             indexData = getOneSymbolData((self.mt, indexID, startTimeStamp, endTimeStamp))
 
-        indexData['return'] = np.log(indexData['close'] / indexData['close'].shift(1))
-        indexData = indexData.dropna()
-        self.benchmarkData = indexData
+        if indexData is not None:
+            indexData['return'] = np.log(indexData['close'] / indexData['close'].shift(1))
+            indexData = indexData.dropna()
+            self.benchmarkData = indexData
 
-        self.logger.info("Benchmark data loading finished!")
+            self.logger.info("Benchmark data loading finished!")
+        else:
+            raise ValueError('Benchmark data for {0} cant be got!'.format(indexID))
 
     def updateInternalDate(self):
         return False

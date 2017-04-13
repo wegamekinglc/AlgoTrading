@@ -9,17 +9,17 @@ import datetime as dt
 from AlgoTrading.api import Strategy
 from AlgoTrading.api import strategyRunner
 from AlgoTrading.api import DataSource
-from PyFin.api import MAX
-from PyFin.api import MIN
+from PyFin.api import MMAX
+from PyFin.api import MMIN
 from PyFin.api import CLOSE
 
 
 class IndexMomentumStrategy(Strategy):
 
     def __init__(self):
-        self.preMax = MAX(10, 'close').shift(1)
-        self.preMin = MIN(10, 'close').shift(1)
-        self.maxOI = MAX(10, 'openInterest')
+        self.preMax = MMAX(10, 'close').shift(1)
+        self.preMin = MMIN(10, 'close').shift(1)
+        self.maxOI = MMAX(10, 'openInterest')
         self.current = CLOSE()
         self.count = 0
 

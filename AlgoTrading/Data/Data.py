@@ -17,6 +17,7 @@ from AlgoTrading.Utilities.functions import categorizeSymbols
 from AlgoTrading.Utilities.functions import convert2WindSymbol
 from AlgoTrading.Utilities.functions import equityCodeToSecurityID
 
+
 def set_universe(code, refDate=None):
     if Settings.data_source == DataSource.WIND:
         from WindPy import w
@@ -48,7 +49,7 @@ def set_universe(code, refDate=None):
 
     elif Settings.data_source != DataSource.DXDataCenter:
         import os
-        import Tushare as ts
+        import tushare as ts
 
         try:
             ts.set_token(os.environ['DATAYES_TOKEN'])

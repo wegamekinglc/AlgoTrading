@@ -6,14 +6,12 @@ Created on 2016-4-25
 """
 
 import datetime as dt
-from collections import OrderedDict
-import pandas as pd
 import numpy as np
 from AlgoTrading.api import Strategy
 from AlgoTrading.api import strategyRunner
 from AlgoTrading.api import DataSource
 from AlgoTrading.api import PortfolioType
-from PyFin.Analysis.SecurityValues import SecurityValues
+from PyFin.Analysis.SeriesValues import SeriesValues
 from PyFin.api import CLOSE
 from PyFin.api import OPEN
 from PyFin.api import LOW
@@ -51,8 +49,8 @@ class MovingAverageCrossStrategy(Strategy):
 
         # 定义指数的权重
         names = ['000016.zicn', '000300.zicn', '000905.zicn']
-        self.indexWeights = SecurityValues(np.array([1., -2., 1.]),
-                                           index=dict(zip(names, range(len(names)))))
+        self.indexWeights = SeriesValues(np.array([1., -2., 1.]),
+                                         index=dict(zip(names, range(len(names)))))
 
     def handle_data(self):
 
@@ -65,10 +63,14 @@ class MovingAverageCrossStrategy(Strategy):
         ihc, ifc, icc = 'ih.ccfx', 'if.ccfx', 'ic.ccfx'
 
         # 计算指数指标得分
-        closeDLastCloseScore = self.closeDLastClose.value_by_names(['000016.zicn', '000300.zicn', '000905.zicn']).dot(self.indexWeights)
-        closeDOpenScore = self.closeDOpen.value_by_names(['000016.zicn', '000300.zicn', '000905.zicn']).dot(self.indexWeights)
-        closeDLowScore = self.closeDLow.value_by_names(['000016.zicn', '000300.zicn', '000905.zicn']).dot(self.indexWeights)
-        highDCloseScore = self.highDClose.value_by_names(['000016.zicn', '000300.zicn', '000905.zicn']).dot(self.indexWeights)
+        closeDLastCloseScore = self.closeDLastClose.value_by_names(['000016.zicn', '000300.zicn', '000905.zicn']).dot(
+            self.indexWeights)
+        closeDOpenScore = self.closeDOpen.value_by_names(['000016.zicn', '000300.zicn', '000905.zicn']).dot(
+            self.indexWeights)
+        closeDLowScore = self.closeDLow.value_by_names(['000016.zicn', '000300.zicn', '000905.zicn']).dot(
+            self.indexWeights)
+        highDCloseScore = self.highDClose.value_by_names(['000016.zicn', '000300.zicn', '000905.zicn']).dot(
+            self.indexWeights)
 
         # 定义基差
         ihBasis = self.closes[ihc] / self.closes['000016.zicn'] / self.mul[ihc] - 1.

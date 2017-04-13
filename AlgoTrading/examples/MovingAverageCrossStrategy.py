@@ -10,19 +10,20 @@ from AlgoTrading.api import Strategy
 from AlgoTrading.api import strategyRunner
 from AlgoTrading.api import DataSource
 from PyFin.api import MA
-from PyFin.api import MAX
-from PyFin.api import MIN
+from PyFin.api import MMAX
+from PyFin.api import MMIN
 
 
 class MovingAverageCrossStrategy(Strategy):
     def __init__(self):
         short_sma = MA(10, 'close')
         long_sma = MA(30, 'close')
-        filter = (MAX(10, 'close') / MIN(10, 'close')) > 1.02
+        filter = (MMAX(10, 'close') / MMIN(10, 'close')) > 1.02
+        self.filter = filter
         self.signal = (short_sma - long_sma)[filter]
 
     def handle_data(self):
-        for s in self.universe:
+        for s in self.signal.value.index():
             if self.signal[s] > 0:
                 self.order(s, 1, quantity=100)
             elif self.signal[s] < 0 and self.secPos[s] != 0:

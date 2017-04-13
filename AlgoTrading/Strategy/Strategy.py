@@ -457,6 +457,15 @@ class Strategy(object):
         actual_amount = rought_amount // self._port.assets[symbol].minimum * self._port.assets[symbol].minimum
         self.order_to(symbol, direction, actual_amount)
 
+    def send_targets(self, target_positions):
+
+        for name in target_positions:
+            pos = target_positions[name]
+            if pos > 0.:
+                self.order_to_pct(name, 1, pos)
+            elif pos < 0.:
+                self.order_to_pct(name, -1, pos)
+
     @property
     def liveOrders(self):
         return self._port.orderBook.liveOrders()

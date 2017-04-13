@@ -9,12 +9,8 @@ import datetime as dt
 from AlgoTrading.api import Strategy
 from AlgoTrading.api import strategyRunner
 from AlgoTrading.api import DataSource
-from AlgoTrading.api import set_universe
 from AlgoTrading.api import PortfolioType
 from PyFin.api import *
-from PyFin.api import MACD
-from PyFin.api import RSI
-from PyFin.api import EMA
 
 
 class MovingAverageCrossStrategy(Strategy):
@@ -26,13 +22,11 @@ class MovingAverageCrossStrategy(Strategy):
         self.total_length = max(slow + MACDLength, RSILength)
         self.count = 0
 
-        self.test_ret = SUM(10, RETURNSimple('close'))
+        self.test_ret = MSUM(10, RETURNSimple('close'))
 
     def handle_data(self):
 
         for secID in self.tradableAssets:
-            #if not self.MACDDiff.isFull[secID] or not self.RSI.isFull[secID]:
-            #    continue
             if self.MACDDiff[secID] > 2 \
                     and self.RSI[secID] > 51.:
                 self.order_to(secID, 1, 2)
@@ -44,7 +38,7 @@ class MovingAverageCrossStrategy(Strategy):
 
 
 def run_example():
-    universe = ['000905.zicn'] #set_universe('000300.zicn', refDate='2012-06-01')
+    universe = ['000905.zicn']
 
     startDate = dt.datetime(2013, 1, 1)
     endDate = dt.datetime(2016, 8, 12)

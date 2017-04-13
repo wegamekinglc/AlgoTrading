@@ -12,17 +12,18 @@ from AlgoTrading.api import strategyRunner
 from AlgoTrading.api import DataSource
 from AlgoTrading.api import set_universe
 from PyFin.api import MA
-from PyFin.api import MAX
-from PyFin.api import MIN
+from PyFin.api import MMAX
+from PyFin.api import MMIN
 
 
 class MovingAverageCrossStrategy(Strategy):
     def __init__(self):
-        filtering = (MAX(10, 'close') / MIN(10, 'close')) >= 1.00
+        filtering = (MMAX(10, 'close') / MMIN(10, 'close')) >= 1.00
         indicator = MA(10, 'close') - MA(120, 'close')
         self.signal = indicator[filtering]
 
     def handle_data(self):
+        print(self.current_datetime)
         for s in self.universe:
             amount = self.avaliableForSale(s)
             if self.signal[s] > 0. and self.secPos[s] == 0:
@@ -32,7 +33,7 @@ class MovingAverageCrossStrategy(Strategy):
 
 
 def run_example():
-    universe = set_universe('000300.zicn')[:200]
+    universe = set_universe('000300.zicn')[:10]
     startDate = dt.datetime(2001, 1, 1)
     endDate = dt.datetime(2017, 1, 1)
 
@@ -41,7 +42,6 @@ def run_example():
                    startDate=startDate,
                    endDate=endDate,
                    freq=0,
-                   benchmark='000300.zicn',
                    dataSource=DataSource.DataYes,
                    logLevel='info',
                    saveFile=True,
